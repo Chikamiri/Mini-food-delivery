@@ -1,1 +1,43 @@
+### --- IDE & System --- ###
 .cursor
+.vscode/
+.idea/
+*.swp
+*.DS_Store
+atlassian-ide-plugin.xml
+.classpath
+.project
+.settings/
+bin/
+
+### --- Backend --- ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+activemq-data
+.mvn/wrapper/maven-wrapper.jar
+
+# Log files
+*.log
+logs/
+
+### --- Frontend --- ###
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Cypress & Testing
+cypress/videos/
+cypress/screenshots/
+/coverage/
+
+### --- Database & Environment --- ###
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
