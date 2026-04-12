@@ -66,6 +66,7 @@ CREATE TABLE restaurants (
     is_deleted      BOOLEAN DEFAULT FALSE,
     
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_restaurants_owner    FOREIGN KEY (owner_id)    REFERENCES users(id),
     CONSTRAINT fk_restaurants_category FOREIGN KEY (category_id) REFERENCES restaurant_categories(id)
@@ -101,6 +102,7 @@ CREATE TABLE menu_items (
     is_deleted      BOOLEAN DEFAULT FALSE,
     
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_menu_items_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
     CONSTRAINT fk_menu_items_category   FOREIGN KEY (category_id)   REFERENCES categories(id) ON DELETE SET NULL,
@@ -186,7 +188,7 @@ CREATE TABLE delivery_assignments (
     order_id        BIGINT NOT NULL UNIQUE,
     shipper_id      BIGINT NOT NULL,
     
-    status          VARCHAR(50) NOT NULL DEFAULT 'ASSIGNED',
+    status          VARCHAR(50) NOT NULL DEFAULT 'NONASSIGNED',
     
     picked_up_at    TIMESTAMP NULL,
     delivered_at    TIMESTAMP NULL,

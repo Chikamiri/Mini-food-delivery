@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.*;
 
 @Entity
 @Table(name = "orders")
@@ -26,10 +27,10 @@ public class Order {
 	@Column(name = "delivery_address", nullable = false)
 	private String deliveryAddress;
 
-	@Column(name = "delivery_lat", nullable = false, precision = 12, scale = 2)
+	@Column(name = "delivery_lat", nullable = false, precision = 10, scale = 8)
 	private BigDecimal deliveryLat;
 
-	@Column(name = "delivery_lng", nullable = false, precision = 12, scale = 2)
+	@Column(name = "delivery_lng", nullable = false, precision = 11, scale = 8)
 	private BigDecimal deliveryLng;
 
 	@Column(name = "subtotal", nullable = false, precision = 12, scale = 2)
@@ -41,10 +42,10 @@ public class Order {
 	@Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
 	private BigDecimal totalAmount;
 
-	@Column(name = "payment_method", nullable = false)
+	@Column(name = "payment_method")
 	private String paymentMethod = "COD";
 
-	@Column(name = "status", nullable = false)
+	@Column(name = "status")
 	private String status = "PENDING";
 
 	@Column(name = "note")
@@ -65,4 +66,7 @@ public class Order {
 	protected void onUpdate() {
 		updatedAt = LocalDateTime.now();
 	}
+
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderItem> orderItems;
 }

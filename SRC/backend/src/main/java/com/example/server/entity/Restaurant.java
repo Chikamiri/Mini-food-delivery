@@ -47,6 +47,7 @@ public class Restaurant {
 
 	@Column(name = "opening_time")
 	private LocalTime openingTime;
+
 	@Column(name = "closing_time")
 	private LocalTime closingTime;
 
@@ -62,6 +63,9 @@ public class Restaurant {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
+
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<MenuItem> menuItems = new ArrayList<>();
 
@@ -69,4 +73,12 @@ public class Restaurant {
 	protected void onCreate() {
 		createdAt = LocalDateTime.now();
 	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+
+	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
 }

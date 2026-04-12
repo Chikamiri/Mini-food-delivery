@@ -21,8 +21,9 @@ public class OrderStatusHistory {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "changed_by", nullable = false)
-    private Long changedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "changed_by", nullable = false)
+    private User changedBy;
 
     @Column(name = "note")
     private String note;

@@ -26,6 +26,7 @@ public class User {
 
 	@Column(unique = true, length = 15)
 	private String phone;
+
 	@Column(name = "avatar_url")
 	private String avatarUrl;
 
@@ -34,6 +35,7 @@ public class User {
 
 	@Column(name = "is_active")
 	private Boolean active = true;
+
 	@Column(name = "is_deleted")
 	private Boolean deleted = false;
 
@@ -57,4 +59,13 @@ public class User {
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Restaurant> restaurants = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
+
+	@OneToMany(mappedBy = "shipperID", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<DeliveryAssignment> deliveryAssignment = new ArrayList<>();
+
+	@OneToMany(mappedBy = "changedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 }

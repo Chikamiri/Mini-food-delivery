@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.*;
 import java.time.*;
+import java.util.*;
 
 @Entity
 @Table(name = "menu_items")
@@ -42,8 +43,19 @@ public class MenuItem {
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
+
 	@PrePersist
 	protected void onCreate() {
 		createdAt = LocalDateTime.now();
 	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
+
+	@OneToMany(mappedBy = "menuItem", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderItem> orderItems;
 }
