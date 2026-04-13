@@ -1,10 +1,10 @@
 <script setup>
-const navLinks = ['Why Foodeli?', 'Services', 'Menu', 'Contact']
+const navLinks = ['Vì sao chọn chúng tôi', 'Dịch vụ', 'Thực đơn', 'Liên hệ']
 
 const popularItems = [
   {
     id: 1,
-    name: 'Italian Pizza',
+    name: 'Pizza Y',
     price: '$7.49',
     rating: '4.9',
     image:
@@ -12,7 +12,7 @@ const popularItems = [
   },
   {
     id: 2,
-    name: 'Chicken Burger',
+    name: 'Burger Gà',
     price: '$5.20',
     rating: '4.7',
     image:
@@ -20,7 +20,7 @@ const popularItems = [
   },
   {
     id: 3,
-    name: 'Fresh Salad',
+    name: 'Salad Tươi',
     price: '$6.10',
     rating: '4.8',
     image:
@@ -31,18 +31,18 @@ const popularItems = [
 const steps = [
   {
     id: 1,
-    title: 'Choose Food',
-    description: 'Browse menu from many restaurants near you.',
+    title: 'Chọn món',
+    description: 'Xem thực đơn từ nhiều nhà hàng gần bạn.',
   },
   {
     id: 2,
-    title: 'Place Order',
-    description: 'Confirm address and order with simple checkout.',
+    title: 'Đặt đơn',
+    description: 'Xác nhận địa chỉ và đặt đơn nhanh gọn.',
   },
   {
     id: 3,
-    title: 'Fast Delivery',
-    description: 'Track your order and receive food quickly.',
+    title: 'Giao nhanh',
+    description: 'Theo dõi đơn hàng và nhận món trong thời gian ngắn.',
   },
 ]
 </script>
@@ -52,35 +52,35 @@ const steps = [
     <div class="hero-nav">
       <div class="brand">
         <div class="logo-box">FO</div>
-        <span>Foodeli</span>
+        <span>Giao Đồ Ăn</span>
       </div>
       <ul class="hero-links">
         <li v-for="item in navLinks" :key="item">{{ item }}</li>
       </ul>
-      <button class="login-btn">Login</button>
+      <button class="login-btn">Đăng nhập</button>
     </div>
 
     <div class="hero-content">
       <div class="left">
-        <span class="pill">More than Faster</span>
+        <span class="pill">Nhanh hơn mong đợi</span>
         <h1 class="hero-title">
-          Claim Best Offer
+          Nhận ưu đãi tốt nhất
           <br />
-          on Fast <span>Food</span> &
+          cho <span>Đồ ăn</span> và
           <br />
-          <span>Restaurants</span>
+          <span>Nhà hàng</span>
         </h1>
         <p class="hero-description">
-          Our job is to filling your tummy with delicious food
+          Chúng tôi giúp bạn no bụng với những món ăn ngon
           <br />
-          and with fast and free delivery
+          và giao hàng nhanh miễn phí
         </p>
 
         <div class="cta-row">
-          <button class="primary-btn">Get Started</button>
+          <button class="primary-btn">Bắt đầu ngay</button>
           <button class="watch-btn">
             <i>▶</i>
-            Watch Video
+            Xem video
           </button>
         </div>
 
@@ -91,8 +91,8 @@ const steps = [
             <span>C</span>
           </div>
           <div>
-            <strong>Our Happy Customer</strong>
-            <p>4.8 (12.5k Review)</p>
+            <strong>Khách hàng hài lòng</strong>
+            <p>4.8 (12.5 nghìn đánh giá)</p>
           </div>
         </div>
       </div>
@@ -102,14 +102,14 @@ const steps = [
         <img
           class="dish-image"
           src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80"
-          alt="Food bowl"
+          alt="Món ăn"
         />
 
         <div class="floating courier-card">
           <div class="avatar">RW</div>
           <div class="card-text">
-            <strong>Richard Watson</strong>
-            <small>Food Courier</small>
+            <strong>Nguyễn Văn A</strong>
+            <small>Nhân viên giao hàng</small>
           </div>
           <button class="call-btn">☎</button>
         </div>
@@ -120,7 +120,7 @@ const steps = [
             alt="Pizza"
           />
           <div class="card-text">
-            <strong>Italian Pizza</strong>
+            <strong>Pizza Y</strong>
             <small>★★★★★</small>
             <p>$ 7.49</p>
           </div>
@@ -131,10 +131,10 @@ const steps = [
     <section class="section-block">
       <div class="section-heading">
         <div>
-          <span class="section-tag">Popular Menu</span>
-          <h2>Choose your favorite food</h2>
+          <span class="section-tag">Món phổ biến</span>
+          <h2>Chọn món bạn yêu thích</h2>
         </div>
-        <button class="outline-btn">See All Menu</button>
+        <button class="outline-btn">Xem tất cả món</button>
       </div>
 
       <div class="menu-grid">
@@ -153,8 +153,8 @@ const steps = [
 
     <section class="section-block how-it-works">
       <div class="section-heading center">
-        <span class="section-tag">How it works</span>
-        <h2>Get food in 3 easy steps</h2>
+        <span class="section-tag">Cách hoạt động</span>
+        <h2>Đặt món với 3 bước đơn giản</h2>
       </div>
       <div class="step-grid">
         <article v-for="step in steps" :key="step.id" class="step-card">
@@ -167,11 +167,11 @@ const steps = [
 
     <section class="promo-banner">
       <div>
-        <span class="section-tag">Special Offer</span>
-        <h2>Get 20% discount for your first order</h2>
-        <p>Use code <strong>WELCOME20</strong> at checkout.</p>
+        <span class="section-tag">Ưu đãi đặc biệt</span>
+        <h2>Giảm 20% cho đơn hàng đầu tiên</h2>
+        <p>Sử dụng mã <strong>CHAO20</strong> khi thanh toán.</p>
       </div>
-      <button class="primary-btn">Order Now</button>
+      <button class="primary-btn">Đặt món ngay</button>
     </section>
   </section>
 </template>
