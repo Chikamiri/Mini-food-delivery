@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "restaurantId": 1,
+    "categoryId": 1,
+    "name": "Hamburger Bo",
+    "description": "Burger bo nuong than, rau tuoi, pho mai",
+    "price": 55000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 2,
+    "restaurantId": 1,
+    "categoryId": 1,
+    "name": "Hamburger Ga",
+    "description": "Burger ga gion, salad, sot mayonnaise",
+    "price": 45000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 3,
+    "restaurantId": 1,
+    "categoryId": 2,
+    "name": "Khoai Tay Chien",
+    "description": "Khoai tay chien gion, size lon",
+    "price": 30000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 4,
+    "restaurantId": 1,
+    "categoryId": 3,
+    "name": "Coca Cola",
+    "description": "Coca Cola lon 330ml",
+    "price": 15000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 5,
+    "restaurantId": 2,
+    "categoryId": 4,
+    "name": "Tra Sua Tran Chau",
+    "description": "Tra sua truyen thong voi tran chau den",
+    "price": 35000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 6,
+    "restaurantId": 2,
+    "categoryId": 4,
+    "name": "Tra Sua Matcha",
+    "description": "Tra sua vi matcha Nhat Ban",
+    "price": 40000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 7,
+    "restaurantId": 2,
+    "categoryId": 5,
+    "name": "Tra Dao",
+    "description": "Tra dao cam sa, thanh mat",
+    "price": 30000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 8,
+    "restaurantId": 3,
+    "categoryId": 7,
+    "name": "Com Tam Suon Bi Cha",
+    "description": "Com tam dac biet voi suon nuong, bi, cha trung",
+    "price": 50000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 9,
+    "restaurantId": 3,
+    "categoryId": 7,
+    "name": "Com Tam Suon",
+    "description": "Com tam suon nuong thom phuc",
+    "price": 40000,
+    "imageUrl": null,
+    "isAvailable": true
+  },
+  {
+    "id": 10,
+    "restaurantId": 3,
+    "categoryId": 9,
+    "name": "Nuoc Mia",
+    "description": "Nuoc mia tuoi, da lanh",
+    "price": 15000,
+    "imageUrl": null,
+    "isAvailable": true
+  }
+]
