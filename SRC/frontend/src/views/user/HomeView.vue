@@ -1,5 +1,50 @@
 <script setup>
 const navLinks = ['Why Foodeli?', 'Services', 'Menu', 'Contact']
+
+const popularItems = [
+  {
+    id: 1,
+    name: 'Italian Pizza',
+    price: '$7.49',
+    rating: '4.9',
+    image:
+      'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80',
+  },
+  {
+    id: 2,
+    name: 'Chicken Burger',
+    price: '$5.20',
+    rating: '4.7',
+    image:
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80',
+  },
+  {
+    id: 3,
+    name: 'Fresh Salad',
+    price: '$6.10',
+    rating: '4.8',
+    image:
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=80',
+  },
+]
+
+const steps = [
+  {
+    id: 1,
+    title: 'Choose Food',
+    description: 'Browse menu from many restaurants near you.',
+  },
+  {
+    id: 2,
+    title: 'Place Order',
+    description: 'Confirm address and order with simple checkout.',
+  },
+  {
+    id: 3,
+    title: 'Fast Delivery',
+    description: 'Track your order and receive food quickly.',
+  },
+]
 </script>
 
 <template>
@@ -18,14 +63,14 @@ const navLinks = ['Why Foodeli?', 'Services', 'Menu', 'Contact']
     <div class="hero-content">
       <div class="left">
         <span class="pill">More than Faster</span>
-        <h1>
+        <h1 class="hero-title">
           Claim Best Offer
           <br />
           on Fast <span>Food</span> &
           <br />
           <span>Restaurants</span>
         </h1>
-        <p>
+        <p class="hero-description">
           Our job is to filling your tummy with delicious food
           <br />
           and with fast and free delivery
@@ -82,6 +127,52 @@ const navLinks = ['Why Foodeli?', 'Services', 'Menu', 'Contact']
         </div>
       </div>
     </div>
+
+    <section class="section-block">
+      <div class="section-heading">
+        <div>
+          <span class="section-tag">Popular Menu</span>
+          <h2>Choose your favorite food</h2>
+        </div>
+        <button class="outline-btn">See All Menu</button>
+      </div>
+
+      <div class="menu-grid">
+        <article v-for="item in popularItems" :key="item.id" class="menu-card">
+          <img :src="item.image" :alt="item.name" />
+          <div class="menu-card-body">
+            <h3>{{ item.name }}</h3>
+            <div class="meta-row">
+              <span class="price">{{ item.price }}</span>
+              <span class="rating">★ {{ item.rating }}</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-block how-it-works">
+      <div class="section-heading center">
+        <span class="section-tag">How it works</span>
+        <h2>Get food in 3 easy steps</h2>
+      </div>
+      <div class="step-grid">
+        <article v-for="step in steps" :key="step.id" class="step-card">
+          <span class="step-number">0{{ step.id }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="promo-banner">
+      <div>
+        <span class="section-tag">Special Offer</span>
+        <h2>Get 20% discount for your first order</h2>
+        <p>Use code <strong>WELCOME20</strong> at checkout.</p>
+      </div>
+      <button class="primary-btn">Order Now</button>
+    </section>
   </section>
 </template>
 
@@ -153,19 +244,19 @@ const navLinks = ['Why Foodeli?', 'Services', 'Menu', 'Contact']
   margin-bottom: 1.4rem;
 }
 
-h1 {
+.hero-title {
   font-size: clamp(2.2rem, 5vw, 4rem);
   line-height: 1.1;
   margin: 0;
   color: #061428;
 }
 
-h1 span {
+.hero-title span {
   color: #f8143f;
   font-style: italic;
 }
 
-p {
+.hero-description {
   color: #5b5d66;
   line-height: 1.6;
 }
@@ -322,6 +413,141 @@ p {
   color: #15181f;
 }
 
+.section-block {
+  margin-top: 4.5rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
+}
+
+.section-heading.center {
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+}
+
+.section-tag {
+  display: inline-block;
+  color: #f64839;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: #061428;
+}
+
+.outline-btn {
+  border: 1px solid #f8143f;
+  background: #fff;
+  color: #f8143f;
+  border-radius: 999px;
+  padding: 0.6rem 1.05rem;
+  font-weight: 600;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.menu-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.07);
+}
+
+.menu-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.menu-card-body {
+  padding: 0.95rem;
+}
+
+.menu-card-body h3 {
+  margin: 0 0 0.45rem;
+  color: #161a21;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.price {
+  color: #f8143f;
+  font-weight: 700;
+}
+
+.rating {
+  color: #8a8d97;
+}
+
+.how-it-works {
+  background: #fff;
+  border-radius: 18px;
+  padding: 2rem 1.2rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.step-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.step-card {
+  background: #f9fafc;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.step-number {
+  color: #f8143f;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.step-card h3 {
+  margin: 0.4rem 0;
+  color: #151923;
+}
+
+.step-card p {
+  margin: 0;
+  color: #666a73;
+}
+
+.promo-banner {
+  margin-top: 4rem;
+  border-radius: 22px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ffe4e8 0%, #fff3f5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.promo-banner p {
+  margin: 0.5rem 0 0;
+  color: #535761;
+}
+
 @media (max-width: 980px) {
   .hero-links {
     display: none;
@@ -333,6 +559,21 @@ p {
 
   .right {
     min-height: 470px;
+  }
+
+  .menu-grid,
+  .step-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .promo-banner {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
