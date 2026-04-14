@@ -173,6 +173,25 @@ const steps = [
       </div>
       <button class="primary-btn">Đặt món ngay</button>
     </section>
+
+    <footer class="home-footer">
+      <div class="footer-brand">
+        <div class="logo-box">FO</div>
+        <div>
+          <strong>Giao Đồ Ăn</strong>
+          <p>Ngon nhanh, giao tận nơi.</p>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <a href="#">Thực đơn</a>
+        <a href="#">Dịch vụ</a>
+        <a href="#">Liên hệ</a>
+        <a href="#">Chính sách</a>
+      </div>
+
+      <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
+    </footer>
   </section>
 </template>
 
