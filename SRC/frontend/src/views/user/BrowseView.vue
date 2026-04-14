@@ -29,11 +29,6 @@ const recentOrders = [
   { id: 3, name: 'Cơm Gà Nướng', price: '69.000đ', eta: '18 phút' },
 ]
 
-const orderMenu = [
-  { name: 'Pizza Pepperoni', price: '95.000đ' },
-  { name: 'Burger Bò', price: '59.000đ' },
-  { name: 'Salad Tươi', price: '48.000đ' },
-]
 </script>
 
 <template>
@@ -125,56 +120,21 @@ const orderMenu = [
       </section>
     </main>
 
-    <aside class="right-panel">
-      <div class="balance-card">
-        <h4>Số dư ví</h4>
-        <p>1.250.000đ</p>
-        <div>
-          <button>Nạp tiền</button>
-          <button>Rút tiền</button>
-        </div>
-      </div>
-
-      <div class="address-card">
-        <h4>Địa chỉ giao hàng</h4>
-        <p>227 Nguyễn Văn Cừ, Quận 5, TP.HCM</p>
-        <div class="address-actions">
-          <button>Nhà</button>
-          <button>Sửa</button>
-        </div>
-      </div>
-
-      <div class="order-card">
-        <h4>Đơn hàng hiện tại</h4>
-        <ul>
-          <li v-for="item in orderMenu" :key="item.name">
-            <span>{{ item.name }}</span>
-            <strong>{{ item.price }}</strong>
-          </li>
-        </ul>
-        <div class="total-row">
-          <span>Tạm tính</span>
-          <strong>202.000đ</strong>
-        </div>
-        <button class="checkout-btn">Thanh toán</button>
-      </div>
-    </aside>
   </section>
 </template>
 
 <style scoped>
 .browse-page {
   min-height: 100vh;
-  background: #f2f3f7;
+  background: #fff4f6;
   display: grid;
-  grid-template-columns: 220px 1fr 310px;
+  grid-template-columns: 220px 1fr;
   gap: 1rem;
   padding: 1rem;
 }
 
 .left-sidebar,
-.main-content,
-.right-panel {
+.main-content {
   background: #fff;
   border-radius: 16px;
 }
@@ -196,7 +156,7 @@ const orderMenu = [
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #f5b400;
+  background: #f8143f;
   color: #fff;
   display: grid;
   place-items: center;
@@ -218,20 +178,20 @@ const orderMenu = [
 }
 
 .menu-list a.active {
-  background: #f5b400;
+  background: #f8143f;
   color: #fff;
 }
 
 .upgrade-box {
   margin-top: auto;
-  background: #fff7db;
+  background: #ffe8ee;
   border-radius: 12px;
   padding: 0.85rem;
 }
 
 .upgrade-box p {
   margin: 0;
-  color: #6e5c24;
+  color: #7a3142;
   font-size: 0.85rem;
 }
 
@@ -239,7 +199,7 @@ const orderMenu = [
   margin-top: 0.75rem;
   border: 0;
   border-radius: 8px;
-  background: #f5b400;
+  background: #f8143f;
   color: #fff;
   padding: 0.5rem 0.8rem;
   font-weight: 600;
@@ -276,7 +236,7 @@ const orderMenu = [
 .voucher-banner {
   margin-top: 1rem;
   border-radius: 12px;
-  background: linear-gradient(120deg, #f5b400 0%, #ffd45f 100%);
+  background: linear-gradient(120deg, #f8143f 0%, #ff5578 100%);
   padding: 1rem;
   display: flex;
   align-items: center;
@@ -292,14 +252,14 @@ const orderMenu = [
 
 .voucher-banner p {
   margin: 0.35rem 0 0;
-  color: #fffde9;
+  color: #ffe9ef;
 }
 
 .voucher-banner button {
   border: 0;
   border-radius: 10px;
   background: #fff;
-  color: #d19600;
+  color: #e01846;
   font-weight: 700;
   padding: 0.7rem 1rem;
 }
@@ -319,7 +279,7 @@ const orderMenu = [
 }
 
 .section-head a {
-  color: #f5b400;
+  color: #f8143f;
   text-decoration: none;
 }
 
@@ -392,7 +352,7 @@ const orderMenu = [
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: #f5b400;
+  background: #f8143f;
   color: #fff;
 }
 
@@ -402,86 +362,6 @@ const orderMenu = [
   color: #868d98;
 }
 
-.right-panel {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.balance-card,
-.address-card,
-.order-card {
-  border: 1px solid #eceff5;
-  border-radius: 12px;
-  padding: 0.9rem;
-}
-
-.balance-card h4,
-.address-card h4,
-.order-card h4 {
-  margin: 0;
-}
-
-.balance-card p {
-  margin: 0.55rem 0;
-  font-size: 1.4rem;
-  font-weight: 700;
-}
-
-.balance-card div {
-  display: flex;
-  gap: 0.55rem;
-}
-
-.balance-card button,
-.address-actions button {
-  border: 1px solid #eceff5;
-  border-radius: 8px;
-  background: #fff;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.8rem;
-}
-
-.address-card p {
-  color: #6d737f;
-}
-
-.address-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.order-card ul {
-  padding: 0;
-  margin: 0.65rem 0;
-  list-style: none;
-}
-
-.order-card li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.35rem 0;
-}
-
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  border-top: 1px solid #eceff5;
-  padding-top: 0.65rem;
-}
-
-.checkout-btn {
-  margin-top: 0.7rem;
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: #f5b400;
-  color: #fff;
-  padding: 0.7rem;
-  font-weight: 700;
-}
-
 @media (max-width: 1200px) {
   .browse-page {
     grid-template-columns: 1fr;
@@ -489,10 +369,6 @@ const orderMenu = [
 
   .left-sidebar {
     order: 2;
-  }
-
-  .right-panel {
-    order: 3;
   }
 
   .category-grid {
