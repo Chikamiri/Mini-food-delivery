@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "label": "Nha",
+    "addressLine": "227 Nguyen Van Cu, Quan 5, TP.HCM",
+    "latitude": 10.7620,
+    "longitude": 106.6820,
+    "isDefault": true
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "label": "Co quan",
+    "addressLine": "1 Vo Van Ngan, Thu Duc, TP.HCM",
+    "latitude": 10.8510,
+    "longitude": 106.7720,
+    "isDefault": false
+  }
+]

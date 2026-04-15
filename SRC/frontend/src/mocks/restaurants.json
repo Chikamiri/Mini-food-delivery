@@ -1,0 +1,65 @@
+[
+  {
+    "id": 1,
+    "ownerId": 2,
+    "categoryId": 1,
+    "name": "Burger King",
+    "description": "Chuoi nha hang do an nhanh noi tieng",
+    "phone": "0281234567",
+    "address": "123 Nguyen Hue, Quan 1, TP.HCM",
+    "latitude": 10.7731,
+    "longitude": 106.7030,
+    "imageUrl": null,
+    "openingTime": "07:00",
+    "closingTime": "22:00",
+    "isOpen": true,
+    "isApproved": true,
+    "categories": [
+      { "id": 1, "name": "Burger", "sortOrder": 0 },
+      { "id": 2, "name": "Khoai tay", "sortOrder": 1 },
+      { "id": 3, "name": "Do uong", "sortOrder": 2 }
+    ]
+  },
+  {
+    "id": 2,
+    "ownerId": 2,
+    "categoryId": 2,
+    "name": "Tra Sua ToCoToCo",
+    "description": "Tra sua tuoi ngon, nhieu topping",
+    "phone": "0282345678",
+    "address": "456 Le Loi, Quan 1, TP.HCM",
+    "latitude": 10.7725,
+    "longitude": 106.6980,
+    "imageUrl": null,
+    "openingTime": "08:00",
+    "closingTime": "23:00",
+    "isOpen": true,
+    "isApproved": true,
+    "categories": [
+      { "id": 4, "name": "Tra sua", "sortOrder": 0 },
+      { "id": 5, "name": "Tra trai cay", "sortOrder": 1 },
+      { "id": 6, "name": "Topping", "sortOrder": 2 }
+    ]
+  },
+  {
+    "id": 3,
+    "ownerId": 2,
+    "categoryId": 3,
+    "name": "Com Tam Sai Gon",
+    "description": "Com tam suon bi cha truyen thong",
+    "phone": "0283456789",
+    "address": "789 Vo Van Tan, Quan 3, TP.HCM",
+    "latitude": 10.7750,
+    "longitude": 106.6900,
+    "imageUrl": null,
+    "openingTime": "06:00",
+    "closingTime": "21:00",
+    "isOpen": true,
+    "isApproved": true,
+    "categories": [
+      { "id": 7, "name": "Com tam", "sortOrder": 0 },
+      { "id": 8, "name": "Mon them", "sortOrder": 1 },
+      { "id": 9, "name": "Nuoc uong", "sortOrder": 2 }
+    ]
+  }
+]

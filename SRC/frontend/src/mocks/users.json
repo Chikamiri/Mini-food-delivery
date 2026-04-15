@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "email": "user@example.com",
+    "fullName": "Nguyen Van A",
+    "phone": "0901234567",
+    "avatarUrl": null,
+    "role": "USER",
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "email": "restaurant@example.com",
+    "fullName": "Tran Thi B",
+    "phone": "0912345678",
+    "avatarUrl": null,
+    "role": "RESTAURANT_OWNER",
+    "isActive": true
+  },
+  {
+    "id": 3,
+    "email": "shipper@example.com",
+    "fullName": "Le Van C",
+    "phone": "0923456789",
+    "avatarUrl": null,
+    "role": "SHIPPER",
+    "isActive": true
+  },
+  {
+    "id": 4,
+    "email": "admin@example.com",
+    "fullName": "Admin",
+    "phone": "0900000000",
+    "avatarUrl": null,
+    "role": "ADMIN",
+    "isActive": true
+  }
+]
