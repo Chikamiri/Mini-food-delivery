@@ -1,5 +1,7 @@
 # Self note
 
+Current: Entities và Repositories tạm thời xong
+
 ```txt
 src/main/java/com/example/server/
 ├── ServerApplication.java          # File main để khởi chạy Spring Boot
@@ -14,6 +16,7 @@ src/main/java/com/example/server/
 ├── dto/                            # Data Transfer Objects (Dữ liệu giao tiếp với Client)
 │   ├── request/                    # Dữ liệu Client gửi lên (VD: OrderRequest, LoginRequest)
 │   └── response/                   # Dữ liệu Server trả về (VD: OrderResponse, JwtResponse)
+|           # Note: Thư mục dto sẽ theo layout mới, dùng lệnh ls để kiểm tra
 ├── entity/                         # Các class map với bảng trong MySQL
 │   ├── User.java                   # Đại diện chung cho Customer, Shipper, Admin
 │   ├── Role.java                   # Quyền của User
