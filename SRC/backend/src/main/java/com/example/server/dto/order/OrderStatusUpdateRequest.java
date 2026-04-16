@@ -1,6 +1,5 @@
-package com.example.server.dto.auth;
+package com.example.server.dto.order;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class OrderStatusUpdateRequest {
     @NotBlank
-    @Email
-    private String email;
+    private String status;
 
-    @NotBlank
-    private String password;
+    private String note;
 }

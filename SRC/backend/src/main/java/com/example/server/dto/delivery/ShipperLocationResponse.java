@@ -1,6 +1,7 @@
-package com.example.server.dto.user;
+package com.example.server.dto.delivery;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressResponse {
+public class ShipperLocationResponse {
     private Long id;
-    private String label;
-    private String addressLine;
+    private Long shipperId;
     private BigDecimal latitude;
     private BigDecimal longitude;
-    private Boolean isDefault;
+    private Boolean isOnline;
+    private LocalDateTime updatedAt;
 }

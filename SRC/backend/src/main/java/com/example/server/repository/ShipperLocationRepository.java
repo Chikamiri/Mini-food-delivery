@@ -13,10 +13,10 @@ import java.util.List;
 public interface ShipperLocationRepository extends JpaRepository<ShipperLocation, Long> {
     List<ShipperLocation> findByIsOnlineTrue();
 
-    Optional<ShipperLocation> findByUserId(Long userId);
+    Optional<ShipperLocation> findByShipperIDId(Long userId);
 
     // toggleOnlineStatus(status)
     @Modifying
-    @Query("UPDATE ShipperLocation s SET s.isOnline = :status WHERE s.userId = :userId")
+    @Query("UPDATE ShipperLocation s SET s.isOnline = :status WHERE s.shipperID.id = :userId")
     void updateOnlineStatus(@Param("userId") Long userId, @Param("status") boolean status);
 }

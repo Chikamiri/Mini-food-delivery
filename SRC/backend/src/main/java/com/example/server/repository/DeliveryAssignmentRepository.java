@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DeliveryAssignmentRepository extends JpaRepository<DeliveryAssignment, Long> {
-    Optional<DeliveryAssignment> findByShipperIdAndStatusIn(Long shipperId, List<String> statuses);
+    Optional<DeliveryAssignment> findByShipperIDIdAndStatusIn(Long shipperId, List<String> statuses);
 }

@@ -11,18 +11,18 @@ import com.example.server.entity.Restaurant;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-    // search(keywords, categoryId)
-    @Query("SELECT r FROM Restaurant r JOIN r.categories c WHERE " +
+        // search(keywords, categoryId)
+    @Query("SELECT r FROM Restaurant r LEFT JOIN r.category c WHERE " +
             "(:categoryId IS NULL OR c.id = :categoryId) AND " +
-            "(:keywords IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :keywords, '%'))) AND " +
-            "r.isApproved = true")
-    Page<Restaurant> searchRestaurants(@Param("keywords") String keywords,
-            @Param("categoryId") Long categoryId,
-            Pageable pageable);
+                        "(:keywords IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :keywords, '%'))) AND " +
+            "r.isApproved = true AND r.isDeleted = false")
+        Page<Restaurant> searchRestaurants(@Param("keywords") String keywords,
+                        @Param("categoryId") Long categoryId,
+                        Pageable pageable);
 
-    Page<Restaurant> findByIsApprovedFalse(Pageable pageable);
+        Page<Restaurant> findByIsApprovedFalse(Pageable pageable);
 
-    @Modifying
-    @Query("UPDATE Restaurant r SET r.isApproved = true WHERE r.id = :id")
-    void approveRestaurant(@Param("id") Long id);
+        @Modifying
+        @Query("UPDATE Restaurant r SET r.isApproved = true WHERE r.id = :id")
+        void approveRestaurant(@Param("id") Long id);
 }
