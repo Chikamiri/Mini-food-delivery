@@ -2,8 +2,11 @@ package com.example.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import com.example.server.repository.UserRepository;
 
 @SpringBootApplication
 public class ServerApplication {
@@ -24,6 +27,16 @@ public class ServerApplication {
 		}
 
 		app.run(args);
+	}
+
+	@Bean
+	CommandLineRunner runner(UserRepository userRepository) {
+		return args -> {
+			System.out.println("=======================================");
+			System.out.println("   Backend Server Started Successfully  ");
+			System.out.println("   Found users count: " + (isSmokeModeEnabled() ? "N/A (Smoke Mode)" : userRepository.count()));
+			System.out.println("=======================================");
+		};
 	}
 
 	private static boolean isSmokeModeEnabled() {

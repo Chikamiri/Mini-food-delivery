@@ -27,7 +27,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
         @Query(value = "SELECT o.*, (6371 * acos(cos(radians(:lat)) * cos(radians(o.delivery_lat)) * " +
                         "cos(radians(o.delivery_lng) - radians(:lng)) + sin(radians(:lat)) * " +
                         "sin(radians(o.delivery_lat)))) AS distance " +
-                        "FROM orders o WHERE o.status = 'READY_FOR_PICKUP' " +
+                        "FROM orders o WHERE o.status = 'READY' " +
                         "HAVING distance < :radius ORDER BY distance ASC", nativeQuery = true)
         List<Order> findAvailableOrdersNearLocation(@Param("lat") BigDecimal lat,
                         @Param("lng") BigDecimal lng,
