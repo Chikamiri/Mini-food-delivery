@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
-        // search(keywords, categoryId)
         @Query("SELECT r FROM Restaurant r LEFT JOIN r.category c WHERE " +
                         "(:categoryId IS NULL OR c.id = :categoryId) AND " +
                         "(:keywords IS NULL OR LOWER(r.name) LIKE LOWER(CONCAT('%', :keywords, '%'))) AND " +
@@ -28,4 +27,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
         void approveRestaurant(@Param("id") Long id);
 
         List<Restaurant> findByOwnerId(Long ownerId);
+
+        long countByIsApprovedTrue();
 }

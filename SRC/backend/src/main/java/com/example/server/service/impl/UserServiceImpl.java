@@ -3,6 +3,7 @@ package com.example.server.service.impl;
 import com.example.server.dto.user.*;
 import com.example.server.entity.Address;
 import com.example.server.entity.User;
+import com.example.server.exception.AppException;
 import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.mapper.AddressMapper;
 import com.example.server.mapper.UserMapper;
@@ -10,6 +11,7 @@ import com.example.server.repository.AddressRepository;
 import com.example.server.repository.UserRepository;
 import com.example.server.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,7 +92,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Address does not belong to user");
+            throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
         }
 
         if (Boolean.TRUE.equals(request.getIsDefault())) {
@@ -108,7 +110,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Address does not belong to user");
+            throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
         }
 
         addressRepository.delete(address);
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Address does not belong to user");
+            throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
         }
 
         resetDefaultAddress(userId);

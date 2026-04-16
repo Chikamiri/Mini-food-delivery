@@ -294,7 +294,7 @@ erDiagram
 | id           | BIGINT       | PK, AUTO_INCREMENT            |
 | order_id     | BIGINT       | NOT NULL, UNIQUE, FK -> orders.id |
 | shipper_id   | BIGINT       | NOT NULL, FK -> users.id      |
-| status       | VARCHAR(50)  | NOT NULL, DEFAULT 'NONASSIGNED' |
+| status       | VARCHAR(50)  | NOT NULL, DEFAULT 'UNASSIGNED' |
 | picked_up_at | TIMESTAMP    | NULL                          |
 | delivered_at | TIMESTAMP    | NULL                          |
 | created_at   | TIMESTAMP    | DEFAULT CURRENT_TIMESTAMP     |

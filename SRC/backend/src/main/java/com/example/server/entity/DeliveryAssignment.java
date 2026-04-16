@@ -23,7 +23,7 @@ public class DeliveryAssignment {
     private User shipper;
 
     @Column(name = "status", nullable = false)
-    private String status = "NONASSIGNED";
+	private String status = "UNASSIGNED";
 
     @Column(name = "picked_up_at")
     private LocalDateTime pickedUpAt;

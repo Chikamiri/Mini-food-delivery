@@ -1,6 +1,7 @@
 package com.example.server.exception;
 
 import com.example.server.dto.common.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .errorCode("RESOURCE_NOT_FOUND")
                 .build();
-        return new ResponseEntity<>(response, org.springframework.http.HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AppException.class)
@@ -40,6 +41,6 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .errorCode("INTERNAL_SERVER_ERROR")
                 .build();
-        return new ResponseEntity<>(response, org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

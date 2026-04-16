@@ -12,7 +12,7 @@ public interface DeliveryMapper {
     @Mapping(target = "orderId", source = "order.id")
     @Mapping(target = "shipperId", source = "shipper.id")
     @Mapping(target = "shipperName", source = "shipper.fullName")
-    DeliveryAssignmentResponse toAssignmentResponse(DeliveryAssignment assignment);
+    DeliveryAssignmentResponse toResponse(DeliveryAssignment assignment);
 
     @Mapping(target = "shipperId", source = "shipper.id")
     ShipperLocationResponse toLocationResponse(ShipperLocation location);
