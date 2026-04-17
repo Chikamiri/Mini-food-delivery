@@ -18,7 +18,7 @@ public class ShipperLocation {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_id", nullable = false, unique = true)
-    private User shipperID;
+    private User shipper;
 
     @Column(name = "latitude", nullable = false, precision = 10, scale = 8)
     private BigDecimal latitude;

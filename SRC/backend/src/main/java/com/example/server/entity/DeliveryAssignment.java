@@ -16,14 +16,14 @@ public class DeliveryAssignment {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, unique = true)
-    private Order orderID;
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipper_id", nullable = false)
-    private User shipperID;
+    private User shipper;
 
     @Column(name = "status", nullable = false)
-    private String status = "NONASSIGNED";
+	private String status = "UNASSIGNED";
 
     @Column(name = "picked_up_at")
     private LocalDateTime pickedUpAt;

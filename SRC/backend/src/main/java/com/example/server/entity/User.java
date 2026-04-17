@@ -22,7 +22,7 @@ public class User {
 	private String password;
 
 	@Column(nullable = false, name = "full_name")
-	private String fullname;
+	private String fullName;
 
 	@Column(unique = true, length = 15)
 	private String phone;
@@ -63,7 +63,7 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
 
-	@OneToMany(mappedBy = "shipperID", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "shipper", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<DeliveryAssignment> deliveryAssignment = new ArrayList<>();
 
 	@OneToMany(mappedBy = "changedBy", cascade = CascadeType.ALL, orphanRemoval = true)

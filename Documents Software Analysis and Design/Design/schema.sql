@@ -188,7 +188,7 @@ CREATE TABLE delivery_assignments (
     order_id        BIGINT NOT NULL UNIQUE,
     shipper_id      BIGINT NOT NULL,
     
-    status          VARCHAR(50) NOT NULL DEFAULT 'NONASSIGNED',
+    status          VARCHAR(50) NOT NULL DEFAULT 'UNASSIGNED',
     
     picked_up_at    TIMESTAMP NULL,
     delivered_at    TIMESTAMP NULL,

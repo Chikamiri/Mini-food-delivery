@@ -68,5 +68,11 @@ public class Order {
 	}
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<OrderItem> orderItems;
+	private List<OrderItem> orderItems = new ArrayList<>();
+
+	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	private DeliveryAssignment deliveryAssignment;
+
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OrderStatusHistory> statusHistories = new ArrayList<>();
 }
