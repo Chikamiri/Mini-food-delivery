@@ -1,4 +1,8 @@
 <script setup>
+import iconFacebook from '@/assets/icon/facebook.svg'
+import iconInstagram from '@/assets/icon/instagram.svg'
+import iconTiktok from '@/assets/icon/tiktok.svg'
+
 const navLinks = ['Vì sao chọn chúng tôi', 'Dịch vụ', 'Thực đơn', 'Liên hệ']
 
 const popularItems = [
@@ -191,9 +195,15 @@ const steps = [
       </div>
 
       <div class="footer-social">
-        <a href="#" aria-label="Facebook">f</a>
-        <a href="#" aria-label="Instagram">◎</a>
-        <a href="#" aria-label="TikTok">♪</a>
+        <a href="#" aria-label="Facebook">
+          <img :src="iconFacebook" alt="" width="18" height="18" />
+        </a>
+        <a href="#" aria-label="Instagram">
+          <img :src="iconInstagram" alt="" width="18" height="18" />
+        </a>
+        <a href="#" aria-label="TikTok">
+          <img :src="iconTiktok" alt="" width="18" height="18" />
+        </a>
       </div>
 
       <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>

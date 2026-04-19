@@ -432,11 +432,21 @@ h2 {
     border-color 0.2s ease;
 }
 
+.footer-social a img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
 .footer-social a:hover {
   transform: translateY(-2px);
   background: #f8143f;
   color: #fff;
   border-color: #f8143f;
+}
+
+.footer-social a:hover img {
+  filter: brightness(0) invert(1);
 }
 
 .footer-copy {
