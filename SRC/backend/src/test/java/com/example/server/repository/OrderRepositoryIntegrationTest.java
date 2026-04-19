@@ -7,8 +7,6 @@ import com.example.server.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -64,12 +62,13 @@ class OrderRepositoryIntegrationTest extends BaseIntegrationTest {
 
         // Order 1: Near (Approx 0.5 km)
         Order order1 = createOrder("Near Order", new BigDecimal("10.00300000"), new BigDecimal("10.00300000"), "READY");
-        
+
         // Order 2: Far (Approx 15 km)
         Order order2 = createOrder("Far Order", new BigDecimal("10.10000000"), new BigDecimal("10.10000000"), "READY");
 
         // Order 3: Near but PENDING (should be excluded by query status filter)
-        Order order3 = createOrder("Near Pending", new BigDecimal("10.00100000"), new BigDecimal("10.00100000"), "PENDING");
+        Order order3 = createOrder("Near Pending", new BigDecimal("10.00100000"), new BigDecimal("10.00100000"),
+                "PENDING");
 
         orderRepository.saveAllAndFlush(List.of(order1, order2, order3));
 

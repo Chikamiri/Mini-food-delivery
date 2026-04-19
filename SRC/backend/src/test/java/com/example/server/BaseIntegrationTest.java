@@ -18,8 +18,7 @@ public abstract class BaseIntegrationTest {
         mysql = new MySQLContainer<>("mysql:8.0")
                 .withDatabaseName("testdb")
                 .withUsername("testuser")
-                .withPassword("testpass")
-                .withReuse(true);
+                .withPassword("testpass");
         mysql.start();
     }
 }

@@ -4,8 +4,9 @@ import com.example.server.dto.delivery.*;
 import com.example.server.entity.*;
 import com.example.server.enums.DeliveryAssignmentStatus;
 import com.example.server.enums.OrderStatus;
-import com.example.server.exception.ResourceNotFoundException;
+import com.example.server.enums.Role;
 import com.example.server.exception.AppException;
+import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.mapper.DeliveryMapper;
 import com.example.server.repository.*;
 import com.example.server.service.DeliveryService;
@@ -35,7 +36,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         User shipper = userRepository.findById(request.getShipperId())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getShipperId()));
 
-        if (!"SHIPPER".equals(shipper.getRole())) {
+        if (!Role.ROLE_SHIPPER.equals(shipper.getRole())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "User is not a shipper", "INVALID_ROLE");
         }
 
@@ -60,7 +61,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .orElseThrow(() -> new ResourceNotFoundException("DeliveryAssignment", "orderId", orderId));
 
         if (!assignment.getShipper().getId().equals(shipperId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Unauthorized to update this assignment", "UNAUTHORIZED_UPDATE");
+            throw new AppException(HttpStatus.FORBIDDEN, "Unauthorized to update this assignment",
+                    "UNAUTHORIZED_UPDATE");
         }
 
         assignment.setStatus(DeliveryAssignmentStatus.PICKED_UP.name());
@@ -75,7 +77,8 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .orElseThrow(() -> new ResourceNotFoundException("DeliveryAssignment", "orderId", orderId));
 
         if (!assignment.getShipper().getId().equals(shipperId)) {
-            throw new AppException(HttpStatus.FORBIDDEN, "Unauthorized to update this assignment", "UNAUTHORIZED_UPDATE");
+            throw new AppException(HttpStatus.FORBIDDEN, "Unauthorized to update this assignment",
+                    "UNAUTHORIZED_UPDATE");
         }
         assignment.setStatus(DeliveryAssignmentStatus.DELIVERED.name());
         assignment.setDeliveredAt(LocalDateTime.now());
