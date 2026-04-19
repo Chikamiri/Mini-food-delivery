@@ -528,6 +528,32 @@ h2 {
   box-shadow: 0 24px 48px rgba(6, 20, 40, 0.22);
 }
 
+/* Một khung cố định: đăng nhập | đăng ký nằm ngang; trượt -50% để “chuyển cảnh” sang ô bên phải */
+.login-panel.auth-dialog {
+  max-width: 420px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.auth-inner {
+  display: flex;
+  width: 200%;
+  align-items: flex-start;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-inner.auth-inner--register {
+  transform: translateX(-50%);
+}
+
+.auth-col {
+  flex: 0 0 50%;
+  width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1.75rem 1.75rem 1.5rem;
+}
+
 .login-close {
   position: absolute;
   top: 0.85rem;
@@ -648,5 +674,21 @@ h2 {
 }
 
 .login-alt a:hover {
+  text-decoration: underline;
+}
+
+button.auth-link {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  font: inherit;
+  color: #f8143f;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button.auth-link:hover {
   text-decoration: underline;
 }
