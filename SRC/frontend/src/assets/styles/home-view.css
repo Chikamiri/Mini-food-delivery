@@ -46,6 +46,16 @@
   color: #fff;
   padding: 0.65rem 1.35rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.login-btn:hover {
+  background: #d91036;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
 }
 
 .hero-content {
@@ -432,11 +442,21 @@ h2 {
     border-color 0.2s ease;
 }
 
+.footer-social a img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
 .footer-social a:hover {
   transform: translateY(-2px);
   background: #f8143f;
   color: #fff;
   border-color: #f8143f;
+}
+
+.footer-social a:hover img {
+  filter: brightness(0) invert(1);
 }
 
 .footer-copy {
@@ -483,4 +503,192 @@ h2 {
   .footer-copy {
     text-align: left;
   }
+}
+
+/* Modal đăng nhập (HomeView) */
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(6, 20, 40, 0.62);
+  backdrop-filter: blur(4px);
+}
+
+.login-panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  box-shadow: 0 24px 48px rgba(6, 20, 40, 0.22);
+}
+
+/* Một khung cố định: đăng nhập | đăng ký nằm ngang; trượt -50% để “chuyển cảnh” sang ô bên phải */
+.login-panel.auth-dialog {
+  max-width: 420px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.auth-inner {
+  display: flex;
+  width: 200%;
+  align-items: flex-start;
+  transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-inner.auth-inner--register {
+  transform: translateX(-50%);
+}
+
+.auth-col {
+  flex: 0 0 50%;
+  width: 50%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 1.75rem 1.75rem 1.5rem;
+}
+
+.login-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem;
+  border-radius: 8px;
+  cursor: pointer;
+  line-height: 0;
+  opacity: 0.65;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.login-close:hover {
+  opacity: 1;
+  background: #f3f4f6;
+}
+
+.login-title {
+  margin: 0 2rem 0.4rem 0;
+  font-size: 1.35rem;
+  color: #061428;
+}
+
+.login-sub {
+  margin: 0 0 1.25rem;
+  font-size: 0.92rem;
+  color: #5b5d66;
+  line-height: 1.45;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.login-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f2532;
+}
+
+.login-label input {
+  border: 1px solid #e2e5eb;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-label input:focus {
+  outline: none;
+  border-color: #f8143f;
+  box-shadow: 0 0 0 3px rgba(248, 20, 63, 0.12);
+}
+
+.login-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+}
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 500;
+  color: #3f4552;
+  cursor: pointer;
+}
+
+.login-forgot {
+  color: #f8143f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-forgot:hover {
+  text-decoration: underline;
+}
+
+.login-submit {
+  margin-top: 0.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: #f8143f;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.login-submit:hover {
+  background: #d91036;
+}
+
+.login-alt {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.92rem;
+  color: #5b5d66;
+}
+
+.login-alt a {
+  color: #f8143f;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-alt a:hover {
+  text-decoration: underline;
+}
+
+button.auth-link {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  font: inherit;
+  color: #f8143f;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button.auth-link:hover {
+  text-decoration: underline;
 }

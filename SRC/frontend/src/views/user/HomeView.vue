@@ -1,5 +1,67 @@
 <script setup>
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import iconFacebook from '@/assets/icon/facebook.svg'
+import iconInstagram from '@/assets/icon/instagram.svg'
+import iconYoutube from '@/assets/icon/youtube.svg'
+import iconTwitter from '@/assets/icon/twitter.svg'
+import iconClose from '@/assets/icon/close.svg'
+
 const navLinks = ['Vì sao chọn chúng tôi', 'Dịch vụ', 'Thực đơn', 'Liên hệ']
+
+const loginOpen = ref(false)
+/** Trên mobile: 'login' = khối trái, 'register' = khối phải (trượt ngang). Desktop: hiển thị cả hai. */
+const authTab = ref('login')
+
+const loginEmail = ref('')
+const loginPassword = ref('')
+const loginRemember = ref(false)
+
+const regFullName = ref('')
+const regEmail = ref('')
+const regPassword = ref('')
+const regConfirm = ref('')
+
+function openLoginModal() {
+  authTab.value = 'login'
+  loginOpen.value = true
+}
+
+function closeLoginModal() {
+  loginOpen.value = false
+}
+
+function showRegisterPanel() {
+  authTab.value = 'register'
+}
+
+function showLoginPanel() {
+  authTab.value = 'login'
+}
+
+function onLoginSubmit() {
+  // Khi backend sẵn sàng: gọi API đăng nhập tại đây
+  closeLoginModal()
+}
+
+function onRegisterSubmit() {
+  // Khi backend sẵn sàng: gọi API đăng ký + kiểm tra trùng mật khẩu tại đây
+  closeLoginModal()
+}
+
+watch(loginOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+  if (!open) authTab.value = 'login'
+})
+
+function onKeydownEscape(e) {
+  if (e.key === 'Escape' && loginOpen.value) closeLoginModal()
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydownEscape))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydownEscape)
+  document.body.style.overflow = ''
+})
 
 const popularItems = [
   {
@@ -51,13 +113,13 @@ const steps = [
   <section class="hero">
     <div class="hero-nav">
       <div class="brand">
-        <div class="logo-box">FO</div>
+        <div class="logo-box">FD</div>
         <span>Giao Đồ Ăn</span>
       </div>
       <ul class="hero-links">
         <li v-for="item in navLinks" :key="item">{{ item }}</li>
       </ul>
-      <button class="login-btn">Đăng nhập</button>
+      <button type="button" class="login-btn" @click="openLoginModal">Đăng nhập</button>
     </div>
 
     <div class="hero-content">
@@ -105,14 +167,7 @@ const steps = [
           alt="Món ăn"
         />
 
-        <div class="floating courier-card">
-          <div class="avatar">RW</div>
-          <div class="card-text">
-            <strong>Nguyễn Văn A</strong>
-            <small>Nhân viên giao hàng</small>
-          </div>
-          <button class="call-btn">☎</button>
-        </div>
+       
 
         <div class="floating price-card">
           <img
@@ -191,13 +246,152 @@ const steps = [
       </div>
 
       <div class="footer-social">
-        <a href="#" aria-label="Facebook">f</a>
-        <a href="#" aria-label="Instagram">◎</a>
-        <a href="#" aria-label="TikTok">♪</a>
+        <a href="https://www.facebook.com/" aria-label="Facebook">
+          <img :src="iconFacebook" alt="" width="18" height="18" />
+        </a>
+        <a href="https://www.instagram.com/" aria-label="Instagram">
+          <img :src="iconInstagram" alt="" width="18" height="18" />
+        </a>
+        <a href="https://www.youtube.com/" aria-label="YouTube">
+          <img :src="iconYoutube" alt="" width="18" height="18" />
+        </a>
+        <a href="https://twitter.com/" aria-label="Twitter">
+          <img :src="iconTwitter" alt="" width="18" height="18" />
+        </a>
       </div>
 
       <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
     </footer>
+
+    <Teleport to="body">
+      <div
+        v-if="loginOpen"
+        class="login-overlay"
+        @click.self="closeLoginModal"
+      >
+        <div
+          class="login-panel auth-dialog"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="authTab === 'login' ? 'login-title' : 'register-title'"
+          @click.stop
+        >
+          <button
+            type="button"
+            class="login-close"
+            aria-label="Đóng"
+            @click="closeLoginModal"
+          >
+            <img :src="iconClose" alt="" width="20" height="20" />
+          </button>
+          <div
+            class="auth-inner"
+            :class="{ 'auth-inner--register': authTab === 'register' }"
+          >
+            <section class="auth-col auth-col--login" aria-label="Đăng nhập">
+              <h2 id="login-title" class="login-title">Đăng nhập</h2>
+              <p class="login-sub">Nhập email và mật khẩu để tiếp tục đặt món.</p>
+              <form class="login-form" @submit.prevent="onLoginSubmit">
+                <label class="login-label">
+                  Email
+                  <input
+                    v-model="loginEmail"
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                    placeholder="ten@email.com"
+                  />
+                </label>
+                <label class="login-label">
+                  Mật khẩu
+                  <input
+                    v-model="loginPassword"
+                    type="password"
+                    name="password"
+                    autocomplete="current-password"
+                    required
+                    placeholder="••••••••"
+                  />
+                </label>
+                <div class="login-row">
+                  <label class="login-remember">
+                    <input v-model="loginRemember" type="checkbox" name="remember" />
+                    Ghi nhớ đăng nhập
+                  </label>
+                  <a href="#" class="login-forgot" @click.prevent>Quên mật khẩu?</a>
+                </div>
+                <button type="submit" class="login-submit">Đăng nhập</button>
+              </form>
+              <p class="login-alt">
+                Chưa có tài khoản?
+                <button type="button" class="auth-link" @click="showRegisterPanel">
+                  Đăng ký
+                </button>
+              </p>
+            </section>
+            <section class="auth-col auth-col--register" aria-label="Đăng ký">
+              <h2 id="register-title" class="login-title">Đăng ký</h2>
+              <p class="login-sub">Tạo tài khoản để lưu địa chỉ và đặt món nhanh hơn.</p>
+              <form class="login-form" @submit.prevent="onRegisterSubmit">
+                <label class="login-label">
+                  Họ và tên
+                  <input
+                    v-model="regFullName"
+                    type="text"
+                    name="fullName"
+                    autocomplete="name"
+                    required
+                    placeholder="Nguyễn Văn A"
+                  />
+                </label>
+                <label class="login-label">
+                  Email
+                  <input
+                    v-model="regEmail"
+                    type="email"
+                    name="regEmail"
+                    autocomplete="email"
+                    required
+                    placeholder="ten@email.com"
+                  />
+                </label>
+                <label class="login-label">
+                  Mật khẩu
+                  <input
+                    v-model="regPassword"
+                    type="password"
+                    name="newPassword"
+                    autocomplete="new-password"
+                    required
+                    minlength="6"
+                    placeholder="Ít nhất 6 ký tự"
+                  />
+                </label>
+                <label class="login-label">
+                  Xác nhận mật khẩu
+                  <input
+                    v-model="regConfirm"
+                    type="password"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    required
+                    placeholder="Nhập lại mật khẩu"
+                  />
+                </label>
+                <button type="submit" class="login-submit">Tạo tài khoản</button>
+              </form>
+              <p class="login-alt">
+                Đã có tài khoản?
+                <button type="button" class="auth-link" @click="showLoginPanel">
+                  Đăng nhập
+                </button>
+              </p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
