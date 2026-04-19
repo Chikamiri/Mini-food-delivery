@@ -1,9 +1,45 @@
 <script setup>
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import iconFacebook from '@/assets/icon/facebook.svg'
 import iconInstagram from '@/assets/icon/instagram.svg'
-import iconTiktok from '@/assets/icon/tiktok.svg'
+import iconYoutube from '@/assets/icon/youtube.svg'
+import iconTwitter from '@/assets/icon/twitter.svg'
+import iconClose from '@/assets/icon/close.svg'
 
 const navLinks = ['Vì sao chọn chúng tôi', 'Dịch vụ', 'Thực đơn', 'Liên hệ']
+
+const loginOpen = ref(false)
+const loginEmail = ref('')
+const loginPassword = ref('')
+const loginRemember = ref(false)
+
+function openLoginModal() {
+  loginOpen.value = true
+}
+
+function closeLoginModal() {
+  loginOpen.value = false
+}
+
+function onLoginSubmit() {
+  // Khi backend sẵn sàng: gọi API đăng nhập tại đây
+  closeLoginModal()
+}
+
+watch(loginOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+
+function onKeydownEscape(e) {
+  if (e.key === 'Escape' && loginOpen.value) closeLoginModal()
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydownEscape))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeydownEscape)
+  document.body.style.overflow = ''
+})
 
 const popularItems = [
   {
@@ -55,13 +91,13 @@ const steps = [
   <section class="hero">
     <div class="hero-nav">
       <div class="brand">
-        <div class="logo-box">FO</div>
+        <div class="logo-box">FD</div>
         <span>Giao Đồ Ăn</span>
       </div>
       <ul class="hero-links">
         <li v-for="item in navLinks" :key="item">{{ item }}</li>
       </ul>
-      <button class="login-btn">Đăng nhập</button>
+      <button type="button" class="login-btn" @click="openLoginModal">Đăng nhập</button>
     </div>
 
     <div class="hero-content">
@@ -109,14 +145,7 @@ const steps = [
           alt="Món ăn"
         />
 
-        <div class="floating courier-card">
-          <div class="avatar">RW</div>
-          <div class="card-text">
-            <strong>Nguyễn Văn A</strong>
-            <small>Nhân viên giao hàng</small>
-          </div>
-          <button class="call-btn">☎</button>
-        </div>
+       
 
         <div class="floating price-card">
           <img
@@ -195,19 +224,85 @@ const steps = [
       </div>
 
       <div class="footer-social">
-        <a href="#" aria-label="Facebook">
+        <a href="https://www.facebook.com/" aria-label="Facebook">
           <img :src="iconFacebook" alt="" width="18" height="18" />
         </a>
-        <a href="#" aria-label="Instagram">
+        <a href="https://www.instagram.com/" aria-label="Instagram">
           <img :src="iconInstagram" alt="" width="18" height="18" />
         </a>
-        <a href="#" aria-label="TikTok">
-          <img :src="iconTiktok" alt="" width="18" height="18" />
+        <a href="https://www.youtube.com/" aria-label="YouTube">
+          <img :src="iconYoutube" alt="" width="18" height="18" />
+        </a>
+        <a href="https://twitter.com/" aria-label="Twitter">
+          <img :src="iconTwitter" alt="" width="18" height="18" />
         </a>
       </div>
 
       <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
     </footer>
+
+    <Teleport to="body">
+      <div
+        v-if="loginOpen"
+        class="login-overlay"
+        @click.self="closeLoginModal"
+      >
+        <div
+          class="login-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="login-title"
+          @click.stop
+        >
+          <button
+            type="button"
+            class="login-close"
+            aria-label="Đóng"
+            @click="closeLoginModal"
+          >
+            <img :src="iconClose" alt="" width="20" height="20" />
+          </button>
+          <h2 id="login-title" class="login-title">Đăng nhập</h2>
+          <p class="login-sub">Nhập email và mật khẩu để tiếp tục đặt món.</p>
+          <form class="login-form" @submit.prevent="onLoginSubmit">
+            <label class="login-label">
+              Email
+              <input
+                v-model="loginEmail"
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="ten@email.com"
+              />
+            </label>
+            <label class="login-label">
+              Mật khẩu
+              <input
+                v-model="loginPassword"
+                type="password"
+                name="password"
+                autocomplete="current-password"
+                required
+                placeholder="••••••••"
+              />
+            </label>
+            <div class="login-row">
+              <label class="login-remember">
+                <input v-model="loginRemember" type="checkbox" name="remember" />
+                Ghi nhớ đăng nhập
+              </label>
+              <a href="#" class="login-forgot" @click.prevent>Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="login-submit">Đăng nhập</button>
+          </form>
+          <p class="login-alt">
+            Chưa có tài khoản?
+            <RouterLink to="/register" @click="closeLoginModal">Đăng ký</RouterLink>
+          </p>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
