@@ -22,6 +22,7 @@ public class OrderSummaryResponse {
     private BigDecimal totalAmount;
     private String paymentMethod;
     private String status;
+    private Boolean isPaid;
     private String note;
     private LocalDateTime createdAt;
 }

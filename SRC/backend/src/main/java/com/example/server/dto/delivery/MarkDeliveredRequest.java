@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MarkDeliveredRequest {
     private String note;
+    private Boolean codCollected;
 }

@@ -48,6 +48,9 @@ public class Order {
 	@Column(name = "status")
 	private String status = "PENDING";
 
+	@Column(name = "is_paid", nullable = false)
+	private Boolean isPaid = false;
+
 	@Column(name = "note")
 	private String note;
 

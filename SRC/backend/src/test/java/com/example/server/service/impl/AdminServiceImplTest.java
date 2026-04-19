@@ -85,7 +85,8 @@ class AdminServiceImplTest {
     void approveRestaurant_NotFound_ShouldThrowException() {
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
+        RestaurantApprovalRequest request = new RestaurantApprovalRequest(true, null);
         assertThrows(ResourceNotFoundException.class, 
-            () -> adminService.approveRestaurant(restaurantId, new RestaurantApprovalRequest(true, null)));
+            () -> adminService.approveRestaurant(restaurantId, request));
     }
 }

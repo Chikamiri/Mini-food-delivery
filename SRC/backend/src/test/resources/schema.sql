@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS orders (
     total_amount        DECIMAL(12,2) NOT NULL,
     payment_method      VARCHAR(50) NOT NULL DEFAULT 'COD',
     status              VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    is_paid             BOOLEAN NOT NULL DEFAULT FALSE,
     note                VARCHAR(500),
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

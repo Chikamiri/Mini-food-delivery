@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
+    private static final String RESOURCE_NOTIFICATION = "Notification";
+    private static final String RESOURCE_USER = "User";
+
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final NotificationMapper notificationMapper;
@@ -38,7 +41,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAsRead(Long userId, MarkNotificationReadRequest request) {
         Notification notification = notificationRepository.findById(request.getNotificationId())
-                .orElseThrow(() -> new ResourceNotFoundException("Notification", "id", request.getNotificationId()));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NOTIFICATION, "id", request.getNotificationId()));
         
         if (!notification.getUser().getId().equals(userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Unauthorized to mark this notification as read", "UNAUTHORIZED_NOTIFICATION_ACCESS");
@@ -62,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void createNotification(Long userId, String title, String message, String type) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", userId));
         
         Notification notification = new Notification();
         notification.setUser(user);

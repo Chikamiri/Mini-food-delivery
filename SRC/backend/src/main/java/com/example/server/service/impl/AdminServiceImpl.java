@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
+    private static final String RESOURCE_NAME = "Restaurant";
+
     private final RestaurantRepository restaurantRepository;
     private final UserService userService;
     private final NotificationService notificationService;
@@ -25,7 +27,7 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void approveRestaurant(Long restaurantId, RestaurantApprovalRequest request) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", restaurantId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", restaurantId));
 
         restaurant.setIsApproved(request.getApproved());
         restaurantRepository.save(restaurant);

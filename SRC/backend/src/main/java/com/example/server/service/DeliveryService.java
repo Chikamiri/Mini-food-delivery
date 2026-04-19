@@ -3,6 +3,7 @@ package com.example.server.service;
 import com.example.server.dto.delivery.*;
 
 public interface DeliveryService {
+    void createUnassignedAssignment(Long orderId);
     DeliveryAssignmentResponse assignShipper(AssignShipperRequest request);
     void markPickedUp(Long shipperId, Long orderId, MarkPickupRequest request);
     void markDelivered(Long shipperId, Long orderId, MarkDeliveredRequest request);

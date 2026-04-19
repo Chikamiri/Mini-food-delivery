@@ -4,14 +4,18 @@ import com.example.server.dto.common.PageResponse;
 import com.example.server.dto.order.*;
 import com.example.server.entity.*;
 import com.example.server.enums.OrderStatus;
+import com.example.server.event.OrderReadyEvent;
+import com.example.server.exception.AppException;
 import com.example.server.exception.ResourceNotFoundException;
 import com.example.server.mapper.OrderMapper;
 import com.example.server.repository.*;
 import com.example.server.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +27,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
+    private static final String RESOURCE_NAME = "Order";
+
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
     private final MenuItemRepository menuItemRepository;
     private final OrderMapper orderMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -63,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setSubtotal(menuItem.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity())));
             orderItem.setNote(itemRequest.getNote());
             return orderItem;
-        }).collect(Collectors.toList());
+        }).toList();
 
         for (OrderItem item : items) {
             subtotal = subtotal.add(item.getSubtotal());
@@ -84,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderSummaryResponse getOrderSummary(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", id));
         return orderMapper.toSummaryResponse(order);
     }
 
@@ -109,20 +116,57 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void updateOrderStatus(Long orderId, Long userId, OrderStatusUpdateRequest request) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", orderId));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
-        order.setStatus(request.getStatus());
+        String oldStatus = order.getStatus();
+        String newStatus = request.getStatus();
+
+        validateStateTransition(oldStatus, newStatus);
+
+        order.setStatus(newStatus);
         orderRepository.save(order);
 
-        addStatusHistory(order, user, request.getStatus(), request.getNote());
+        addStatusHistory(order, user, newStatus, request.getNote());
+
+        // Publish event if ready for delivery
+        if (OrderStatus.READY.name().equals(newStatus)) {
+            eventPublisher.publishEvent(new OrderReadyEvent(this, order.getId()));
+        }
+    }
+
+    private void validateStateTransition(String oldStatus, String newStatus) {
+        OrderStatus current = OrderStatus.valueOf(oldStatus);
+        OrderStatus next = OrderStatus.valueOf(newStatus);
+
+        if (next == OrderStatus.CANCELLED || next == OrderStatus.REJECTED) {
+            if (current == OrderStatus.SHIPPING || current == OrderStatus.DELIVERED) {
+                throw new AppException(HttpStatus.BAD_REQUEST,
+                        "Cannot cancel/reject an order that is already shipping or delivered", "INVALID_TRANSITION");
+            }
+            return;
+        }
+
+        boolean valid = switch (current) {
+            case PENDING -> next == OrderStatus.CONFIRMED;
+            case CONFIRMED -> next == OrderStatus.PREPARING;
+            case PREPARING -> next == OrderStatus.READY;
+            case READY -> next == OrderStatus.SHIPPING;
+            case SHIPPING -> next == OrderStatus.DELIVERED;
+            default -> false;
+        };
+
+        if (!valid) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Invalid order status transition from " + oldStatus + " to " + newStatus, "INVALID_TRANSITION");
+        }
     }
 
     @Override
     public OrderTrackingResponse getOrderTracking(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", orderId));
         return orderMapper.toTrackingResponse(order);
     }
 

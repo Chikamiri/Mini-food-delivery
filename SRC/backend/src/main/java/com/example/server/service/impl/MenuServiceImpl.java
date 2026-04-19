@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MenuServiceImpl implements MenuService {
 
+    private static final String RESOURCE_RESTAURANT = "Restaurant";
+    private static final String RESOURCE_CATEGORY = "MenuCategory";
+    private static final String RESOURCE_ITEM = "MenuItem";
+
     private final MenuItemRepository menuItemRepository;
     private final MenuCategoryRepository menuCategoryRepository;
     private final RestaurantRepository restaurantRepository;
@@ -37,7 +41,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public MenuCategoryResponse addMenuCategory(Long restaurantId, String name) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", restaurantId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_RESTAURANT, "id", restaurantId));
         
         MenuCategory category = new MenuCategory();
         category.setRestaurant(restaurant);
@@ -50,7 +54,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public MenuCategoryResponse updateMenuCategory(Long categoryId, String name) {
         MenuCategory category = menuCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuCategory", "id", categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_CATEGORY, "id", categoryId));
         category.setName(name);
         return menuMapper.toCategoryResponse(menuCategoryRepository.save(category));
     }
@@ -68,9 +72,9 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public MenuItemResponse addMenuItem(Long restaurantId, Long categoryId, MenuItemRequest request) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", restaurantId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_RESTAURANT, "id", restaurantId));
         MenuCategory category = menuCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuCategory", "id", categoryId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_CATEGORY, "id", categoryId));
 
         MenuItem menuItem = menuMapper.toEntity(request);
         menuItem.setRestaurant(restaurant);
@@ -82,7 +86,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public MenuItemResponse updateMenuItem(Long itemId, MenuItemRequest request) {
         MenuItem menuItem = menuItemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem", "id", itemId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ITEM, "id", itemId));
         
         menuMapper.updateEntity(menuItem, request);
         
@@ -99,7 +103,7 @@ public class MenuServiceImpl implements MenuService {
     @Transactional
     public void deleteMenuItem(Long itemId) {
         MenuItem menuItem = menuItemRepository.findById(itemId)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem", "id", itemId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ITEM, "id", itemId));
         menuItem.setIsDeleted(true);
         menuItemRepository.save(menuItem);
     }
@@ -107,7 +111,7 @@ public class MenuServiceImpl implements MenuService {
     @Override
     public MenuItemResponse getMenuItem(Long id) {
         MenuItem menuItem = menuItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("MenuItem", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ITEM, "id", id));
         return menuMapper.toItemResponse(menuItem);
     }
 }

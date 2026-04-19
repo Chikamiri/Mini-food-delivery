@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RestaurantServiceImpl implements RestaurantService {
 
+    private static final String RESOURCE_NAME = "Restaurant";
+
     private final RestaurantRepository restaurantRepository;
     private final RestaurantMapper restaurantMapper;
 
@@ -57,7 +59,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public RestaurantDetailResponse getRestaurantDetail(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", id));
         return restaurantMapper.toDetailResponse(restaurant);
     }
 
@@ -65,7 +67,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Transactional
     public void approveRestaurant(Long id, RestaurantApprovalRequest request) {
         Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", id));
         
         restaurant.setIsApproved(request.getApproved());
         // note is ignored for now as there is no field in entity

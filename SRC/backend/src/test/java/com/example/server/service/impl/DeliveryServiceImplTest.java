@@ -105,19 +105,24 @@ class DeliveryServiceImplTest {
     void markPickedUp_Unauthorized_ShouldThrowException() {
         when(deliveryAssignmentRepository.findByOrderId(orderId)).thenReturn(Optional.of(assignment));
 
+        MarkPickupRequest request = new MarkPickupRequest();
         AppException exception = assertThrows(AppException.class,
-                () -> deliveryService.markPickedUp(2L, orderId, new MarkPickupRequest()));
+                () -> deliveryService.markPickedUp(2L, orderId, request));
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test
     void markDelivered_Success() {
+        assignment.setStatus(DeliveryAssignmentStatus.PICKED_UP.name());
         when(deliveryAssignmentRepository.findByOrderId(orderId)).thenReturn(Optional.of(assignment));
 
-        deliveryService.markDelivered(shipperId, orderId, new MarkDeliveredRequest());
+        MarkDeliveredRequest request = new MarkDeliveredRequest();
+        request.setCodCollected(true);
+        deliveryService.markDelivered(shipperId, orderId, request);
 
         assertEquals(DeliveryAssignmentStatus.DELIVERED.name(), assignment.getStatus());
         assertEquals(OrderStatus.DELIVERED.name(), order.getStatus());
+        assertTrue(order.getIsPaid());
         assertNotNull(assignment.getDeliveredAt());
         verify(deliveryAssignmentRepository).save(assignment);
         verify(orderRepository).save(order);

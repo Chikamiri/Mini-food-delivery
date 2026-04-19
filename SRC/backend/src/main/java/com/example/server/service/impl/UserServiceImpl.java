@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final String RESOURCE_USER = "User";
+    private static final String RESOURCE_ADDRESS = "Address";
+
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final UserMapper userMapper;
@@ -30,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserProfileResponse getUserProfile(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
         return userMapper.toProfileResponse(user);
     }
 
@@ -38,7 +41,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserProfileResponse updateUserProfile(Long id, UserProfileResponse request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
         user.setAvatarUrl(request.getAvatarUrl());
@@ -49,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUserRole(Long id, UserRoleUpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
         user.setRole(request.getRole());
         userRepository.save(user);
     }
@@ -58,7 +61,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUserStatus(Long id, UserStatusUpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
         user.setActive(request.getActive());
         userRepository.save(user);
     }
@@ -74,7 +77,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public AddressResponse addAddress(Long userId, AddressRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", userId));
 
         if (Boolean.TRUE.equals(request.getIsDefault())) {
             resetDefaultAddress(userId);
@@ -89,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public AddressResponse updateAddress(Long userId, Long addressId, AddressRequest request) {
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ADDRESS, "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
@@ -107,7 +110,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteAddress(Long userId, Long addressId) {
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ADDRESS, "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
@@ -120,7 +123,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void setDefaultAddress(Long userId, Long addressId) {
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ADDRESS, "id", addressId));
 
         if (!address.getUser().getId().equals(userId)) {
             throw new AppException(HttpStatus.FORBIDDEN, "Address does not belong to user", "UNAUTHORIZED_ADDRESS_ACCESS");
