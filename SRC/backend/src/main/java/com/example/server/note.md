@@ -35,20 +35,21 @@ src/main/java/com/example/server/
 
 ## Current Implementation Status
 
-- **Dependencies**: Spring Boot Web, Data JPA, Security, Validation, MySQL, Lombok, MapStruct, JJWT.
-- **Services**: All core business services are implemented.
+- **Dependencies**: Spring Boot Web, Data JPA, Security, Validation, MySQL, Lombok, MapStruct, JJWT, Testcontainers.
+- **Services**: All core business services implemented (AuthService remains [TODO]).
+- **Testing**: Full coverage with JUnit 5 + Mockito (Unit) and Testcontainers + MySQL (Integration).
 - **Exceptions**: `AppException` refactored with `HttpStatus` (400, 403, 404) and `@NonNull` status.
 - **Database**: 12-table schema mapped; `UNASSIGNED` set as default for delivery.
 
 ## Immediate Backend Roadmap
 
-1. **Testing [High Priority]**:
-    - **Unit Tests**: JUnit 5 + Mockito for business logic.
-    - **Integration Tests**: Testcontainers + MySQL for complex native queries (Distance-based search).
-2. **Security Implementation**: Create `security/` package logic and `config/SecurityConfig.java`.
-3. **Auth Service**: Implement password encoding (BCrypt) and JWT generation logic.
-4. **Controllers**: Build and test REST endpoints for all major services.
-5. **Order-Delivery Link**: Trigger `DeliveryAssignment` automatically when an order is updated to `READY`.
+1. **Security Layer [CRITICAL]**:
+    - Create `security/` package for JWT Filter and Authentication Provider.
+    - Implement `config/SecurityConfig.java` for RBAC (Role-Based Access Control) and CORS.
+2. **Auth Service**: Implement `AuthServiceImpl` with BCrypt password encoding and JWT token issuance.
+3. **Controllers [High Priority]**: Build REST endpoints for all major services (Admin, User, Restaurant, Order, Delivery).
+4. **Order-Delivery Integration**: Automate `DeliveryAssignment` triggering within `OrderServiceImpl` when status is set to `READY`.
+5. **Global Configuration**: Add `WebConfig.java` for MVC/CORS patterns.
 
 ## Design Constraints
 
