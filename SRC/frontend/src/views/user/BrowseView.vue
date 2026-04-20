@@ -14,12 +14,48 @@ const sidebarMenus = [
 ]
 
 const categories = [
-  { icon: '🥐', label: 'Bánh' },
-  { icon: '🍔', label: 'Burger' },
-  { icon: '🧋', label: 'Trà sữa' },
-  { icon: '🍗', label: 'Gà rán' },
-  { icon: '🍕', label: 'Pizza' },
-  { icon: '🥗', label: 'Healthy' },
+  {
+    icon: '🥖',
+    label: 'Bánh mì',
+    subtitle: 'Giòn nóng mỗi ngày',
+    image:
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    icon: '🍔',
+    label: 'Burger',
+    subtitle: 'Đậm vị Âu Mỹ',
+    image:
+      'https://images.unsplash.com/photo-1550317138-10000687a72b?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    icon: '🧋',
+    label: 'Trà sữa',
+    subtitle: 'Mát lạnh giải khát',
+    image:
+      'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    icon: '🍗',
+    label: 'Gà rán',
+    subtitle: 'Giòn cay hấp dẫn',
+    image:
+      'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    icon: '🍕',
+    label: 'Pizza',
+    subtitle: 'Phô mai kéo sợi',
+    image:
+      'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    icon: '🥗',
+    label: 'Healthy',
+    subtitle: 'Ít calo, nhiều chất',
+    image:
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
+  },
 ]
 
 const popularDishes = [
@@ -105,8 +141,12 @@ const recentOrders = [
         </div>
         <div class="category-grid">
           <article v-for="item in categories" :key="item.label" class="category-card">
-            <span>{{ item.icon }}</span>
-            <p>{{ item.label }}</p>
+            <img class="category-image" :src="item.image" :alt="item.label" />
+            <div class="category-overlay">
+              <span class="category-icon">{{ item.icon }}</span>
+              <h4>{{ item.label }}</h4>
+              <p>{{ item.subtitle }}</p>
+            </div>
           </article>
         </div>
       </section>
