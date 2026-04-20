@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const isEditing = ref(false)
 
@@ -51,6 +52,13 @@ const menuItems = [
   { icon: '⚙️', label: 'Cài đặt', route: '/settings' },
   { icon: '❓', label: 'Trợ giúp', route: '/help' },
 ]
+
+const router = useRouter()
+
+function logout() {
+  // TODO: Khi có backend, gọi API logout + xóa token/session tại đây.
+  router.push('/')
+}
 </script>
 
 <template>
@@ -135,6 +143,7 @@ const menuItems = [
               <span class="menu-arrow">›</span>
             </a>
           </div>
+          <button type="button" class="logout-btn" @click="logout">Đăng xuất</button>
         </div>
 
         <!-- Danger zone -->

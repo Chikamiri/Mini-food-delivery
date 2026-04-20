@@ -288,6 +288,24 @@
   font-size: 1.2rem;
 }
 
+.logout-btn {
+  margin-top: 0.9rem;
+  width: 100%;
+  border: 1px solid #f8c9d3;
+  background: #fff3f6;
+  color: #d73a56;
+  border-radius: 10px;
+  padding: 0.62rem 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #ffe7ee;
+  border-color: #f59aad;
+}
+
 /* Danger zone */
 .danger-card {
   border-color: #fecaca;
