@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '@/views/auth/LoginView.vue'
 import RegisterView from '@/views/auth/RegisterView.vue'
 import HomeView from '@/views/user/HomeView.vue'
+import BrowseView from '@/views/user/BrowseView.vue'
 import RestaurantDetail from '@/views/user/RestaurantDetail.vue'
 import CartView from '@/views/user/CartView.vue'
 import CheckoutView from '@/views/user/CheckoutView.vue'
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/register', name: 'register', component: RegisterView },
 
     // User routes
+    { path: '/browse', name: 'browse', component: BrowseView },
     { path: '/restaurants/:id', name: 'restaurant-detail', component: RestaurantDetail },
     { path: '/cart', name: 'cart', component: CartView },
     { path: '/checkout', name: 'checkout', component: CheckoutView },

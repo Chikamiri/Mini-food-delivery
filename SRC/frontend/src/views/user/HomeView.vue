@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import iconFacebook from '@/assets/icon/facebook.svg'
 import iconInstagram from '@/assets/icon/instagram.svg'
 import iconYoutube from '@/assets/icon/youtube.svg'
@@ -20,6 +21,7 @@ const regFullName = ref('')
 const regEmail = ref('')
 const regPassword = ref('')
 const regConfirm = ref('')
+const router = useRouter()
 
 function openLoginModal() {
   authTab.value = 'login'
@@ -39,8 +41,9 @@ function showLoginPanel() {
 }
 
 function onLoginSubmit() {
-  // Khi backend sẵn sàng: gọi API đăng nhập tại đây
+  // Tạm thời điều hướng sau khi bấm đăng nhập; khi có backend sẽ thay bằng gọi API auth.
   closeLoginModal()
+  router.push('/browse')
 }
 
 function onRegisterSubmit() {
