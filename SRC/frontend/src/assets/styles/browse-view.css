@@ -477,6 +477,97 @@
   border-color: #f7a2b3;
 }
 
+/* Recommended section */
+.recommend-list {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.recommend-card {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  background: #fff;
+  border: 1px solid #edf0f5;
+  border-radius: 18px;
+  padding: 0.62rem 0.72rem;
+  box-shadow: 0 8px 22px rgba(19, 29, 47, 0.07);
+}
+
+.recommend-thumb {
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  object-fit: cover;
+  display: block;
+}
+
+.recommend-content h4 {
+  margin: 0 0 0.42rem;
+  font-size: 1.03rem;
+  line-height: 1.2;
+  color: #1b1f2a;
+}
+
+.recommend-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.24rem;
+  font-size: 0.88rem;
+  color: #7f8692;
+}
+
+.recommend-meta .dot {
+  margin: 0 0.14rem;
+}
+
+.recommend-meta .star {
+  color: #f3a91b;
+}
+
+.recommend-meta .muted {
+  color: #9aa1ad;
+}
+
+.recommend-price-row {
+  margin-top: 0.55rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.recommend-price-row .leaf {
+  color: #29b756;
+  font-size: 0.96rem;
+}
+
+.recommend-price-row strong {
+  color: #6f7683;
+  font-size: 1.48rem;
+  line-height: 1;
+}
+
+.recommend-fav {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ffd0d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #f25b76;
+  display: grid;
+  place-items: center;
+  font-size: 1.02rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.recommend-fav:hover {
+  background: #ffedf1;
+  border-color: #f7a2b3;
+}
+
 @media (max-width: 1200px) {
   .browse-page {
     grid-template-columns: 1fr;
@@ -533,6 +624,29 @@
 
   .popular-grid {
     grid-template-columns: 1fr;
+  }
+
+  .recommend-card {
+    grid-template-columns: 80px 1fr auto;
+    gap: 0.6rem;
+  }
+
+  .recommend-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+  }
+
+  .recommend-content h4 {
+    font-size: 0.98rem;
+  }
+
+  .recommend-meta {
+    font-size: 0.82rem;
+  }
+
+  .recommend-price-row strong {
+    font-size: 1.25rem;
   }
 
   .voucher-banner {

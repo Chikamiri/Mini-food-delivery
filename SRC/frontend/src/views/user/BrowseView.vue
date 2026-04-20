@@ -103,6 +103,29 @@ const recentOrders = [
   { id: 3, name: 'Cơm Gà Nướng', price: '69.000đ', eta: '18 phút' },
 ]
 
+const recommendedItems = [
+  {
+    id: 1,
+    name: 'Vegetarian Noodles',
+    distance: '800 m',
+    rating: '4.9',
+    reviews: '2.3k',
+    price: '$2.00',
+    image:
+      'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 2,
+    name: 'Bún bò đặc biệt',
+    distance: '1.2 km',
+    rating: '4.8',
+    reviews: '1.9k',
+    price: '$2.40',
+    image:
+      'https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=800&q=80',
+  },
+]
+
 </script>
 
 <template>
@@ -186,7 +209,7 @@ const recentOrders = [
 
       <section class="section-block">
         <div class="section-head">
-          <h3>Món phổ biến</h3>
+          <h3>Món mới ra</h3>
           <a href="#">Xem tất cả</a>
         </div>
         <div class="popular-grid">
@@ -227,9 +250,37 @@ const recentOrders = [
           </article>
         </div>
       </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <h3>Có thể bạn thích</h3>
+          <a href="#">Xem tất cả</a>
+        </div>
+        <div class="recommend-list">
+          <article v-for="item in recommendedItems" :key="item.id" class="recommend-card">
+            <img :src="item.image" :alt="item.name" class="recommend-thumb" />
+            <div class="recommend-content">
+              <h4>{{ item.name }}</h4>
+              <div class="recommend-meta">
+                <span>{{ item.distance }}</span>
+                <span class="dot">|</span>
+                <span class="star">★</span>
+                <span>{{ item.rating }}</span>
+                <span class="muted">({{ item.reviews }})</span>
+              </div>
+              <div class="recommend-price-row">
+                <span class="leaf">♻</span>
+                <strong>{{ item.price }}</strong>
+              </div>
+            </div>
+            <button type="button" class="recommend-fav" aria-label="Yêu thích">♥</button>
+          </article>
+        </div>
+      </section>
     </main>
 
   </section>
+  
 </template>
 
 <style scoped src="@/assets/styles/browse-view.css"></style>
