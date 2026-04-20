@@ -59,9 +59,42 @@ const categories = [
 ]
 
 const popularDishes = [
-  { id: 1, name: 'Burger Cá', price: '55.000đ', badge: 'Giảm 15%' },
-  { id: 2, name: 'Burger Bò', price: '59.000đ', badge: 'Giảm 10%' },
-  { id: 3, name: 'Burger Phô Mai', price: '62.000đ', badge: 'Mới' },
+  {
+    id: 1,
+    name: 'Mixed Salad Bowl',
+    distance: '1.5 km',
+    rating: '4.8',
+    reviews: '1.2k',
+    price: '$6.00',
+    oldPrice: '$2.00',
+    badge: 'PROMO',
+    image:
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 2,
+    name: 'Bánh mì gà nướng',
+    distance: '2.1 km',
+    rating: '4.7',
+    reviews: '900',
+    price: '$5.40',
+    oldPrice: '$1.80',
+    badge: 'HOT',
+    image:
+      'https://images.unsplash.com/photo-1481070555726-e2fe8357725c?auto=format&fit=crop&w=900&q=80',
+  },
+  {
+    id: 3,
+    name: 'Cơm gà teriyaki',
+    distance: '1.8 km',
+    rating: '4.9',
+    reviews: '2.0k',
+    price: '$6.80',
+    oldPrice: '$2.30',
+    badge: 'MỚI',
+    image:
+      'https://images.unsplash.com/photo-1604908812858-5d36f9c94b7d?auto=format&fit=crop&w=900&q=80',
+  },
 ]
 
 const recentOrders = [
@@ -156,13 +189,26 @@ const recentOrders = [
           <h3>Món phổ biến</h3>
           <a href="#">Xem tất cả</a>
         </div>
-        <div class="dish-grid">
-          <article v-for="dish in popularDishes" :key="dish.id" class="dish-card">
-            <span class="badge">{{ dish.badge }}</span>
-            <div class="dish-img">🍔</div>
+        <div class="popular-grid">
+          <article v-for="dish in popularDishes" :key="dish.id" class="popular-card">
+            <div class="popular-image-wrap">
+              <img :src="dish.image" :alt="dish.name" class="popular-image" />
+              <span class="popular-badge">{{ dish.badge }}</span>
+            </div>
             <h4>{{ dish.name }}</h4>
-            <p>{{ dish.price }}</p>
-            <button>+</button>
+            <div class="popular-meta">
+              <span>{{ dish.distance }}</span>
+              <span class="dot">|</span>
+              <span class="star">★</span>
+              <span>{{ dish.rating }}</span>
+              <span class="muted">({{ dish.reviews }})</span>
+            </div>
+            <div class="popular-price-row">
+              <strong>{{ dish.price }}</strong>
+              <span class="dot">•</span>
+              <small>{{ dish.oldPrice }}</small>
+              <button type="button" class="favorite-btn" aria-label="Yêu thích">♡</button>
+            </div>
           </article>
         </div>
       </section>
