@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import iconBackspace from '@/assets/icon/back-arrow.svg'
 
 const isEditing = ref(false)
 
@@ -59,10 +60,17 @@ function logout() {
   // TODO: Khi có backend, gọi API logout + xóa token/session tại đây.
   router.push('/')
 }
+
+function goBackToBrowse() {
+  router.push('/browse')
+}
 </script>
 
 <template>
   <section class="profile-view">
+    <button type="button" class="back-btn" @click="goBackToBrowse">
+      <img :src="iconBackspace" alt="" width="18" height="18" />
+    </button>
     <div class="profile-layout">
       <!-- Profile card -->
       <div class="profile-card">

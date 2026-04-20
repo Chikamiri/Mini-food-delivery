@@ -12,6 +12,31 @@
   gap: 1.2rem;
 }
 
+.back-btn {
+  border: 1px solid #d7dbe3;
+  background: #fff;
+  color: #303544;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.8rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.back-btn:hover {
+  border-color: #ff7f23;
+  color: #ff7f23;
+  background: #fff9f4;
+}
+
+.back-btn img {
+  display: block;
+}
+
 /* Profile card */
 .profile-card {
   background: linear-gradient(135deg, #ff7f23 0%, #ff9a56 100%);

@@ -6,10 +6,10 @@ import iconSetting from '@/assets/icon/setting.svg'
 
 const sidebarMenus = [
   'Trang tổng quan',
-  'Món đang giảm',
+  'Ưu đãi',
   'Yêu thích',
-  'Tin nhắn',
-  'Lịch sử đơn',
+  'Flash sale',
+  'Đơn hàng',
   'Cài đặt',
 ]
 
