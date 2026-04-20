@@ -1,4 +1,9 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+import iconMessage from '@/assets/icon/messaging.svg'
+import iconNotice from '@/assets/icon/notice.svg'
+import iconSetting from '@/assets/icon/setting.svg'
+
 const sidebarMenus = [
   'Trang tổng quan',
   'Món đang giảm',
@@ -50,10 +55,28 @@ const recentOrders = [
         </a>
       </nav>
 
-      <div class="upgrade-box">
-        <p>Nâng cấp tài khoản để nhận ưu đãi dành riêng cho bạn.</p>
-        <button>Nâng cấp</button>
+      <div class="sidebar-footer">
+        <div class="header-actions">
+          <button type="button" class="action-btn has-dot" aria-label="Tin nhắn">
+            <img :src="iconMessage" alt="" width="22" height="22" />
+          </button>
+          <button type="button" class="action-btn has-dot" aria-label="Thông báo">
+            <img :src="iconNotice" alt="" width="22" height="22" />
+          </button>
+          <button type="button" class="action-btn" aria-label="Cài đặt">
+            <img :src="iconSetting" alt="" width="22" height="22" />
+          </button>
+        </div>
+        <RouterLink to="/profile" class="profile-shortcut" aria-label="Trang cá nhân">
+          <img
+            class="profile-avatar"
+            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
+            alt="Ảnh đại diện"
+          />
+          <span class="profile-name">Nguyễn Văn A</span>
+        </RouterLink>
       </div>
+
     </aside>
 
     <main class="main-content">

@@ -60,27 +60,10 @@
   color: #fff;
 }
 
-.upgrade-box {
+.sidebar-footer {
   margin-top: auto;
-  background: #ffe8ee;
-  border-radius: 12px;
-  padding: 0.85rem;
-}
-
-.upgrade-box p {
-  margin: 0;
-  color: #7a3142;
-  font-size: 0.85rem;
-}
-
-.upgrade-box button {
-  margin-top: 0.75rem;
-  border: 0;
-  border-radius: 8px;
-  background: #f8143f;
-  color: #fff;
-  padding: 0.5rem 0.8rem;
-  font-weight: 600;
+  padding-top: 0.65rem;
+  border-top: 1px solid #f0f2f6;
 }
 
 .main-content {
@@ -115,6 +98,86 @@
   border: 1px solid #e8ebf1;
   border-radius: 10px;
   padding: 0.6rem 0.8rem;
+}
+
+.search-input input:focus {
+  outline: none;
+  border-color: #f8a1b1;
+  box-shadow: 0 0 0 3px rgba(248, 20, 63, 0.1);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.action-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: #f6f7fa;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.action-btn:hover {
+  background: #eceff5;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
+}
+
+.action-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn.has-dot::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f7b500;
+}
+
+.profile-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: #1f2532;
+  border-radius: 12px;
+  padding: 0.3rem 0.45rem;
+  transition: background-color 0.2s ease;
+}
+
+.profile-shortcut:hover {
+  background: #f5f7fb;
+}
+
+.profile-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(29, 38, 56, 0.12);
+}
+
+.profile-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #303544;
 }
 
 .voucher-banner {
@@ -272,8 +335,20 @@
     padding: 0;
   }
 
+  .header-actions {
+    justify-content: flex-start;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
   .search-input input {
     width: 100%;
+  }
+
+  .profile-name {
+    font-size: 0.88rem;
   }
 
   .dish-grid {
