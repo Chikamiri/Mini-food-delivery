@@ -1,8 +1,15 @@
 <script setup>
+import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import iconMessage from '@/assets/icon/messaging.svg'
 import iconNotice from '@/assets/icon/notice.svg'
 import iconSetting from '@/assets/icon/setting.svg'
+import iconFacebook from '@/assets/icon/facebook.svg'
+import iconInstagram from '@/assets/icon/instagram.svg'
+import iconYoutube from '@/assets/icon/youtube.svg'
+import iconTwitter from '@/assets/icon/twitter.svg'
+import iconSearch from '@/assets/icon/search.svg'
+import iconCart from '@/assets/icon/shopping-cart.svg'
 
 const sidebarMenus = [
   'Trang tổng quan',
@@ -107,6 +114,9 @@ const recommendedItems = [
   {
     id: 1,
     name: 'Vegetarian Noodles',
+    restaurant: 'Green Bowl Kitchen',
+    restaurantLogo:
+      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
     distance: '800 m',
     rating: '4.9',
     reviews: '2.3k',
@@ -117,6 +127,9 @@ const recommendedItems = [
   {
     id: 2,
     name: 'Bún bò đặc biệt',
+    restaurant: 'Bún Nhà Nhiên',
+    restaurantLogo:
+      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=120&q=80',
     distance: '1.2 km',
     rating: '4.8',
     reviews: '1.9k',
@@ -125,6 +138,24 @@ const recommendedItems = [
       'https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=800&q=80',
   },
 ]
+
+const selectedDish = ref(null)
+const dishNote = ref('')
+const selectedSize = ref('Vừa')
+
+function openDishDetail(item) {
+  selectedDish.value = item
+  dishNote.value = ''
+  selectedSize.value = 'Vừa'
+}
+
+function closeDishDetail() {
+  selectedDish.value = null
+}
+
+watch(selectedDish, (value) => {
+  document.body.style.overflow = value ? 'hidden' : ''
+})
 
 </script>
 
@@ -178,7 +209,11 @@ const recommendedItems = [
           <p>Hôm nay bạn muốn ăn món gì?</p>
         </div>
         <div class="search-input">
+          <img :src="iconSearch" alt="" class="search-icon" />
           <input type="text" placeholder="Tìm món ăn, nhà hàng..." />
+          <RouterLink to="/cart" class="cart-btn" aria-label="Giỏ hàng">
+            <img :src="iconCart" alt="" />
+          </RouterLink>
         </div>
       </header>
 
@@ -257,7 +292,16 @@ const recommendedItems = [
           <a href="#">Xem tất cả</a>
         </div>
         <div class="recommend-list">
-          <article v-for="item in recommendedItems" :key="item.id" class="recommend-card">
+          <article
+            v-for="item in recommendedItems"
+            :key="item.id"
+            class="recommend-card"
+            role="button"
+            tabindex="0"
+            @click="openDishDetail(item)"
+            @keydown.enter="openDishDetail(item)"
+            @keydown.space.prevent="openDishDetail(item)"
+          >
             <img :src="item.image" :alt="item.name" class="recommend-thumb" />
             <div class="recommend-content">
               <h4>{{ item.name }}</h4>
@@ -273,12 +317,137 @@ const recommendedItems = [
                 <strong>{{ item.price }}</strong>
               </div>
             </div>
-            <button type="button" class="recommend-fav" aria-label="Yêu thích">♥</button>
+            <button
+              type="button"
+              class="recommend-fav"
+              aria-label="Yêu thích"
+              @click.stop
+            >
+              ♥
+            </button>
           </article>
         </div>
       </section>
+
+      <footer class="home-footer">
+        <div class="footer-brand">
+          <div class="logo-box">FO</div>
+          <div>
+            <strong>Giao Đồ Ăn</strong>
+            <p>Ngon nhanh, giao tận nơi.</p>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <a href="#">Thực đơn</a>
+          <a href="#">Dịch vụ</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Chính sách</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="https://www.facebook.com/" aria-label="Facebook">
+            <img :src="iconFacebook" alt="" width="18" height="18" />
+          </a>
+          <a href="https://www.instagram.com/" aria-label="Instagram">
+            <img :src="iconInstagram" alt="" width="18" height="18" />
+          </a>
+          <a href="https://www.youtube.com/" aria-label="YouTube">
+            <img :src="iconYoutube" alt="" width="18" height="18" />
+          </a>
+          <a href="https://twitter.com/" aria-label="Twitter">
+            <img :src="iconTwitter" alt="" width="18" height="18" />
+          </a>
+        </div>
+
+        <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
+      </footer>
     </main>
 
+    <Teleport to="body">
+      <div
+        v-if="selectedDish"
+        class="dish-detail-overlay"
+        @click.self="closeDishDetail"
+      >
+        <article class="dish-detail-modal">
+          <button
+            type="button"
+            class="dish-detail-close"
+            aria-label="Đóng chi tiết món"
+            @click="closeDishDetail"
+          >
+            ✕
+          </button>
+
+          <img :src="selectedDish.image" :alt="selectedDish.name" class="dish-detail-image" />
+
+          <div class="dish-detail-body">
+            <div class="dish-detail-head">
+              <h3>{{ selectedDish.name }}</h3>
+              <span class="dish-restaurant">
+                <img :src="selectedDish.restaurantLogo" :alt="selectedDish.restaurant" />
+                {{ selectedDish.restaurant }}
+              </span>
+            </div>
+            <div class="dish-detail-meta">
+              <span>{{ selectedDish.distance }}</span>
+              <span class="dot">|</span>
+              <span class="star">★</span>
+              <span>{{ selectedDish.rating }}</span>
+              <span class="muted">({{ selectedDish.reviews }})</span>
+            </div>
+            <p>
+              Món ăn nổi bật được gợi ý cho bạn hôm nay. Vị ngon cân bằng, nguyên liệu tươi,
+              phù hợp cho bữa ăn nhanh nhưng vẫn đầy đủ dinh dưỡng.
+            </p>
+
+            <div class="dish-size-picker">
+              <span>Kích cỡ</span>
+              <div class="dish-size-options">
+                <button
+                  type="button"
+                  :class="{ active: selectedSize === 'Nhỏ' }"
+                  @click="selectedSize = 'Nhỏ'"
+                >
+                  Nhỏ
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: selectedSize === 'Vừa' }"
+                  @click="selectedSize = 'Vừa'"
+                >
+                  Vừa
+                </button>
+                <button
+                  type="button"
+                  :class="{ active: selectedSize === 'Lớn' }"
+                  @click="selectedSize = 'Lớn'"
+                >
+                  Lớn
+                </button>
+              </div>
+            </div>
+
+            <label class="dish-note-field">
+              <span>Ghi chú cho quán</span>
+              <textarea
+                v-model="dishNote"
+                maxlength="180"
+                placeholder="Ví dụ: ít cay, không hành, thêm tương..."
+              ></textarea>
+              <small>{{ dishNote.length }}/180</small>
+            </label>
+
+            <div class="dish-detail-footer">
+              <strong>{{ selectedDish.price }}</strong>
+              <button type="button">Thêm vào giỏ</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </Teleport>
+    
   </section>
   
 </template>

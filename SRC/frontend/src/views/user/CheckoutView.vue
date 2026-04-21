@@ -138,36 +138,38 @@ const cartItems = [
 
 <style scoped>
 .checkout-page {
-  max-width: 1240px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: grid;
-  grid-template-columns: 1fr 330px;
-  gap: 1.2rem;
-  background: #f4f5f7;
+  grid-template-columns: minmax(0, 1fr) 345px;
+  gap: 1rem;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #fff7fa 0%, #f7f8fc 55%, #f3f5fa 100%);
 }
 
 .checkout-main,
 .summary-card {
   background: #fff;
-  border-radius: 14px;
-  border: 1px solid #eceef3;
+  border-radius: 18px;
+  border: 1px solid #e8ecf4;
+  box-shadow: 0 10px 24px rgba(22, 33, 52, 0.07);
 }
 
 .checkout-main {
-  padding: 1.2rem;
+  padding: 1.1rem;
 }
 
 .checkout-header {
-  border-bottom: 1px solid #eceef3;
-  padding-bottom: 0.7rem;
-  margin-bottom: 0.9rem;
+  border-bottom: 1px solid #edf1f7;
+  padding-bottom: 0.9rem;
+  margin-bottom: 0.8rem;
 }
 
 .checkout-header h1 {
   margin: 0;
-  font-size: 1.25rem;
-  color: #151824;
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+  color: #171f2f;
 }
 
 .checkout-section {
@@ -175,38 +177,39 @@ const cartItems = [
 }
 
 .checkout-section h2 {
-  margin: 0 0 0.7rem;
+  margin: 0 0 0.75rem;
   font-size: 1rem;
-  color: #202432;
+  color: #1f293b;
 }
 
 .address-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
+  gap: 0.75rem;
 }
 
 .address-card {
-  border: 1px dashed #d8dce6;
-  border-radius: 12px;
-  padding: 0.8rem;
+  border: 1px dashed #d5dce9;
+  border-radius: 14px;
+  padding: 0.85rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .address-card.active {
   border-style: solid;
-  border-color: #ff7f23;
-  background: #fff5ed;
+  border-color: #f8143f;
+  background: #fff3f6;
 }
 
 .address-label {
   margin: 0;
   font-weight: 700;
-  color: #303544;
+  color: #2c364a;
 }
 
 .address-detail {
   margin: 0.3rem 0 0;
-  color: #656b78;
+  color: #677185;
   font-size: 0.9rem;
   line-height: 1.45;
 }
@@ -218,23 +221,27 @@ const cartItems = [
 }
 
 .chip-btn {
-  border: 1px dashed #d7dbe3;
-  border-radius: 10px;
-  padding: 0.55rem 0.85rem;
+  border: 1px solid #d9deea;
+  border-radius: 999px;
+  padding: 0.5rem 0.82rem;
   background: #fff;
-  color: #434a59;
+  color: #465066;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
 
 .chip-btn.active {
-  border-style: solid;
-  border-color: #ff7f23;
-  background: #ff7f23;
+  border-color: #f8143f;
+  background: #f8143f;
   color: #fff;
 }
 
 .chip-btn.secondary.active {
-  background: #fff3e8;
-  color: #ff7f23;
+  background: #ffedf1;
+  border-color: #f6b6c5;
+  color: #d81642;
 }
 
 .form-grid {
@@ -246,26 +253,27 @@ const cartItems = [
 label {
   display: block;
   margin-bottom: 0.45rem;
-  color: #2b3140;
+  color: #2c364a;
   font-weight: 600;
   font-size: 0.92rem;
 }
 
 .tabs-row {
   display: flex;
-  border-bottom: 1px solid #eceef3;
+  border-bottom: 1px solid #edf0f6;
 }
 
 .tab-btn {
   border: 0;
   background: transparent;
   padding: 0.5rem 0.85rem;
-  color: #707784;
+  color: #727b8d;
+  cursor: pointer;
 }
 
 .tab-btn.active {
-  color: #ff7f23;
-  border-bottom: 2px solid #ff7f23;
+  color: #f8143f;
+  border-bottom: 2px solid #f8143f;
 }
 
 .time-row {
@@ -276,29 +284,39 @@ label {
 }
 
 .time-row span {
-  color: #3a404f;
+  color: #3a4356;
+  font-weight: 600;
 }
 
 .time-row button {
   border: 0;
-  background: #fff1e3;
-  color: #ff7f23;
-  border-radius: 8px;
-  padding: 0.35rem 0.55rem;
+  background: #fff0f4;
+  color: #d81642;
+  border-radius: 999px;
+  padding: 0.34rem 0.64rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 textarea {
   width: 100%;
-  min-height: 86px;
-  border: 1px solid #d7dbe3;
-  border-radius: 10px;
+  min-height: 94px;
+  border: 1px solid #d9deea;
+  border-radius: 12px;
   padding: 0.65rem 0.75rem;
   resize: vertical;
   font-family: inherit;
+  font-size: 0.9rem;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #f8a1b1;
+  box-shadow: 0 0 0 3px rgba(248, 20, 63, 0.1);
 }
 
 .summary-card {
-  padding: 1rem;
+  padding: 1rem 1rem 1.1rem;
   position: sticky;
   top: 1rem;
 }
@@ -311,10 +329,11 @@ textarea {
 
 .summary-head h3 {
   margin: 0;
+  color: #1d273a;
 }
 
 .summary-head span {
-  color: #7b818d;
+  color: #7c8595;
   font-size: 0.85rem;
 }
 
@@ -326,14 +345,15 @@ textarea {
 }
 
 .summary-item {
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid #f1f2f6;
+  padding-bottom: 0.7rem;
+  border-bottom: 1px dashed #edf1f7;
 }
 
 .restaurant-name {
   margin: 0;
   font-size: 0.8rem;
-  color: #ff7f23;
+  color: #f8143f;
+  font-weight: 600;
 }
 
 .item-row {
@@ -344,15 +364,15 @@ textarea {
 }
 
 .item-row span {
-  color: #2b3140;
+  color: #2a3346;
 }
 
 .item-row strong {
-  color: #303544;
+  color: #202a3c;
 }
 
 .summary-item small {
-  color: #858b97;
+  color: #8a92a0;
 }
 
 .bill-detail {
@@ -365,36 +385,46 @@ textarea {
 .bill-detail div {
   display: flex;
   justify-content: space-between;
-  color: #6b7280;
+  color: #6f7788;
+  font-size: 0.9rem;
 }
 
 .total-row {
   margin-top: 0.9rem;
   padding-top: 0.8rem;
-  border-top: 1px solid #eceef3;
+  border-top: 1px solid #edf1f7;
   display: flex;
   justify-content: space-between;
   align-items: baseline;
 }
 
 .total-row span {
-  color: #262b38;
+  color: #273144;
+  font-weight: 700;
 }
 
 .total-row strong {
   font-size: 1.28rem;
-  color: #131722;
+  color: #121b2c;
 }
 
 .pay-btn {
   margin-top: 1rem;
   width: 100%;
   border: 0;
-  border-radius: 10px;
-  background: #ff7f23;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #f8143f 0%, #ff4f72 100%);
   color: #fff;
   padding: 0.75rem;
   font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pay-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(248, 20, 63, 0.24);
 }
 
 @media (max-width: 1024px) {
@@ -408,6 +438,10 @@ textarea {
 }
 
 @media (max-width: 768px) {
+  .checkout-page {
+    padding: 0.95rem 0.8rem 1.4rem;
+  }
+
   .address-grid,
   .form-grid {
     grid-template-columns: 1fr;
