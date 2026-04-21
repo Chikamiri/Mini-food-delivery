@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
 import userService from '@/services/userService'
 import { useAuthStore } from '@/stores/auth'
+import restaurantService from '@/services/restaurantService'
 
 const isEditing = ref(false)
 const isLoading = ref(false)
@@ -54,9 +55,23 @@ const menuItems = [
   { icon: '📍', label: 'Quản lý địa chỉ', route: '/addresses' },
   { icon: '🔔', label: 'Thông báo', route: '/notifications' },
   { icon: '💳', label: 'Phương thức thanh toán', route: '/payment' },
+  { icon: '🏪', label: 'Mở nhà hàng', route: 'open-restaurant' },
   { icon: '⚙️', label: 'Cài đặt', route: '/settings' },
   { icon: '❓', label: 'Trợ giúp', route: '/help' },
 ]
+
+const restaurantModalOpen = ref(false)
+const restaurantLoading = ref(false)
+const restaurants = ref([])
+const restaurantMessage = ref('')
+const showOpenRestaurantForm = ref(false)
+const openingForm = ref({
+  name: '',
+  phone: '',
+  address: '',
+  description: '',
+  noteToAdmin: '',
+})
 
 const router = useRouter()
 
@@ -67,6 +82,51 @@ function logout() {
 
 function goBackToBrowse() {
   router.push('/browse')
+}
+
+async function openRestaurantModal() {
+  restaurantModalOpen.value = true
+  showOpenRestaurantForm.value = false
+  restaurantMessage.value = ''
+  restaurantLoading.value = true
+  try {
+    const data = await restaurantService.getMyRestaurants()
+    restaurants.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    restaurants.value = []
+    restaurantMessage.value = error.message || 'Chưa thể tải danh sách nhà hàng'
+  } finally {
+    restaurantLoading.value = false
+  }
+}
+
+function closeRestaurantModal() {
+  restaurantModalOpen.value = false
+  showOpenRestaurantForm.value = false
+}
+
+function openRestaurantForm() {
+  showOpenRestaurantForm.value = true
+}
+
+function handleMenuClick(item) {
+  if (item.route === 'open-restaurant') {
+    openRestaurantModal()
+    return
+  }
+  router.push(item.route)
+}
+
+function submitOpenRestaurant() {
+  restaurantMessage.value =
+    'Đã ghi nhận thông tin mở quán. Bộ phận admin sẽ liên hệ và duyệt hồ sơ cho bạn.'
+  openingForm.value = {
+    name: '',
+    phone: '',
+    address: '',
+    description: '',
+    noteToAdmin: '',
+  }
 }
 
 async function loadProfile() {
@@ -123,6 +183,10 @@ onMounted(() => {
     profile.value.role = authStore.user.role || profile.value.role
   }
   loadProfile()
+})
+
+watch(restaurantModalOpen, (value) => {
+  document.body.style.overflow = value ? 'hidden' : ''
 })
 </script>
 
@@ -207,11 +271,17 @@ onMounted(() => {
         <div class="menu-card">
           <h2>Truy cập nhanh</h2>
           <div class="menu-list">
-            <a v-for="item in menuItems" :key="item.label" :href="item.route" class="menu-item">
+            <button
+              v-for="item in menuItems"
+              :key="item.label"
+              type="button"
+              class="menu-item menu-item-btn"
+              @click="handleMenuClick(item)"
+            >
               <span class="menu-icon">{{ item.icon }}</span>
               <span class="menu-label">{{ item.label }}</span>
               <span class="menu-arrow">›</span>
-            </a>
+            </button>
           </div>
           <button type="button" class="logout-btn" @click="logout">Đăng xuất</button>
         </div>
@@ -224,6 +294,74 @@ onMounted(() => {
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div v-if="restaurantModalOpen" class="restaurant-overlay" @click.self="closeRestaurantModal">
+        <article class="restaurant-modal">
+          <div class="restaurant-modal-head">
+            <h3>Mở nhà hàng</h3>
+            <button type="button" class="modal-close-btn" @click="closeRestaurantModal">✕</button>
+          </div>
+
+          <section class="restaurant-section">
+            <h4>Nhà hàng của bạn</h4>
+            <p v-if="restaurantLoading">Đang tải danh sách...</p>
+            <p v-else-if="!restaurants.length">Bạn chưa có nhà hàng nào.</p>
+            <ul v-else class="restaurant-list">
+              <li v-for="restaurant in restaurants" :key="restaurant.id">
+                <strong>{{ restaurant.name }}</strong>
+                <small>{{ restaurant.address || 'Chưa có địa chỉ' }}</small>
+              </li>
+            </ul>
+          </section>
+
+          <section class="restaurant-section">
+            <h4>Mở quán mới</h4>
+            <button v-if="!showOpenRestaurantForm" type="button" class="save-btn" @click="openRestaurantForm">
+              Mở quán
+            </button>
+            <form v-else class="restaurant-form" @submit.prevent="submitOpenRestaurant">
+              <label class="field">
+                <span>Tên quán</span>
+                <input v-model="openingForm.name" required type="text" placeholder="Ví dụ: Cơm Nhà 1988" />
+              </label>
+              <label class="field">
+                <span>Số điện thoại quán</span>
+                <input v-model="openingForm.phone" required type="tel" placeholder="09xxxxxxxx" />
+              </label>
+              <label class="field">
+                <span>Địa chỉ</span>
+                <input
+                  v-model="openingForm.address"
+                  required
+                  type="text"
+                  placeholder="Số nhà, đường, quận/huyện, thành phố"
+                />
+              </label>
+              <label class="field">
+                <span>Mô tả quán</span>
+                <textarea
+                  v-model="openingForm.description"
+                  rows="3"
+                  placeholder="Món chính, phong cách phục vụ, giờ mở cửa..."
+                ></textarea>
+              </label>
+              <label class="field">
+                <span>Ghi chú gửi admin</span>
+                <textarea
+                  v-model="openingForm.noteToAdmin"
+                  rows="2"
+                  placeholder="Thông tin bổ sung để admin duyệt hồ sơ"
+                ></textarea>
+              </label>
+              <button type="submit" class="save-btn">Gửi yêu cầu mở quán</button>
+            </form>
+          </section>
+
+          <p v-if="restaurantMessage" class="restaurant-message">{{ restaurantMessage }}</p>
+        </article>
+      </div>
+    </Teleport>
   </section>
 </template>
 
