@@ -8,6 +8,8 @@ import iconFacebook from '@/assets/icon/facebook.svg'
 import iconInstagram from '@/assets/icon/instagram.svg'
 import iconYoutube from '@/assets/icon/youtube.svg'
 import iconTwitter from '@/assets/icon/twitter.svg'
+import iconSearch from '@/assets/icon/search.svg'
+import iconCart from '@/assets/icon/shopping-cart.svg'
 
 const sidebarMenus = [
   'Trang tổng quan',
@@ -207,7 +209,11 @@ watch(selectedDish, (value) => {
           <p>Hôm nay bạn muốn ăn món gì?</p>
         </div>
         <div class="search-input">
+          <img :src="iconSearch" alt="" class="search-icon" />
           <input type="text" placeholder="Tìm món ăn, nhà hàng..." />
+          <button type="button" class="cart-btn" aria-label="Giỏ hàng">
+            <img :src="iconCart" alt="" />
+          </button>
         </div>
       </header>
 
