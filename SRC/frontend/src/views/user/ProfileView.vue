@@ -2,6 +2,17 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
+import iconEdit from '@/assets/icon/edit.svg'
+import iconOrder from '@/assets/icon/reciept.svg'
+import iconCheck from '@/assets/icon/check.svg'
+import iconFavorite from '@/assets/icon/love.svg'
+import iconLocation from '@/assets/icon/home.svg'
+import iconHistory from '@/assets/icon/time.svg'
+import iconNotification from '@/assets/icon/notice.svg'
+import iconPayment from '@/assets/icon/credit-card.svg'
+import iconOpenRestaurant from '@/assets/icon/home.svg'
+import iconSetting from '@/assets/icon/setting.svg'
+import iconHelp from '@/assets/icon/info.svg'
 import userService from '@/services/userService'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
@@ -44,20 +55,20 @@ function saveProfile() {
 }
 
 const stats = ref([
-  { label: 'Đơn hàng', value: '24', icon: '📦' },
-  { label: 'Đã giao', value: '21', icon: '✅' },
-  { label: 'Yêu thích', value: '8', icon: '❤️' },
-  { label: 'Địa chỉ', value: '3', icon: '📍' },
+  { label: 'Đơn hàng', value: '24', icon: iconOrder },
+  { label: 'Đã giao', value: '21', icon: iconCheck },
+  { label: 'Yêu thích', value: '8', icon: iconFavorite },
+  { label: 'Địa chỉ', value: '3', icon: iconLocation },
 ])
 
 const menuItems = [
-  { icon: '📋', label: 'Lịch sử đơn hàng', route: '/orders' },
-  { icon: '📍', label: 'Quản lý địa chỉ', route: '/addresses' },
-  { icon: '🔔', label: 'Thông báo', route: '/notifications' },
-  { icon: '💳', label: 'Phương thức thanh toán', route: '/payment' },
-  { icon: '🏪', label: 'Mở nhà hàng', route: 'open-restaurant' },
-  { icon: '⚙️', label: 'Cài đặt', route: '/settings' },
-  { icon: '❓', label: 'Trợ giúp', route: '/help' },
+  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders' },
+  { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
+  { icon: iconNotification, label: 'Thông báo', route: '/notifications' },
+  { icon: iconPayment, label: 'Phương thức thanh toán', route: '/payment' },
+  { icon: iconOpenRestaurant, label: 'Mở nhà hàng', route: 'open-restaurant' },
+  { icon: iconSetting, label: 'Cài đặt', route: '/settings' },
+  { icon: iconHelp, label: 'Trợ giúp', route: '/help' },
 ]
 
 const restaurantModalOpen = ref(false)
@@ -213,7 +224,7 @@ watch(restaurantModalOpen, (value) => {
 
         <div class="stats-row">
           <div v-for="stat in stats" :key="stat.label" class="stat-item">
-            <span class="stat-icon">{{ stat.icon }}</span>
+            <span class="stat-icon"><img :src="stat.icon" alt="" /></span>
             <strong>{{ stat.value }}</strong>
             <small>{{ stat.label }}</small>
           </div>
@@ -225,7 +236,10 @@ watch(restaurantModalOpen, (value) => {
         <div class="info-card">
           <div class="info-header">
             <h2>Thông tin cá nhân</h2>
-            <button v-if="!isEditing" class="edit-btn" @click="startEditing">✏️ Chỉnh sửa</button>
+            <button v-if="!isEditing" class="edit-btn" @click="startEditing">
+              <img :src="iconEdit" alt="" />
+              Chỉnh sửa
+            </button>
           </div>
 
           <form v-if="isEditing" class="edit-form" @submit.prevent="saveProfile">
@@ -278,7 +292,7 @@ watch(restaurantModalOpen, (value) => {
               class="menu-item menu-item-btn"
               @click="handleMenuClick(item)"
             >
-              <span class="menu-icon">{{ item.icon }}</span>
+              <span class="menu-icon"><img :src="item.icon" alt="" /></span>
               <span class="menu-label">{{ item.label }}</span>
               <span class="menu-arrow">›</span>
             </button>
