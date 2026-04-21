@@ -1,5 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
+import iconBackArrow from '@/assets/icon/back-arrow.svg'
 
 const cartItems = ref([
   {
@@ -73,6 +75,11 @@ const groupedByRestaurant = computed(() => {
 
 <template>
   <section class="cart-view">
+    <RouterLink to="/browse" class="back-btn" aria-label="Quay lại danh sách món">
+      <img :src="iconBackArrow" alt="" width="16" height="16" />
+      Quay lại
+    </RouterLink>
+
     <header class="cart-header">
       <h1>Giỏ hàng</h1>
       <span class="item-count">{{ cartItems.length }} món</span>
@@ -146,7 +153,7 @@ const groupedByRestaurant = computed(() => {
             <strong>{{ formatPrice(total) }}</strong>
           </div>
 
-          <button class="checkout-btn">Tiến hành thanh toán</button>
+          <RouterLink to="/checkout" class="checkout-btn">Tiến hành thanh toán</RouterLink>
         </div>
       </aside>
     </div>
