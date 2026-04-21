@@ -11,12 +11,12 @@ const errorMessage = ref('')
 const authStore = useAuthStore()
 
 const profile = ref({
-  full_name: 'Nguyễn Văn A',
-  email: 'nguyenvana@email.com',
-  phone: '0901 234 567',
+  full_name: '',
+  email: '',
+  phone: '',
   avatar_url: '',
-  role: 'USER',
-  created_at: '2026-01-15',
+  role: '',
+  created_at: '',
 })
 
 const form = ref({
@@ -117,6 +117,11 @@ async function updateProfile() {
 }
 
 onMounted(() => {
+  if (authStore.user) {
+    profile.value.full_name = authStore.user.fullName || profile.value.full_name
+    profile.value.email = authStore.user.email || profile.value.email
+    profile.value.role = authStore.user.role || profile.value.role
+  }
   loadProfile()
 })
 </script>

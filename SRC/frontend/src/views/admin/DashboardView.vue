@@ -1,4 +1,7 @@
 <script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
 const sidebarItems = [
   'Tổng quan',
   'Duyệt nhà hàng',
@@ -28,6 +31,14 @@ const recentFeedback = [
   { user: 'Phạm Gia B', issue: 'Món nhận sai topping', level: 'Trung bình' },
   { user: 'Võ Anh C', issue: 'Không áp được mã giảm giá', level: 'Thấp' },
 ]
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+async function logout() {
+  await authStore.logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -64,6 +75,7 @@ const recentFeedback = [
         <div class="topbar-right">
           <input type="text" placeholder="Tìm nhà hàng, đơn hàng, người dùng..." />
           <button type="button">Xuất báo cáo</button>
+          <button type="button" class="logout-btn" @click="logout">Đăng xuất</button>
         </div>
       </header>
 

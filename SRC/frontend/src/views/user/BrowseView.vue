@@ -37,7 +37,7 @@ const recentOrders = [
 const recommendedItems = ref([])
 const isLoading = ref(false)
 const loadError = ref('')
-const profileName = ref('Người dùng')
+const profileName = ref('')
 const profileAvatar = ref(
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
 )
@@ -115,6 +115,9 @@ async function loadBrowseData() {
     if (authStore.token && !authStore.user) {
       await authStore.fetchProfile()
     }
+    if (authStore.user?.fullName) {
+      profileName.value = authStore.user.fullName
+    }
     const [categoryData, restaurants] = await Promise.all([
       restaurantService.getCategories(),
       restaurantService.getAll(),
@@ -129,13 +132,14 @@ async function loadBrowseData() {
     recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
     try {
       const profile = await userService.getProfile()
-      profileName.value = profile.fullName || authStore.user?.fullName || profileName.value
+      profileName.value = profile.fullName || authStore.user?.fullName || 'Người dùng'
       if (profile.avatarUrl) profileAvatar.value = profile.avatarUrl
     } catch {
-      profileName.value = authStore.user?.fullName || profileName.value
+      profileName.value = authStore.user?.fullName || profileName.value || 'Người dùng'
     }
   } catch (error) {
     loadError.value = error.message || 'Khong the tai du lieu mon an'
+    profileName.value = authStore.user?.fullName || profileName.value || 'Người dùng'
   } finally {
     isLoading.value = false
   }
