@@ -1,5 +1,6 @@
 package com.example.server.controller;
 
+import com.example.server.dto.restaurant.MenuCategoryRequest;
 import com.example.server.dto.restaurant.MenuCategoryResponse;
 import com.example.server.dto.restaurant.MenuItemRequest;
 import com.example.server.dto.restaurant.MenuItemResponse;
@@ -31,8 +32,8 @@ public class MenuController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<MenuCategoryResponse> addMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                @PathVariable Long restaurantId,
-                                                               @RequestBody String name) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuCategory(userDetails.getId(), restaurantId, name));
+                                                               @Valid @RequestBody MenuCategoryRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuCategory(userDetails.getId(), restaurantId, request));
     }
 
     @PutMapping("/categories/{categoryId}")
@@ -40,8 +41,8 @@ public class MenuController {
     public ResponseEntity<MenuCategoryResponse> updateMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                    @PathVariable Long restaurantId,
                                                                    @PathVariable Long categoryId,
-                                                                   @RequestBody String name) {
-        return ResponseEntity.ok(menuService.updateMenuCategory(userDetails.getId(), categoryId, name));
+                                                                   @Valid @RequestBody MenuCategoryRequest request) {
+        return ResponseEntity.ok(menuService.updateMenuCategory(userDetails.getId(), categoryId, request));
     }
 
     @DeleteMapping("/categories/{categoryId}")

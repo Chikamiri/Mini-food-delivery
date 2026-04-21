@@ -41,12 +41,12 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional
-    public MenuCategoryResponse addMenuCategory(Long ownerId, Long restaurantId, String name) {
+    public MenuCategoryResponse addMenuCategory(Long ownerId, Long restaurantId, MenuCategoryRequest request) {
         Restaurant restaurant = validateRestaurantOwnership(ownerId, restaurantId);
 
         MenuCategory category = new MenuCategory();
         category.setRestaurant(restaurant);
-        category.setName(name);
+        category.setName(request.getName());
         category.setSortOrder(0);
         category.setIsDeleted(false);
         return menuMapper.toCategoryResponse(menuCategoryRepository.save(category));
@@ -54,13 +54,13 @@ public class MenuServiceImpl implements MenuService {
 
     @Override
     @Transactional
-    public MenuCategoryResponse updateMenuCategory(Long ownerId, Long categoryId, String name) {
+    public MenuCategoryResponse updateMenuCategory(Long ownerId, Long categoryId, MenuCategoryRequest request) {
         MenuCategory category = menuCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_CATEGORY, "id", categoryId));
 
         validateRestaurantOwnership(ownerId, category.getRestaurant().getId());
 
-        category.setName(name);
+        category.setName(request.getName());
         return menuMapper.toCategoryResponse(menuCategoryRepository.save(category));
     }
 

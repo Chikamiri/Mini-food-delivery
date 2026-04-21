@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserProfileResponse updateUserProfile(Long id, UserProfileResponse request) {
+    public UserProfileResponse updateUserProfile(Long id, UserProfileUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
         user.setFullName(request.getFullName());

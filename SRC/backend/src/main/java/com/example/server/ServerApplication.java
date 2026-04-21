@@ -30,11 +30,17 @@ public class ServerApplication {
 	}
 
 	@Bean
-	CommandLineRunner runner(UserRepository userRepository) {
+	CommandLineRunner runner(org.springframework.beans.factory.ObjectProvider<UserRepository> userRepositoryProvider) {
 		return args -> {
 			System.out.println("=======================================");
 			System.out.println("   Backend Server Started Successfully  ");
-			System.out.println("   Found users count: " + (isSmokeModeEnabled() ? "N/A (Smoke Mode)" : userRepository.count()));
+			if (isSmokeModeEnabled()) {
+				System.out.println("   Found users count: N/A (Smoke Mode)");
+			} else {
+				userRepositoryProvider.ifAvailable(repo -> 
+					System.out.println("   Found users count: " + repo.count())
+				);
+			}
 			System.out.println("=======================================");
 		};
 	}

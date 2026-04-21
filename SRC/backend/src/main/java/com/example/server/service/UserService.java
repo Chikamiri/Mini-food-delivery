@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface UserService {
     UserProfileResponse getUserProfile(Long id);
-    UserProfileResponse updateUserProfile(Long id, UserProfileResponse request);
+    UserProfileResponse updateUserProfile(Long id, UserProfileUpdateRequest request);
     void updateUserRole(Long id, UserRoleUpdateRequest request);
     void updateUserStatus(Long id, UserStatusUpdateRequest request);
     List<AddressResponse> getUserAddresses(Long userId);

@@ -2,6 +2,7 @@ package com.example.server.exception;
 
 import com.example.server.dto.common.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler {
                 .errorCode("VALIDATION_ERROR")
                 .data(errors)
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -42,7 +43,7 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .errorCode("RESOURCE_NOT_FOUND")
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(AppException.class)
@@ -53,7 +54,8 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .errorCode(ex.getErrorCode())
                 .build();
-        return new ResponseEntity<>(response, ex.getStatus());
+        HttpStatusCode status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(Exception.class)
@@ -64,6 +66,6 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .errorCode("INTERNAL_SERVER_ERROR")
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

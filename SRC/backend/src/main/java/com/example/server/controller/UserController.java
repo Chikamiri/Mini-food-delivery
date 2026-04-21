@@ -6,6 +6,7 @@ import com.example.server.dto.notification.NotificationResponse;
 import com.example.server.dto.user.AddressRequest;
 import com.example.server.dto.user.AddressResponse;
 import com.example.server.dto.user.UserProfileResponse;
+import com.example.server.dto.user.UserProfileUpdateRequest;
 import com.example.server.security.CustomUserDetails;
 import com.example.server.service.NotificationService;
 import com.example.server.service.UserService;
@@ -32,7 +33,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserProfileResponse> updateMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                              @Valid @RequestBody UserProfileResponse request) {
+                                                              @Valid @RequestBody UserProfileUpdateRequest request) {
         return ResponseEntity.ok(userService.updateUserProfile(userDetails.getId(), request));
     }
 

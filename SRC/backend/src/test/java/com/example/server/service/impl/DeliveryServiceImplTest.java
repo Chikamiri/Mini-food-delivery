@@ -34,6 +34,8 @@ class DeliveryServiceImplTest {
     @Mock
     private ShipperLocationRepository shipperLocationRepository;
     @Mock
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+    @Mock
     private DeliveryMapper deliveryMapper;
 
     @InjectMocks
