@@ -1,9 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
+import userService from '@/services/userService'
+import { useAuthStore } from '@/stores/auth'
 
 const isEditing = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const authStore = useAuthStore()
 
 const profile = ref({
   full_name: 'Nguyễn Văn A',
@@ -34,8 +39,7 @@ function cancelEditing() {
 }
 
 function saveProfile() {
-  profile.value = { ...profile.value, ...form.value }
-  isEditing.value = false
+  updateProfile()
 }
 
 const stats = ref([
@@ -57,13 +61,64 @@ const menuItems = [
 const router = useRouter()
 
 function logout() {
-  // TODO: Khi có backend, gọi API logout + xóa token/session tại đây.
+  authStore.logout()
   router.push('/')
 }
 
 function goBackToBrowse() {
   router.push('/browse')
 }
+
+async function loadProfile() {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const data = await userService.getProfile()
+    profile.value = {
+      ...profile.value,
+      full_name: data.fullName || profile.value.full_name,
+      email: data.email || profile.value.email,
+      phone: data.phone || '',
+      avatar_url: data.avatarUrl || '',
+      role: data.role || profile.value.role,
+      created_at: data.createdAt ? String(data.createdAt).slice(0, 10) : profile.value.created_at,
+    }
+    form.value = {
+      full_name: profile.value.full_name,
+      email: profile.value.email,
+      phone: profile.value.phone,
+    }
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the tai thong tin tai khoan'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function updateProfile() {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const updated = await userService.updateProfile({
+      fullName: form.value.full_name,
+      phone: form.value.phone,
+    })
+    profile.value = {
+      ...profile.value,
+      full_name: updated.fullName || form.value.full_name,
+      phone: updated.phone || form.value.phone,
+    }
+    isEditing.value = false
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the cap nhat thong tin'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadProfile()
+})
 </script>
 
 <template>
@@ -84,6 +139,8 @@ function goBackToBrowse() {
             <span class="member-badge">Thành viên từ {{ profile.created_at }}</span>
           </div>
         </div>
+        <p v-if="isLoading" class="member-badge">Dang tai du lieu...</p>
+        <p v-if="errorMessage" class="member-badge">{{ errorMessage }}</p>
 
         <div class="stats-row">
           <div v-for="stat in stats" :key="stat.label" class="stat-item">

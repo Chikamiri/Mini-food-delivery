@@ -1,6 +1,10 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
+import restaurantService from '@/services/restaurantService'
+import userService from '@/services/userService'
 import iconMessage from '@/assets/icon/messaging.svg'
 import iconNotice from '@/assets/icon/notice.svg'
 import iconSetting from '@/assets/icon/setting.svg'
@@ -20,89 +24,9 @@ const sidebarMenus = [
   'Cài đặt',
 ]
 
-const categories = [
-  {
-    icon: '🥖',
-    label: 'Bánh mì',
-    subtitle: 'Giòn nóng mỗi ngày',
-    image:
-      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    icon: '🍔',
-    label: 'Burger',
-    subtitle: 'Đậm vị Âu Mỹ',
-    image:
-      'https://images.unsplash.com/photo-1550317138-10000687a72b?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    icon: '🧋',
-    label: 'Trà sữa',
-    subtitle: 'Mát lạnh giải khát',
-    image:
-      'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    icon: '🍗',
-    label: 'Gà rán',
-    subtitle: 'Giòn cay hấp dẫn',
-    image:
-      'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    icon: '🍕',
-    label: 'Pizza',
-    subtitle: 'Phô mai kéo sợi',
-    image:
-      'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    icon: '🥗',
-    label: 'Healthy',
-    subtitle: 'Ít calo, nhiều chất',
-    image:
-      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
-  },
-]
+const categories = ref([])
 
-const popularDishes = [
-  {
-    id: 1,
-    name: 'Mixed Salad Bowl',
-    distance: '1.5 km',
-    rating: '4.8',
-    reviews: '1.2k',
-    price: '$6.00',
-    oldPrice: '$2.00',
-    badge: 'PROMO',
-    image:
-      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 2,
-    name: 'Bánh mì gà nướng',
-    distance: '2.1 km',
-    rating: '4.7',
-    reviews: '900',
-    price: '$5.40',
-    oldPrice: '$1.80',
-    badge: 'HOT',
-    image:
-      'https://images.unsplash.com/photo-1481070555726-e2fe8357725c?auto=format&fit=crop&w=900&q=80',
-  },
-  {
-    id: 3,
-    name: 'Cơm gà teriyaki',
-    distance: '1.8 km',
-    rating: '4.9',
-    reviews: '2.0k',
-    price: '$6.80',
-    oldPrice: '$2.30',
-    badge: 'MỚI',
-    image:
-      'https://images.unsplash.com/photo-1604908812858-5d36f9c94b7d?auto=format&fit=crop&w=900&q=80',
-  },
-]
+const popularDishes = ref([])
 
 const recentOrders = [
   { id: 1, name: 'Pizza Hải Sản', price: '129.000đ', eta: '30 phút' },
@@ -110,34 +34,16 @@ const recentOrders = [
   { id: 3, name: 'Cơm Gà Nướng', price: '69.000đ', eta: '18 phút' },
 ]
 
-const recommendedItems = [
-  {
-    id: 1,
-    name: 'Vegetarian Noodles',
-    restaurant: 'Green Bowl Kitchen',
-    restaurantLogo:
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
-    distance: '800 m',
-    rating: '4.9',
-    reviews: '2.3k',
-    price: '$2.00',
-    image:
-      'https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 2,
-    name: 'Bún bò đặc biệt',
-    restaurant: 'Bún Nhà Nhiên',
-    restaurantLogo:
-      'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=120&q=80',
-    distance: '1.2 km',
-    rating: '4.8',
-    reviews: '1.9k',
-    price: '$2.40',
-    image:
-      'https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=800&q=80',
-  },
-]
+const recommendedItems = ref([])
+const isLoading = ref(false)
+const loadError = ref('')
+const profileName = ref('Người dùng')
+const profileAvatar = ref(
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
+)
+const authStore = useAuthStore()
+const cartStore = useCartStore()
+const cartCount = computed(() => cartStore.itemCount)
 
 const selectedDish = ref(null)
 const dishNote = ref('')
@@ -153,8 +59,94 @@ function closeDishDetail() {
   selectedDish.value = null
 }
 
+function mapCategory(item) {
+  return {
+    icon: '🍽️',
+    label: item.name || 'Danh mục',
+    subtitle: 'Mon an noi bat',
+    image:
+      item.iconUrl ||
+      'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80',
+  }
+}
+
+function mapMenuItem(item, restaurantMap) {
+  const restaurant = restaurantMap.get(item.restaurantId)
+  return {
+    id: item.id,
+    name: item.name,
+    distance: restaurant?.address ? 'Gan ban' : '---',
+    rating: String(restaurant?.rating ?? 4.7),
+    reviews: 'new',
+    price: `$${Number(item.price || 0).toFixed(2)}`,
+    oldPrice: `$${Math.max(Number(item.price || 0) - 1, 0).toFixed(2)}`,
+    badge: item.isAvailable ? 'SAN SANG' : 'HET MON',
+    image:
+      item.imageUrl ||
+      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
+    restaurant: restaurant?.name || 'Nha hang',
+    restaurantLogo:
+      restaurant?.imageUrl ||
+      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
+    menuItemId: item.id,
+  }
+}
+
+function addToCart(item) {
+  cartStore.addItem(
+    {
+      id: item.menuItemId || item.id,
+      name: item.name,
+      price: Number(String(item.price).replace('$', '')) || 0,
+      imageUrl: item.image,
+      restaurantName: item.restaurant || 'Nha hang',
+      note: dishNote.value,
+      size: selectedSize.value,
+    },
+    1,
+  )
+  closeDishDetail()
+}
+
+async function loadBrowseData() {
+  isLoading.value = true
+  loadError.value = ''
+  try {
+    if (authStore.token && !authStore.user) {
+      await authStore.fetchProfile()
+    }
+    const [categoryData, restaurants] = await Promise.all([
+      restaurantService.getCategories(),
+      restaurantService.getAll(),
+    ])
+    categories.value = (categoryData || []).slice(0, 6).map(mapCategory)
+    const restaurantMap = new Map((restaurants || []).map((restaurant) => [restaurant.id, restaurant]))
+    const menus = await Promise.all(
+      (restaurants || []).slice(0, 4).map((restaurant) => restaurantService.getMenuByRestaurant(restaurant.id)),
+    )
+    const flatMenus = menus.flat().slice(0, 12).map((item) => mapMenuItem(item, restaurantMap))
+    popularDishes.value = flatMenus.slice(0, 6)
+    recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
+    try {
+      const profile = await userService.getProfile()
+      profileName.value = profile.fullName || authStore.user?.fullName || profileName.value
+      if (profile.avatarUrl) profileAvatar.value = profile.avatarUrl
+    } catch {
+      profileName.value = authStore.user?.fullName || profileName.value
+    }
+  } catch (error) {
+    loadError.value = error.message || 'Khong the tai du lieu mon an'
+  } finally {
+    isLoading.value = false
+  }
+}
+
 watch(selectedDish, (value) => {
   document.body.style.overflow = value ? 'hidden' : ''
+})
+
+onMounted(() => {
+  loadBrowseData()
 })
 
 </script>
@@ -193,10 +185,10 @@ watch(selectedDish, (value) => {
         <RouterLink to="/profile" class="profile-shortcut" aria-label="Trang cá nhân">
           <img
             class="profile-avatar"
-            src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
+            :src="profileAvatar"
             alt="Ảnh đại diện"
           />
-          <span class="profile-name">Nguyễn Văn A</span>
+          <span class="profile-name">{{ profileName }}</span>
         </RouterLink>
       </div>
 
@@ -213,9 +205,12 @@ watch(selectedDish, (value) => {
           <input type="text" placeholder="Tìm món ăn, nhà hàng..." />
           <RouterLink to="/cart" class="cart-btn" aria-label="Giỏ hàng">
             <img :src="iconCart" alt="" />
+            <span v-if="cartCount" class="cart-count">{{ cartCount }}</span>
           </RouterLink>
         </div>
       </header>
+      <p v-if="isLoading">Dang tai du lieu...</p>
+      <p v-if="loadError">{{ loadError }}</p>
 
       <section class="voucher-banner">
         <div>
@@ -441,7 +436,7 @@ watch(selectedDish, (value) => {
 
             <div class="dish-detail-footer">
               <strong>{{ selectedDish.price }}</strong>
-              <button type="button">Thêm vào giỏ</button>
+              <button type="button" @click="addToCart(selectedDish)">Thêm vào giỏ</button>
             </div>
           </div>
         </article>
