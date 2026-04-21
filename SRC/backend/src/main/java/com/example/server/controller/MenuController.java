@@ -3,12 +3,14 @@ package com.example.server.controller;
 import com.example.server.dto.restaurant.MenuCategoryResponse;
 import com.example.server.dto.restaurant.MenuItemRequest;
 import com.example.server.dto.restaurant.MenuItemResponse;
+import com.example.server.security.CustomUserDetails;
 import com.example.server.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,45 +29,54 @@ public class MenuController {
 
     @PostMapping("/categories")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<MenuCategoryResponse> addMenuCategory(@PathVariable Long restaurantId, @RequestBody String name) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuCategory(restaurantId, name));
+    public ResponseEntity<MenuCategoryResponse> addMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                               @PathVariable Long restaurantId,
+                                                               @RequestBody String name) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuCategory(userDetails.getId(), restaurantId, name));
     }
 
     @PutMapping("/categories/{categoryId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<MenuCategoryResponse> updateMenuCategory(@PathVariable Long restaurantId,
+    public ResponseEntity<MenuCategoryResponse> updateMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                   @PathVariable Long restaurantId,
                                                                    @PathVariable Long categoryId,
                                                                    @RequestBody String name) {
-        return ResponseEntity.ok(menuService.updateMenuCategory(categoryId, name));
+        return ResponseEntity.ok(menuService.updateMenuCategory(userDetails.getId(), categoryId, name));
     }
 
     @DeleteMapping("/categories/{categoryId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Void> deleteMenuCategory(@PathVariable Long restaurantId, @PathVariable Long categoryId) {
-        menuService.deleteMenuCategory(categoryId);
+    public ResponseEntity<Void> deleteMenuCategory(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                   @PathVariable Long restaurantId,
+                                                   @PathVariable Long categoryId) {
+        menuService.deleteMenuCategory(userDetails.getId(), categoryId);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/categories/{categoryId}/items")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<MenuItemResponse> addMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<MenuItemResponse> addMenuItem(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                        @PathVariable Long restaurantId,
                                                         @PathVariable Long categoryId,
                                                         @Valid @RequestBody MenuItemRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuItem(restaurantId, categoryId, request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(menuService.addMenuItem(userDetails.getId(), restaurantId, categoryId, request));
     }
 
     @PutMapping("/items/{itemId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<MenuItemResponse> updateMenuItem(@PathVariable Long restaurantId,
+    public ResponseEntity<MenuItemResponse> updateMenuItem(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                           @PathVariable Long restaurantId,
                                                            @PathVariable Long itemId,
                                                            @Valid @RequestBody MenuItemRequest request) {
-        return ResponseEntity.ok(menuService.updateMenuItem(itemId, request));
+        return ResponseEntity.ok(menuService.updateMenuItem(userDetails.getId(), itemId, request));
     }
 
     @DeleteMapping("/items/{itemId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Void> deleteMenuItem(@PathVariable Long restaurantId, @PathVariable Long itemId) {
-        menuService.deleteMenuItem(itemId);
+    public ResponseEntity<Void> deleteMenuItem(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @PathVariable Long restaurantId,
+                                               @PathVariable Long itemId) {
+        menuService.deleteMenuItem(userDetails.getId(), itemId);
         return ResponseEntity.noContent().build();
     }
 

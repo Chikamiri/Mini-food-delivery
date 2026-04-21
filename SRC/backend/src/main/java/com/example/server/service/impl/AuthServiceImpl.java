@@ -45,8 +45,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(jwt)
                     .tokenType("Bearer")
                     .email(userDetails.getEmail())
-                    .fullName(userDetails.getEmail()) // Typically would get from a dedicated DTO or more complete
-                                                      // UserDetails
+                    .fullName(userDetails.getFullName())
                     .role(role)
                     .userId(userDetails.getId())
                     .build();

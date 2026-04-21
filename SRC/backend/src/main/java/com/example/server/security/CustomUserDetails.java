@@ -17,6 +17,7 @@ public class CustomUserDetails implements UserDetails {
     private final Long id;
     private final String email;
     private final String password;
+    private final String fullName;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public static CustomUserDetails build(User user) {
@@ -24,6 +25,7 @@ public class CustomUserDetails implements UserDetails {
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getFullName(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
     }

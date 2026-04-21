@@ -11,6 +11,7 @@ import com.example.server.mapper.OrderMapper;
 import com.example.server.repository.*;
 import com.example.server.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,9 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private static final String RESOURCE_NAME = "Order";
+
+    @Value("${app.delivery.default-fee:15.00}")
+    private String defaultDeliveryFee;
 
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
@@ -54,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setNote(request.getNote());
         order.setStatus(OrderStatus.PENDING.name());
-        order.setDeliveryFee(new BigDecimal("15.00")); // Mock delivery fee
+        order.setDeliveryFee(new BigDecimal(defaultDeliveryFee));
 
         BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderItem> items = request.getItems().stream().map(itemRequest -> {

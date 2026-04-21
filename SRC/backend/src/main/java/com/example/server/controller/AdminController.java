@@ -45,7 +45,13 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}/status")
-    public ResponseEntity<Void> updateUserStatus(@PathVariable Long id, @Valid @RequestBody UserStatusUpdateRequest request) {
+    public ResponseEntity<Void> updateUserStatus(@AuthenticationPrincipal CustomUserDetails adminDetails,
+                                                 @PathVariable Long id,
+                                                 @Valid @RequestBody UserStatusUpdateRequest request) {
+        // Prevent self-deactivation
+        if (adminDetails.getId().equals(id)) {
+            throw new RuntimeException("Admins cannot change their own status");
+        }
         adminService.updateUserStatus(id, request);
         return ResponseEntity.ok().build();
     }

@@ -22,4 +22,7 @@ public class MenuCategory {
 
 	@Column(name = "sort_order")
 	private Integer sortOrder = 0;
+
+	@Column(name = "is_deleted")
+	private Boolean isDeleted = false;
 }

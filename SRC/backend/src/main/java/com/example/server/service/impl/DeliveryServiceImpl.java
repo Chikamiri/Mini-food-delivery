@@ -30,6 +30,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ShipperLocationRepository shipperLocationRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final DeliveryMapper deliveryMapper;
 
     @Override
@@ -75,6 +76,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         if (OrderStatus.READY.name().equals(order.getStatus())) {
             order.setStatus(OrderStatus.SHIPPING.name());
             orderRepository.save(order);
+            addStatusHistory(order, shipper, OrderStatus.SHIPPING.name(), "Shipper assigned");
         }
 
         return deliveryMapper.toResponse(deliveryAssignmentRepository.save(assignment));
@@ -97,6 +99,8 @@ public class DeliveryServiceImpl implements DeliveryService {
         assignment.setStatus(DeliveryAssignmentStatus.PICKED_UP.name());
         assignment.setPickedUpAt(LocalDateTime.now());
         deliveryAssignmentRepository.save(assignment);
+
+        addStatusHistory(assignment.getOrder(), assignment.getShipper(), "PICKED_UP", "Order picked up by shipper");
     }
 
     @Override
@@ -126,6 +130,17 @@ public class DeliveryServiceImpl implements DeliveryService {
         order.setStatus(OrderStatus.DELIVERED.name());
         order.setIsPaid(true);
         orderRepository.save(order);
+
+        addStatusHistory(order, assignment.getShipper(), OrderStatus.DELIVERED.name(), "Order delivered");
+    }
+
+    private void addStatusHistory(Order order, User user, String status, String note) {
+        OrderStatusHistory history = new OrderStatusHistory();
+        history.setOrder(order);
+        history.setChangedBy(user);
+        history.setStatus(status);
+        history.setNote(note);
+        orderStatusHistoryRepository.save(history);
     }
 
     @Override
