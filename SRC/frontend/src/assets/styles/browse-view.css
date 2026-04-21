@@ -494,6 +494,13 @@
   border-radius: 18px;
   padding: 0.62rem 0.72rem;
   box-shadow: 0 8px 22px rgba(19, 29, 47, 0.07);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.recommend-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(19, 29, 47, 0.11);
 }
 
 .recommend-thumb {
@@ -566,6 +573,206 @@
 .recommend-fav:hover {
   background: #ffedf1;
   border-color: #f7a2b3;
+}
+
+/* Dish detail modal */
+.dish-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(11, 20, 33, 0.6);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.dish-detail-modal {
+  width: min(640px, 96vw);
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 28px 50px rgba(12, 20, 33, 0.28);
+  position: relative;
+}
+
+.dish-detail-close {
+  position: absolute;
+  top: 0.72rem;
+  right: 0.72rem;
+  border: 0;
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 0.92rem;
+}
+
+.dish-detail-image {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  display: block;
+}
+
+.dish-detail-body {
+  padding: 1rem 1rem 1.1rem;
+}
+
+.dish-detail-body h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1c2432;
+}
+
+.dish-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.dish-restaurant {
+  font-size: 0.84rem;
+  color: #6f7786;
+  background: #f4f6fa;
+  border: 1px solid #e8ecf2;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.dish-restaurant img {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid #dbe1eb;
+}
+
+.dish-detail-meta {
+  margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #7f8793;
+}
+
+.dish-detail-meta .dot {
+  margin: 0 0.18rem;
+}
+
+.dish-detail-meta .star {
+  color: #f3a91b;
+}
+
+.dish-detail-meta .muted {
+  color: #9aa1ad;
+}
+
+.dish-detail-body p {
+  margin: 0.8rem 0 0;
+  line-height: 1.55;
+  color: #596171;
+}
+
+.dish-size-picker {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dish-size-picker > span {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2d3646;
+}
+
+.dish-size-options {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.dish-size-options button {
+  border: 1px solid #dbe0e9;
+  background: #fff;
+  color: #3c4352;
+  border-radius: 999px;
+  padding: 0.3rem 0.72rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dish-size-options button.active {
+  border-color: #f8143f;
+  background: #ffedf1;
+  color: #d81542;
+}
+
+.dish-note-field {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dish-note-field span {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2d3646;
+}
+
+.dish-note-field textarea {
+  border: 1px solid #dbe0e9;
+  border-radius: 12px;
+  padding: 0.62rem 0.72rem;
+  min-height: 86px;
+  resize: vertical;
+  font: inherit;
+  color: #243044;
+}
+
+.dish-note-field textarea:focus {
+  outline: none;
+  border-color: #f8a1b1;
+  box-shadow: 0 0 0 3px rgba(248, 20, 63, 0.1);
+}
+
+.dish-note-field small {
+  align-self: flex-end;
+  color: #8e96a3;
+  font-size: 0.78rem;
+}
+
+.dish-detail-footer {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.dish-detail-footer strong {
+  font-size: 1.65rem;
+  color: #1a9f44;
+}
+
+.dish-detail-footer button {
+  border: 0;
+  background: #f8143f;
+  color: #fff;
+  border-radius: 11px;
+  padding: 0.68rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 @media (max-width: 1200px) {
@@ -647,6 +854,10 @@
 
   .recommend-price-row strong {
     font-size: 1.25rem;
+  }
+
+  .dish-detail-image {
+    height: 190px;
   }
 
   .voucher-banner {
