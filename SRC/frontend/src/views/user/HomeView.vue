@@ -36,10 +36,12 @@ function closeLoginModal() {
 }
 
 function showRegisterPanel() {
+  authError.value = ''
   authTab.value = 'register'
 }
 
 function showLoginPanel() {
+  authError.value = ''
   authTab.value = 'login'
 }
 
@@ -58,6 +60,10 @@ async function onRegisterSubmit() {
   authError.value = ''
   if (!regFullName.value || !regEmail.value || !regPassword.value) {
     authError.value = 'Vui long dien day du thong tin dang ky'
+    return
+  }
+  if (regPassword.value.length < 8) {
+    authError.value = 'Mat khau phai co it nhat 8 ky tu'
     return
   }
   if (regPassword.value !== regConfirm.value) {
@@ -367,6 +373,7 @@ const steps = [
             <section class="auth-col auth-col--register" aria-label="Đăng ký">
               <h2 id="register-title" class="login-title">Đăng ký</h2>
               <p class="login-sub">Tạo tài khoản để lưu địa chỉ và đặt món nhanh hơn.</p>
+              <p v-if="authError" class="login-error">{{ authError }}</p>
               <form class="login-form" @submit.prevent="onRegisterSubmit">
                 <label class="login-label">
                   Họ và tên
@@ -398,8 +405,8 @@ const steps = [
                     name="newPassword"
                     autocomplete="new-password"
                     required
-                    minlength="6"
-                    placeholder="Ít nhất 6 ký tự"
+                    minlength="8"
+                    placeholder="Ít nhất 8 ký tự"
                   />
                 </label>
                 <label class="login-label">

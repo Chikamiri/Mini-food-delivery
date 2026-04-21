@@ -22,7 +22,15 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
+    const validationErrors = payload?.data
+    const validationMessage =
+      validationErrors && typeof validationErrors === 'object'
+        ? Object.entries(validationErrors)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join(', ')
+        : null
     const message =
+      validationMessage ||
       payload?.message ||
       payload?.error ||
       `HTTP ${response.status}: ${response.statusText || 'Request failed'}`
