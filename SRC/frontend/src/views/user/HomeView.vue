@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import iconFacebook from '@/assets/icon/facebook.svg'
 import iconInstagram from '@/assets/icon/instagram.svg'
 import iconYoutube from '@/assets/icon/youtube.svg'
@@ -22,6 +23,8 @@ const regEmail = ref('')
 const regPassword = ref('')
 const regConfirm = ref('')
 const router = useRouter()
+const authStore = useAuthStore()
+const authError = ref('')
 
 function openLoginModal() {
   authTab.value = 'login'
@@ -40,20 +43,45 @@ function showLoginPanel() {
   authTab.value = 'login'
 }
 
-function onLoginSubmit() {
-  // Tạm thời điều hướng sau khi bấm đăng nhập; khi có backend sẽ thay bằng gọi API auth.
-  closeLoginModal()
-  router.push('/browse')
+async function onLoginSubmit() {
+  authError.value = ''
+  try {
+    await authStore.login(loginEmail.value, loginPassword.value)
+    closeLoginModal()
+    router.push('/browse')
+  } catch (error) {
+    authError.value = error.message || 'Dang nhap that bai'
+  }
 }
 
-function onRegisterSubmit() {
-  // Khi backend sẵn sàng: gọi API đăng ký + kiểm tra trùng mật khẩu tại đây
-  closeLoginModal()
+async function onRegisterSubmit() {
+  authError.value = ''
+  if (!regFullName.value || !regEmail.value || !regPassword.value) {
+    authError.value = 'Vui long dien day du thong tin dang ky'
+    return
+  }
+  if (regPassword.value !== regConfirm.value) {
+    authError.value = 'Mat khau xac nhan khong khop'
+    return
+  }
+
+  try {
+    await authStore.register({
+      fullName: regFullName.value,
+      email: regEmail.value,
+      password: regPassword.value,
+    })
+    closeLoginModal()
+    router.push('/browse')
+  } catch (error) {
+    authError.value = error.message || 'Dang ky that bai'
+  }
 }
 
 watch(loginOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
   if (!open) authTab.value = 'login'
+  if (!open) authError.value = ''
 })
 
 function onKeydownEscape(e) {
@@ -294,6 +322,7 @@ const steps = [
             <section class="auth-col auth-col--login" aria-label="Đăng nhập">
               <h2 id="login-title" class="login-title">Đăng nhập</h2>
               <p class="login-sub">Nhập email và mật khẩu để tiếp tục đặt món.</p>
+              <p v-if="authError" class="login-error">{{ authError }}</p>
               <form class="login-form" @submit.prevent="onLoginSubmit">
                 <label class="login-label">
                   Email
@@ -324,7 +353,9 @@ const steps = [
                   </label>
                   <a href="#" class="login-forgot" @click.prevent>Quên mật khẩu?</a>
                 </div>
-                <button type="submit" class="login-submit">Đăng nhập</button>
+                <button type="submit" class="login-submit" :disabled="authStore.isLoading">
+                  {{ authStore.isLoading ? 'Đang xử lý...' : 'Đăng nhập' }}
+                </button>
               </form>
               <p class="login-alt">
                 Chưa có tài khoản?
@@ -382,7 +413,9 @@ const steps = [
                     placeholder="Nhập lại mật khẩu"
                   />
                 </label>
-                <button type="submit" class="login-submit">Tạo tài khoản</button>
+                <button type="submit" class="login-submit" :disabled="authStore.isLoading">
+                  {{ authStore.isLoading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
+                </button>
               </form>
               <p class="login-alt">
                 Đã có tài khoản?

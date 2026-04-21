@@ -2,66 +2,46 @@
  * Restaurant Service
  * Quan ly nha hang va menu
  */
-import mockRestaurants from '@/mocks/restaurants.json'
-import mockMenuItems from '@/mocks/menuItems.json'
-import mockCategories from '@/mocks/restaurantCategories.json'
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
+import api from '@/services/api'
 
 export default {
   // --- Restaurant ---
   async getAll() {
-    await delay()
-    return mockRestaurants.filter((r) => r.isApproved)
-    // Sau nay: return (await api.get('/restaurants')).data
+    return api.post('/api/restaurants/search', {})
   },
 
   async getById(id) {
-    await delay()
-    return mockRestaurants.find((r) => r.id === Number(id))
-    // Sau nay: return (await api.get(`/restaurants/${id}`)).data
+    return api.get(`/api/restaurants/${id}`)
   },
 
   async getByCategory(categoryId) {
-    await delay()
-    return mockRestaurants.filter((r) => r.categoryId === Number(categoryId) && r.isApproved)
+    return api.post('/api/restaurants/search', { categoryId })
   },
 
   // --- Restaurant Categories ---
   async getCategories() {
-    await delay()
-    return mockCategories
-    // Sau nay: return (await api.get('/restaurant-categories')).data
+    return api.get('/api/restaurant-categories')
   },
 
   // --- Menu Items ---
   async getMenuByRestaurant(restaurantId) {
-    await delay()
-    return mockMenuItems.filter((item) => item.restaurantId === Number(restaurantId) && item.isAvailable)
-    // Sau nay: return (await api.get(`/restaurants/${restaurantId}/menu`)).data
+    return api.get(`/api/restaurants/${restaurantId}/menu-items`)
   },
 
   async getMenuItem(id) {
-    await delay()
-    return mockMenuItems.find((item) => item.id === Number(id))
+    return api.get(`/api/menu-items/${id}`)
   },
 
   // --- Restaurant Owner: CRUD ---
   async createMenuItem(restaurantId, itemData) {
-    await delay()
-    return { id: Date.now(), restaurantId, ...itemData, isAvailable: true }
-    // Sau nay: return (await api.post(`/restaurants/${restaurantId}/menu`, itemData)).data
+    return api.post(`/api/restaurants/${restaurantId}/menu-items`, itemData)
   },
 
   async updateMenuItem(itemId, itemData) {
-    await delay()
-    return { id: itemId, ...itemData }
-    // Sau nay: return (await api.put(`/menu-items/${itemId}`, itemData)).data
+    return api.put(`/api/menu-items/${itemId}`, itemData)
   },
 
   async deleteMenuItem(itemId) {
-    await delay()
-    return { success: true, id: itemId }
-    // Sau nay: return (await api.delete(`/menu-items/${itemId}`)).data
+    return api.delete(`/api/menu-items/${itemId}`)
   },
 }

@@ -586,6 +586,12 @@ h2 {
   line-height: 1.45;
 }
 
+.login-error {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: #d91036;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -654,6 +660,11 @@ h2 {
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+.login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
 }
 
 .login-submit:hover {

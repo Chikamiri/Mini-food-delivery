@@ -1,49 +1,50 @@
 /**
  * Auth Service
- * Xu ly dang nhap, dang ky, dang xuat
+ * Goi backend auth API
  */
-import mockUsers from '@/mocks/users.json'
+import api from '@/services/api'
 
-// Simulate async delay
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
+function toUser(authPayload) {
+  return {
+    id: authPayload.userId,
+    email: authPayload.email,
+    fullName: authPayload.fullName,
+    role: authPayload.role,
+  }
+}
 
 export default {
   async login(email, password) {
-    await delay()
-    // Password duoc giu de giu dung signature API login thuc te.
-    const _passwordProvided = Boolean(password)
-    const user = mockUsers.find((u) => u.email === email)
-    if (!user) {
-      throw new Error('Email hoac mat khau khong dung')
+    const data = await api.post('/api/auth/login', { email, password })
+
+    return {
+      user: toUser(data),
+      token: data.accessToken,
     }
-    // Mock token
-    const token = 'mock-jwt-token-' + user.id
-    return { user, token, passwordProvided: _passwordProvided }
-    // Sau nay: return (await api.post('/auth/login', { email, password })).data
   },
 
   async register(userData) {
-    await delay()
-    const newUser = {
-      id: mockUsers.length + 1,
-      ...userData,
-      role: 'USER',
-      isActive: true,
-      avatarUrl: null,
+    const payload = {
+      fullName: userData.fullName,
+      email: userData.email,
+      password: userData.password,
+      phone: userData.phone || null,
+      avatarUrl: userData.avatarUrl || null,
     }
-    return { user: newUser, token: 'mock-jwt-token-' + newUser.id }
-    // Sau nay: return (await api.post('/auth/register', userData)).data
+    const data = await api.post('/api/auth/register', payload)
+
+    return {
+      user: toUser(data),
+      token: data.accessToken,
+    }
   },
 
   async logout() {
-    await delay(100)
+    // Backend hien chua co endpoint logout stateful, FE chi can clear token.
     return { success: true }
-    // Sau nay: return (await api.post('/auth/logout')).data
   },
 
   async getProfile() {
-    await delay()
-    return mockUsers[0]
-    // Sau nay: return (await api.get('/auth/profile')).data
+    return api.get('/api/users/me')
   },
 }

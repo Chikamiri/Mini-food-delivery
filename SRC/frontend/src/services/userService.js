@@ -2,53 +2,36 @@
  * User Service
  * Profile, dia chi
  */
-import mockUsers from '@/mocks/users.json'
-import mockAddresses from '@/mocks/addresses.json'
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
+import api from '@/services/api'
 
 export default {
   // --- Profile ---
-  async getProfile(userId) {
-    await delay()
-    return mockUsers.find((u) => u.id === Number(userId))
-    // Sau nay: return (await api.get('/users/profile')).data
+  async getProfile() {
+    return api.get('/api/users/me')
   },
 
-  async updateProfile(userId, data) {
-    await delay()
-    return { id: userId, ...data }
-    // Sau nay: return (await api.put('/users/profile', data)).data
+  async updateProfile(data) {
+    return api.put('/api/users/me', data)
   },
 
   // --- Addresses ---
-  async getAddresses(userId) {
-    await delay()
-    return mockAddresses.filter((a) => a.userId === Number(userId))
-    // Sau nay: return (await api.get('/users/addresses')).data
+  async getAddresses() {
+    return api.get('/api/users/me/addresses')
   },
 
-  async addAddress(userId, addressData) {
-    await delay()
-    return { id: Date.now(), userId, ...addressData }
-    // Sau nay: return (await api.post('/users/addresses', addressData)).data
+  async addAddress(addressData) {
+    return api.post('/api/users/me/addresses', addressData)
   },
 
   async updateAddress(addressId, data) {
-    await delay()
-    return { id: addressId, ...data }
-    // Sau nay: return (await api.put(`/users/addresses/${addressId}`, data)).data
+    return api.put(`/api/users/me/addresses/${addressId}`, data)
   },
 
   async deleteAddress(addressId) {
-    await delay()
-    return { success: true, id: addressId }
-    // Sau nay: return (await api.delete(`/users/addresses/${addressId}`)).data
+    return api.delete(`/api/users/me/addresses/${addressId}`)
   },
 
   async setDefaultAddress(addressId) {
-    await delay()
-    return { id: addressId, isDefault: true }
-    // Sau nay: return (await api.put(`/users/addresses/${addressId}/default`)).data
+    return api.patch(`/api/users/me/addresses/${addressId}/default`)
   },
 }

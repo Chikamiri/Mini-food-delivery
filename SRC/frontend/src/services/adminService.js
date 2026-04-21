@@ -2,54 +2,39 @@
  * Admin Service
  * Quan ly nguoi dung, duyet nha hang, thong ke
  */
-import mockUsers from '@/mocks/users.json'
-import mockRestaurants from '@/mocks/restaurants.json'
-import mockOrders from '@/mocks/orders.json'
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
+import api from '@/services/api'
 
 export default {
   // --- User Management ---
   async getAllUsers() {
-    await delay()
-    return mockUsers
-    // Sau nay: return (await api.get('/admin/users')).data
+    return api.get('/api/admin/users')
   },
 
   async toggleUserActive(userId, isActive) {
-    await delay()
-    return { id: userId, isActive }
-    // Sau nay: return (await api.put(`/admin/users/${userId}/toggle-active`)).data
+    return api.patch(`/api/admin/users/${userId}/status`, { isActive })
   },
 
   // --- Restaurant Approval ---
   async getPendingRestaurants() {
-    await delay()
-    return mockRestaurants.filter((r) => !r.isApproved)
-    // Sau nay: return (await api.get('/admin/restaurants/pending')).data
+    return api.get('/api/admin/restaurants/pending')
   },
 
   async approveRestaurant(restaurantId) {
-    await delay()
-    return { id: restaurantId, isApproved: true }
-    // Sau nay: return (await api.put(`/admin/restaurants/${restaurantId}/approve`)).data
+    return api.post(`/api/admin/restaurants/${restaurantId}/approve`, {
+      approved: true,
+      reason: null,
+    })
   },
 
   async rejectRestaurant(restaurantId, reason) {
-    await delay()
-    return { id: restaurantId, isApproved: false, reason }
-    // Sau nay: return (await api.put(`/admin/restaurants/${restaurantId}/reject`, { reason })).data
+    return api.post(`/api/admin/restaurants/${restaurantId}/approve`, {
+      approved: false,
+      reason: reason || null,
+    })
   },
 
   // --- Stats ---
   async getSystemStats() {
-    await delay()
-    return {
-      totalUsers: mockUsers.length,
-      totalRestaurants: mockRestaurants.length,
-      totalOrders: mockOrders.length,
-      totalRevenue: mockOrders.reduce((sum, o) => sum + o.totalAmount, 0),
-    }
-    // Sau nay: return (await api.get('/admin/stats')).data
+    return api.get('/api/admin/stats')
   },
 }

@@ -2,84 +2,56 @@
  * Order Service
  * Dat don, theo doi, quan ly don hang
  */
-import mockOrders from '@/mocks/orders.json'
-
-const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms))
+import api from '@/services/api'
 
 export default {
   // --- User ---
   async create(orderData) {
-    await delay()
-    const newOrder = {
-      id: Date.now(),
-      ...orderData,
-      status: 'PENDING',
-      paymentMethod: 'COD',
-      createdAt: new Date().toISOString(),
-    }
-    return newOrder
-    // Sau nay: return (await api.post('/orders', orderData)).data
+    return api.post('/api/orders', orderData)
   },
 
-  async getByUser(userId) {
-    await delay()
-    return mockOrders.filter((o) => o.userId === Number(userId))
-    // Sau nay: return (await api.get('/orders/my')).data
+  async getByUser() {
+    return api.get('/api/orders/history')
   },
 
   async getById(orderId) {
-    await delay()
-    return mockOrders.find((o) => o.id === Number(orderId))
-    // Sau nay: return (await api.get(`/orders/${orderId}`)).data
+    return api.get(`/api/orders/${orderId}`)
   },
 
   async cancel(orderId) {
-    await delay()
-    return { id: orderId, status: 'CANCELLED' }
-    // Sau nay: return (await api.put(`/orders/${orderId}/cancel`)).data
+    return api.patch(`/api/orders/${orderId}/status`, { status: 'CANCELLED' })
   },
 
   // --- Restaurant Owner ---
   async getByRestaurant(restaurantId) {
-    await delay()
-    return mockOrders.filter((o) => o.restaurantId === Number(restaurantId))
-    // Sau nay: return (await api.get(`/restaurants/${restaurantId}/orders`)).data
+    return api.get(`/api/restaurants/${restaurantId}/orders`)
   },
 
   async confirm(orderId) {
-    await delay()
-    return { id: orderId, status: 'CONFIRMED' }
-    // Sau nay: return (await api.put(`/orders/${orderId}/confirm`)).data
+    return api.patch(`/api/orders/${orderId}/status`, { status: 'CONFIRMED' })
   },
 
   async reject(orderId, reason) {
-    await delay()
-    return { id: orderId, status: 'CANCELLED', note: reason }
-    // Sau nay: return (await api.put(`/orders/${orderId}/reject`, { reason })).data
+    return api.patch(`/api/orders/${orderId}/status`, {
+      status: 'CANCELLED',
+      note: reason,
+    })
   },
 
   async updateStatus(orderId, status) {
-    await delay()
-    return { id: orderId, status }
-    // Sau nay: return (await api.put(`/orders/${orderId}/status`, { status })).data
+    return api.patch(`/api/orders/${orderId}/status`, { status })
   },
 
   // --- Shipper ---
   async getAvailableForDelivery() {
-    await delay()
-    return mockOrders.filter((o) => o.status === 'READY')
-    // Sau nay: return (await api.get('/orders/available-delivery')).data
+    return api.get('/api/shipper/orders/available')
   },
 
   async acceptDelivery(orderId) {
-    await delay()
-    return { id: orderId, status: 'DELIVERING' }
-    // Sau nay: return (await api.put(`/orders/${orderId}/accept-delivery`)).data
+    return api.patch(`/api/shipper/orders/${orderId}/accept`)
   },
 
   async completeDelivery(orderId) {
-    await delay()
-    return { id: orderId, status: 'DELIVERED' }
-    // Sau nay: return (await api.put(`/orders/${orderId}/complete-delivery`)).data
+    return api.patch(`/api/shipper/orders/${orderId}/complete`)
   },
 }
