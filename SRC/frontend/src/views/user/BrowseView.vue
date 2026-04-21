@@ -211,9 +211,9 @@ watch(selectedDish, (value) => {
         <div class="search-input">
           <img :src="iconSearch" alt="" class="search-icon" />
           <input type="text" placeholder="Tìm món ăn, nhà hàng..." />
-          <button type="button" class="cart-btn" aria-label="Giỏ hàng">
+          <RouterLink to="/cart" class="cart-btn" aria-label="Giỏ hàng">
             <img :src="iconCart" alt="" />
-          </button>
+          </RouterLink>
         </div>
       </header>
 
