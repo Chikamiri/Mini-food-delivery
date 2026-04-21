@@ -4,6 +4,10 @@ import { RouterLink } from 'vue-router'
 import iconMessage from '@/assets/icon/messaging.svg'
 import iconNotice from '@/assets/icon/notice.svg'
 import iconSetting from '@/assets/icon/setting.svg'
+import iconFacebook from '@/assets/icon/facebook.svg'
+import iconInstagram from '@/assets/icon/instagram.svg'
+import iconYoutube from '@/assets/icon/youtube.svg'
+import iconTwitter from '@/assets/icon/twitter.svg'
 
 const sidebarMenus = [
   'Trang tổng quan',
@@ -318,6 +322,40 @@ watch(selectedDish, (value) => {
           </article>
         </div>
       </section>
+
+      <footer class="home-footer">
+        <div class="footer-brand">
+          <div class="logo-box">FO</div>
+          <div>
+            <strong>Giao Đồ Ăn</strong>
+            <p>Ngon nhanh, giao tận nơi.</p>
+          </div>
+        </div>
+
+        <div class="footer-links">
+          <a href="#">Thực đơn</a>
+          <a href="#">Dịch vụ</a>
+          <a href="#">Liên hệ</a>
+          <a href="#">Chính sách</a>
+        </div>
+
+        <div class="footer-social">
+          <a href="https://www.facebook.com/" aria-label="Facebook">
+            <img :src="iconFacebook" alt="" width="18" height="18" />
+          </a>
+          <a href="https://www.instagram.com/" aria-label="Instagram">
+            <img :src="iconInstagram" alt="" width="18" height="18" />
+          </a>
+          <a href="https://www.youtube.com/" aria-label="YouTube">
+            <img :src="iconYoutube" alt="" width="18" height="18" />
+          </a>
+          <a href="https://twitter.com/" aria-label="Twitter">
+            <img :src="iconTwitter" alt="" width="18" height="18" />
+          </a>
+        </div>
+
+        <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
+      </footer>
     </main>
 
     <Teleport to="body">
@@ -403,6 +441,7 @@ watch(selectedDish, (value) => {
         </article>
       </div>
     </Teleport>
+    
   </section>
   
 </template>
