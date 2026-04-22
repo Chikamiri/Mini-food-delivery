@@ -9,5 +9,7 @@ public interface RestaurantService {
     RestaurantDetailResponse getRestaurantDetail(Long id);
     void approveRestaurant(Long id, RestaurantApprovalRequest request);
     List<RestaurantCardResponse> getMyRestaurants(Long ownerId);
-    // Add more as needed
+    RestaurantDetailResponse createRestaurant(Long ownerId, RestaurantRequest request);
+    RestaurantDetailResponse updateRestaurant(Long ownerId, Long id, RestaurantRequest request);
+    void deleteRestaurant(Long ownerId, Long id);
 }
