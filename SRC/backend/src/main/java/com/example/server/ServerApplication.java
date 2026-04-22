@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,9 +18,19 @@ public class ServerApplication {
 	public static void main(String[] args) {
 		// Load .env variables into system properties if .env exists
 		try {
+			// Check current directory first, then SRC/backend/
 			Dotenv dotenv = Dotenv.configure()
 					.ignoreIfMissing()
 					.load();
+			
+			// If no entries found in current dir, try SRC/backend
+			if (dotenv.entries().isEmpty()) {
+				dotenv = Dotenv.configure()
+						.directory("SRC/backend")
+						.ignoreIfMissing()
+						.load();
+			}
+
 			dotenv.entries().forEach(entry -> {
 				if (System.getProperty(entry.getKey()) == null) {
 					System.setProperty(entry.getKey(), entry.getValue());
