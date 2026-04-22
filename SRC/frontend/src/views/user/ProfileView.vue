@@ -1,17 +1,34 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
+import iconEdit from '@/assets/icon/edit.svg'
+import iconOrder from '@/assets/icon/reciept.svg'
+import iconCheck from '@/assets/icon/check.svg'
+import iconFavorite from '@/assets/icon/love.svg'
+import iconLocation from '@/assets/icon/home.svg'
+import iconHistory from '@/assets/icon/time.svg'
+import iconNotification from '@/assets/icon/notice.svg'
+import iconPayment from '@/assets/icon/credit-card.svg'
+import iconOpenRestaurant from '@/assets/icon/home.svg'
+import iconSetting from '@/assets/icon/setting.svg'
+import iconHelp from '@/assets/icon/info.svg'
+import userService from '@/services/userService'
+import { useAuthStore } from '@/stores/auth'
+import restaurantService from '@/services/restaurantService'
 
 const isEditing = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const authStore = useAuthStore()
 
 const profile = ref({
-  full_name: 'Nguyễn Văn A',
-  email: 'nguyenvana@email.com',
-  phone: '0901 234 567',
+  full_name: '',
+  email: '',
+  phone: '',
   avatar_url: '',
-  role: 'USER',
-  created_at: '2026-01-15',
+  role: '',
+  created_at: '',
 })
 
 const form = ref({
@@ -34,36 +51,154 @@ function cancelEditing() {
 }
 
 function saveProfile() {
-  profile.value = { ...profile.value, ...form.value }
-  isEditing.value = false
+  updateProfile()
 }
 
 const stats = ref([
-  { label: 'Đơn hàng', value: '24', icon: '📦' },
-  { label: 'Đã giao', value: '21', icon: '✅' },
-  { label: 'Yêu thích', value: '8', icon: '❤️' },
-  { label: 'Địa chỉ', value: '3', icon: '📍' },
+  { label: 'Đơn hàng', value: '24', icon: iconOrder },
+  { label: 'Đã giao', value: '21', icon: iconCheck },
+  { label: 'Yêu thích', value: '8', icon: iconFavorite },
+  { label: 'Địa chỉ', value: '3', icon: iconLocation },
 ])
 
 const menuItems = [
-  { icon: '📋', label: 'Lịch sử đơn hàng', route: '/orders' },
-  { icon: '📍', label: 'Quản lý địa chỉ', route: '/addresses' },
-  { icon: '🔔', label: 'Thông báo', route: '/notifications' },
-  { icon: '💳', label: 'Phương thức thanh toán', route: '/payment' },
-  { icon: '⚙️', label: 'Cài đặt', route: '/settings' },
-  { icon: '❓', label: 'Trợ giúp', route: '/help' },
+  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders' },
+  { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
+  { icon: iconNotification, label: 'Thông báo', route: '/notifications' },
+  { icon: iconPayment, label: 'Phương thức thanh toán', route: '/payment' },
+  { icon: iconOpenRestaurant, label: 'Mở nhà hàng', route: 'open-restaurant' },
+  { icon: iconSetting, label: 'Cài đặt', route: '/settings' },
+  { icon: iconHelp, label: 'Trợ giúp', route: '/help' },
 ]
+
+const restaurantModalOpen = ref(false)
+const restaurantLoading = ref(false)
+const restaurants = ref([])
+const restaurantMessage = ref('')
+const showOpenRestaurantForm = ref(false)
+const openingForm = ref({
+  name: '',
+  phone: '',
+  address: '',
+  description: '',
+  noteToAdmin: '',
+})
 
 const router = useRouter()
 
 function logout() {
-  // TODO: Khi có backend, gọi API logout + xóa token/session tại đây.
+  authStore.logout()
   router.push('/')
 }
 
 function goBackToBrowse() {
   router.push('/browse')
 }
+
+async function openRestaurantModal() {
+  restaurantModalOpen.value = true
+  showOpenRestaurantForm.value = false
+  restaurantMessage.value = ''
+  restaurantLoading.value = true
+  try {
+    const data = await restaurantService.getMyRestaurants()
+    restaurants.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    restaurants.value = []
+    restaurantMessage.value = error.message || 'Chưa thể tải danh sách nhà hàng'
+  } finally {
+    restaurantLoading.value = false
+  }
+}
+
+function closeRestaurantModal() {
+  restaurantModalOpen.value = false
+  showOpenRestaurantForm.value = false
+}
+
+function openRestaurantForm() {
+  showOpenRestaurantForm.value = true
+}
+
+function handleMenuClick(item) {
+  if (item.route === 'open-restaurant') {
+    openRestaurantModal()
+    return
+  }
+  router.push(item.route)
+}
+
+function submitOpenRestaurant() {
+  restaurantMessage.value =
+    'Đã ghi nhận thông tin mở quán. Bộ phận admin sẽ liên hệ và duyệt hồ sơ cho bạn.'
+  openingForm.value = {
+    name: '',
+    phone: '',
+    address: '',
+    description: '',
+    noteToAdmin: '',
+  }
+}
+
+async function loadProfile() {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const data = await userService.getProfile()
+    profile.value = {
+      ...profile.value,
+      full_name: data.fullName || profile.value.full_name,
+      email: data.email || profile.value.email,
+      phone: data.phone || '',
+      avatar_url: data.avatarUrl || '',
+      role: data.role || profile.value.role,
+      created_at: data.createdAt ? String(data.createdAt).slice(0, 10) : profile.value.created_at,
+    }
+    form.value = {
+      full_name: profile.value.full_name,
+      email: profile.value.email,
+      phone: profile.value.phone,
+    }
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the tai thong tin tai khoan'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function updateProfile() {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    const updated = await userService.updateProfile({
+      fullName: form.value.full_name,
+      phone: form.value.phone,
+    })
+    profile.value = {
+      ...profile.value,
+      full_name: updated.fullName || form.value.full_name,
+      phone: updated.phone || form.value.phone,
+    }
+    isEditing.value = false
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the cap nhat thong tin'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  if (authStore.user) {
+    profile.value.full_name = authStore.user.fullName || profile.value.full_name
+    profile.value.email = authStore.user.email || profile.value.email
+    profile.value.role = authStore.user.role || profile.value.role
+  }
+  loadProfile()
+})
+
+watch(restaurantModalOpen, (value) => {
+  document.body.style.overflow = value ? 'hidden' : ''
+})
 </script>
 
 <template>
@@ -84,10 +219,12 @@ function goBackToBrowse() {
             <span class="member-badge">Thành viên từ {{ profile.created_at }}</span>
           </div>
         </div>
+        <p v-if="isLoading" class="member-badge">Dang tai du lieu...</p>
+        <p v-if="errorMessage" class="member-badge">{{ errorMessage }}</p>
 
         <div class="stats-row">
           <div v-for="stat in stats" :key="stat.label" class="stat-item">
-            <span class="stat-icon">{{ stat.icon }}</span>
+            <span class="stat-icon"><img :src="stat.icon" alt="" /></span>
             <strong>{{ stat.value }}</strong>
             <small>{{ stat.label }}</small>
           </div>
@@ -99,7 +236,10 @@ function goBackToBrowse() {
         <div class="info-card">
           <div class="info-header">
             <h2>Thông tin cá nhân</h2>
-            <button v-if="!isEditing" class="edit-btn" @click="startEditing">✏️ Chỉnh sửa</button>
+            <button v-if="!isEditing" class="edit-btn" @click="startEditing">
+              <img :src="iconEdit" alt="" />
+              Chỉnh sửa
+            </button>
           </div>
 
           <form v-if="isEditing" class="edit-form" @submit.prevent="saveProfile">
@@ -145,11 +285,17 @@ function goBackToBrowse() {
         <div class="menu-card">
           <h2>Truy cập nhanh</h2>
           <div class="menu-list">
-            <a v-for="item in menuItems" :key="item.label" :href="item.route" class="menu-item">
-              <span class="menu-icon">{{ item.icon }}</span>
+            <button
+              v-for="item in menuItems"
+              :key="item.label"
+              type="button"
+              class="menu-item menu-item-btn"
+              @click="handleMenuClick(item)"
+            >
+              <span class="menu-icon"><img :src="item.icon" alt="" /></span>
               <span class="menu-label">{{ item.label }}</span>
               <span class="menu-arrow">›</span>
-            </a>
+            </button>
           </div>
           <button type="button" class="logout-btn" @click="logout">Đăng xuất</button>
         </div>
@@ -162,6 +308,74 @@ function goBackToBrowse() {
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div v-if="restaurantModalOpen" class="restaurant-overlay" @click.self="closeRestaurantModal">
+        <article class="restaurant-modal">
+          <div class="restaurant-modal-head">
+            <h3>Mở nhà hàng</h3>
+            <button type="button" class="modal-close-btn" @click="closeRestaurantModal">✕</button>
+          </div>
+
+          <section class="restaurant-section">
+            <h4>Nhà hàng của bạn</h4>
+            <p v-if="restaurantLoading">Đang tải danh sách...</p>
+            <p v-else-if="!restaurants.length">Bạn chưa có nhà hàng nào.</p>
+            <ul v-else class="restaurant-list">
+              <li v-for="restaurant in restaurants" :key="restaurant.id">
+                <strong>{{ restaurant.name }}</strong>
+                <small>{{ restaurant.address || 'Chưa có địa chỉ' }}</small>
+              </li>
+            </ul>
+          </section>
+
+          <section class="restaurant-section">
+            <h4>Mở quán mới</h4>
+            <button v-if="!showOpenRestaurantForm" type="button" class="save-btn" @click="openRestaurantForm">
+              Mở quán
+            </button>
+            <form v-else class="restaurant-form" @submit.prevent="submitOpenRestaurant">
+              <label class="field">
+                <span>Tên quán</span>
+                <input v-model="openingForm.name" required type="text" placeholder="Ví dụ: Cơm Nhà 1988" />
+              </label>
+              <label class="field">
+                <span>Số điện thoại quán</span>
+                <input v-model="openingForm.phone" required type="tel" placeholder="09xxxxxxxx" />
+              </label>
+              <label class="field">
+                <span>Địa chỉ</span>
+                <input
+                  v-model="openingForm.address"
+                  required
+                  type="text"
+                  placeholder="Số nhà, đường, quận/huyện, thành phố"
+                />
+              </label>
+              <label class="field">
+                <span>Mô tả quán</span>
+                <textarea
+                  v-model="openingForm.description"
+                  rows="3"
+                  placeholder="Món chính, phong cách phục vụ, giờ mở cửa..."
+                ></textarea>
+              </label>
+              <label class="field">
+                <span>Ghi chú gửi admin</span>
+                <textarea
+                  v-model="openingForm.noteToAdmin"
+                  rows="2"
+                  placeholder="Thông tin bổ sung để admin duyệt hồ sơ"
+                ></textarea>
+              </label>
+              <button type="submit" class="save-btn">Gửi yêu cầu mở quán</button>
+            </form>
+          </section>
+
+          <p v-if="restaurantMessage" class="restaurant-message">{{ restaurantMessage }}</p>
+        </article>
+      </div>
+    </Teleport>
   </section>
 </template>
 

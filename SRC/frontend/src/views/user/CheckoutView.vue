@@ -1,27 +1,94 @@
 <script setup>
-const deliveryAddresses = [
-  {
-    id: 1,
-    label: 'Nhà',
-    detail: '227 Nguyễn Văn Cừ, Phường 4, Quận 5, TP.HCM',
-    active: true,
-  },
-  {
-    id: 2,
-    label: 'Cơ quan',
-    detail: '1 Võ Văn Ngân, Linh Chiểu, Thủ Đức, TP.HCM',
-    active: false,
-  },
-]
+import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cart'
+import { useOrderStore } from '@/stores/order'
+import userService from '@/services/userService'
 
+const router = useRouter()
+const cartStore = useCartStore()
+const orderStore = useOrderStore()
+
+const deliveryAddresses = ref([])
+const selectedAddressId = ref(null)
 const orderTypes = ['Giao tiêu chuẩn', 'Giao hẹn giờ', 'Nhận tại quán']
 const subscriptionTypes = ['Tháng', 'Tuần', 'Tùy chọn']
 const deliveryPlans = ['3 ngày/tuần', '5 ngày/tuần']
+const selectedOrderType = ref(orderTypes[0])
+const selectedSubscriptionType = ref(subscriptionTypes[0])
+const selectedDeliveryPlan = ref(deliveryPlans[0])
+const orderNote = ref(cartStore.note || '')
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
 
-const cartItems = [
-  { id: 1, restaurant: 'Quán Cơm Nhà', name: 'Cơm gà xối mỡ', quantity: 1, price: '59.000đ' },
-  { id: 2, restaurant: 'Trà sữa Mộc', name: 'Trà sữa trân châu', quantity: 2, price: '35.000đ' },
-]
+const cartItems = computed(() => cartStore.items)
+const subtotal = computed(() => cartStore.subtotal)
+const deliveryFee = computed(() => (subtotal.value > 0 ? 18000 : 0))
+const discount = computed(() => (subtotal.value >= 100000 ? 20000 : 0))
+const total = computed(() => subtotal.value + deliveryFee.value - discount.value)
+const selectedAddress = computed(() =>
+  deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
+)
+
+function formatPrice(value) {
+  return Number(value || 0).toLocaleString('vi-VN') + 'đ'
+}
+
+async function loadAddresses() {
+  try {
+    const addresses = await userService.getAddresses()
+    deliveryAddresses.value = Array.isArray(addresses) ? addresses : []
+    selectedAddressId.value =
+      deliveryAddresses.value.find((item) => item.isDefault)?.id ||
+      deliveryAddresses.value[0]?.id ||
+      null
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the tai danh sach dia chi'
+  }
+}
+
+async function submitOrder() {
+  errorMessage.value = ''
+  successMessage.value = ''
+  if (!cartItems.value.length) {
+    errorMessage.value = 'Gio hang dang trong'
+    return
+  }
+  if (!selectedAddress.value) {
+    errorMessage.value = 'Vui long chon dia chi giao hang'
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    const payload = {
+      addressId: selectedAddress.value.id,
+      deliveryAddress: selectedAddress.value.addressLine || selectedAddress.value.detail || '',
+      note: orderNote.value,
+      orderType: selectedOrderType.value,
+      subscriptionType: selectedSubscriptionType.value,
+      deliveryPlan: selectedDeliveryPlan.value,
+      items: cartItems.value.map((item) => ({
+        menuItemId: item.id,
+        quantity: item.quantity,
+        note: item.note || '',
+      })),
+    }
+    await orderStore.createOrder(payload)
+    cartStore.clearCart()
+    successMessage.value = 'Dat don thanh cong'
+    setTimeout(() => router.push('/orders/history'), 800)
+  } catch (error) {
+    errorMessage.value = error.message || 'Khong the dat don'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+onMounted(() => {
+  loadAddresses()
+})
 </script>
 
 <template>
@@ -38,10 +105,13 @@ const cartItems = [
             v-for="item in deliveryAddresses"
             :key="item.id"
             class="address-card"
-            :class="{ active: item.active }"
+            :class="{ active: item.id === selectedAddressId }"
+            role="button"
+            tabindex="0"
+            @click="selectedAddressId = item.id"
           >
-            <p class="address-label">{{ item.label }}</p>
-            <p class="address-detail">{{ item.detail }}</p>
+            <p class="address-label">{{ item.label || 'Dia chi' }}</p>
+            <p class="address-detail">{{ item.addressLine || item.detail }}</p>
           </article>
         </div>
       </section>
@@ -50,10 +120,11 @@ const cartItems = [
         <h2>Loại đơn hàng</h2>
         <div class="chips-row">
           <button
-            v-for="(item, index) in orderTypes"
+            v-for="item in orderTypes"
             :key="item"
             class="chip-btn"
-            :class="{ active: index === 0 }"
+              :class="{ active: selectedOrderType === item }"
+              @click="selectedOrderType = item"
           >
             {{ item }}
           </button>
@@ -65,10 +136,11 @@ const cartItems = [
           <label>Gói đăng ký?</label>
           <div class="tabs-row">
             <button
-              v-for="(item, index) in subscriptionTypes"
+            v-for="item in subscriptionTypes"
               :key="item"
               class="tab-btn"
-              :class="{ active: index === 0 }"
+              :class="{ active: selectedSubscriptionType === item }"
+              @click="selectedSubscriptionType = item"
             >
               {{ item }}
             </button>
@@ -78,10 +150,11 @@ const cartItems = [
           <label>Gói giao?</label>
           <div class="chips-row">
             <button
-              v-for="(item, index) in deliveryPlans"
+            v-for="item in deliveryPlans"
               :key="item"
               class="chip-btn secondary"
-              :class="{ active: index === 0 }"
+              :class="{ active: selectedDeliveryPlan === item }"
+              @click="selectedDeliveryPlan = item"
             >
               {{ item }}
             </button>
@@ -96,9 +169,14 @@ const cartItems = [
         </div>
         <div>
           <label>Ghi chú cho quán</label>
-          <textarea placeholder="Ví dụ: ít đá, không hành, gọi trước khi giao..."></textarea>
+          <textarea
+            v-model="orderNote"
+            placeholder="Ví dụ: ít đá, không hành, gọi trước khi giao..."
+          ></textarea>
         </div>
       </section>
+      <p v-if="errorMessage" class="checkout-message checkout-message--error">{{ errorMessage }}</p>
+      <p v-if="successMessage" class="checkout-message checkout-message--success">{{ successMessage }}</p>
     </main>
 
     <aside class="checkout-summary">
@@ -113,24 +191,26 @@ const cartItems = [
             <p class="restaurant-name">Từ {{ item.restaurant }}</p>
             <div class="item-row">
               <span>{{ item.name }}</span>
-              <strong>{{ item.price }}</strong>
+              <strong>{{ formatPrice(item.price) }}</strong>
             </div>
             <small>Số lượng: {{ item.quantity }}</small>
           </article>
         </div>
 
         <div class="bill-detail">
-          <div><span>Tạm tính</span><strong>129.000đ</strong></div>
-          <div><span>Phí giao hàng</span><strong>18.000đ</strong></div>
-          <div><span>Giảm giá</span><strong>-20.000đ</strong></div>
+          <div><span>Tạm tính</span><strong>{{ formatPrice(subtotal) }}</strong></div>
+          <div><span>Phí giao hàng</span><strong>{{ formatPrice(deliveryFee) }}</strong></div>
+          <div><span>Giảm giá</span><strong>-{{ formatPrice(discount) }}</strong></div>
         </div>
 
         <div class="total-row">
           <span>Tổng thanh toán (COD)</span>
-          <strong>127.000đ</strong>
+          <strong>{{ formatPrice(total) }}</strong>
         </div>
 
-        <button class="pay-btn">Xác nhận đặt đơn</button>
+        <button class="pay-btn" :disabled="isSubmitting || !cartItems.length" @click="submitOrder">
+          {{ isSubmitting ? 'Dang xu ly...' : 'Xác nhận đặt đơn' }}
+        </button>
       </div>
     </aside>
   </section>
@@ -425,6 +505,27 @@ textarea:focus {
 .pay-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 18px rgba(248, 20, 63, 0.24);
+}
+
+.pay-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.checkout-message {
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.checkout-message--error {
+  color: #d81642;
+}
+
+.checkout-message--success {
+  color: #1f8a4d;
 }
 
 @media (max-width: 1024px) {

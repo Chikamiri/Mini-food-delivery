@@ -37,6 +37,11 @@ async function request(path, options = {}) {
     throw new Error(message)
   }
 
+  // Normalize backend wrapper shape: { success, message, data, ... }
+  if (payload && typeof payload === 'object' && 'data' in payload && 'success' in payload) {
+    return payload.data
+  }
+
   return payload
 }
 

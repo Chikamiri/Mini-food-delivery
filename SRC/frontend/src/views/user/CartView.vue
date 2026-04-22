@@ -1,57 +1,28 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
+import { useCartStore } from '@/stores/cart'
 
-const cartItems = ref([
-  {
-    id: 1,
-    restaurant: 'Quán Cơm Nhà',
-    name: 'Cơm gà xối mỡ',
-    price: 59000,
-    quantity: 1,
-    image: '🍚',
-    note: '',
-  },
-  {
-    id: 2,
-    restaurant: 'Trà sữa Mộc',
-    name: 'Trà sữa trân châu đường đen',
-    price: 35000,
-    quantity: 2,
-    image: '🧋',
-    note: 'Ít đá',
-  },
-  {
-    id: 3,
-    restaurant: 'Burger King',
-    name: 'Whopper Meal',
-    price: 89000,
-    quantity: 1,
-    image: '🍔',
-    note: '',
-  },
-])
+const router = useRouter()
+const cartStore = useCartStore()
+const cartItems = computed(() => cartStore.items)
 
 const deliveryFee = 18000
 
 function increment(item) {
-  item.quantity++
+  cartStore.updateQuantity(item.id, item.quantity + 1)
 }
 
 function decrement(item) {
-  if (item.quantity > 1) {
-    item.quantity--
-  }
+  cartStore.updateQuantity(item.id, item.quantity - 1)
 }
 
 function removeItem(id) {
-  cartItems.value = cartItems.value.filter((i) => i.id !== id)
+  cartStore.removeItem(id)
 }
 
-const subtotal = computed(() =>
-  cartItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
-)
+const subtotal = computed(() => cartStore.subtotal)
 
 const discount = computed(() => (subtotal.value >= 100000 ? 20000 : 0))
 
@@ -64,13 +35,18 @@ function formatPrice(value) {
 const groupedByRestaurant = computed(() => {
   const groups = {}
   cartItems.value.forEach((item) => {
-    if (!groups[item.restaurant]) {
-      groups[item.restaurant] = []
+    const key = item.restaurantName || 'Nhà hàng'
+    if (!groups[key]) {
+      groups[key] = []
     }
-    groups[item.restaurant].push(item)
+    groups[key].push(item)
   })
   return groups
 })
+
+function goBrowse() {
+  router.push('/browse')
+}
 </script>
 
 <template>
@@ -91,7 +67,7 @@ const groupedByRestaurant = computed(() => {
           <span class="empty-icon">🛒</span>
           <h2>Giỏ hàng trống</h2>
           <p>Hãy thêm món ăn từ nhà hàng yêu thích!</p>
-          <button class="browse-btn">Khám phá ngay</button>
+          <button class="browse-btn" @click="goBrowse">Khám phá ngay</button>
         </div>
 
         <div
@@ -105,7 +81,7 @@ const groupedByRestaurant = computed(() => {
           </div>
 
           <article v-for="item in items" :key="item.id" class="cart-item">
-            <div class="item-image">{{ item.image }}</div>
+            <div class="item-image">{{ item.imageUrl ? '🍽️' : '🍱' }}</div>
             <div class="item-info">
               <h4>{{ item.name }}</h4>
               <p v-if="item.note" class="item-note">Ghi chú: {{ item.note }}</p>

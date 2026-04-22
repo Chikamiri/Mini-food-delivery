@@ -1,12 +1,14 @@
 package com.example.server;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
-import io.github.cdimascio.dotenv.Dotenv;
+import javax.sql.DataSource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import com.example.server.repository.UserRepository;
 
 @SpringBootApplication
@@ -45,18 +47,42 @@ public class ServerApplication {
 	}
 
 	@Bean
-	CommandLineRunner runner(org.springframework.beans.factory.ObjectProvider<UserRepository> userRepositoryProvider) {
+	CommandLineRunner runner(
+			org.springframework.beans.factory.ObjectProvider<UserRepository> userRepositoryProvider,
+			org.springframework.beans.factory.ObjectProvider<DataSource> dataSourceProvider,
+			Environment env) {
 		return args -> {
-			System.out.println("=======================================");
-			System.out.println("   Backend Server Started Successfully  ");
+			String port = env.getProperty("local.server.port");
+			if (port == null)
+				port = env.getProperty("server.port", "8080");
+			String baseUrl = "http://localhost:" + port;
+
+			System.out.println("\n====================================================================");
+			System.out.println("🚀  Mini Food Delivery Backend Started Successfully!");
+			System.out.println("🔗  API Base URL (for frontend): " + baseUrl + "/api");
+			System.out.println("📖  Swagger Documentation:      " + baseUrl + "/swagger-ui.html");
+			System.out.println("--------------------------------------------------------------------");
+
 			if (isSmokeModeEnabled()) {
-				System.out.println("   Found users count: N/A (Smoke Mode)");
+				System.out.println("📁  Database: SKIPPED (Smoke Mode enabled)");
 			} else {
-				userRepositoryProvider.ifAvailable(repo -> 
-					System.out.println("   Found users count: " + repo.count())
-				);
+				dataSourceProvider.ifAvailable(dataSource -> {
+					try (Connection conn = dataSource.getConnection()) {
+						System.out.println(
+								"✅  Database: CONNECTED (" + conn.getMetaData().getDatabaseProductName() + ")");
+						userRepositoryProvider.ifAvailable(
+								repo -> System.out.println("📊  Statistics: " + repo.count() + " users registered"));
+					} catch (Exception e) {
+						System.err.println("❌  Database: CONNECTION FAILED!");
+						System.err.println("    Error: " + e.getMessage());
+					}
+				});
+
+				if (dataSourceProvider.getIfAvailable() == null) {
+					System.err.println("❌  Database: NOT CONFIGURED!");
+				}
 			}
-			System.out.println("=======================================");
+			System.out.println("====================================================================\n");
 		};
 	}
 

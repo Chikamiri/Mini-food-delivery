@@ -48,8 +48,12 @@ function showLoginPanel() {
 async function onLoginSubmit() {
   authError.value = ''
   try {
-    await authStore.login(loginEmail.value, loginPassword.value)
+    const loggedInUser = await authStore.login(loginEmail.value, loginPassword.value)
     closeLoginModal()
+    if (loggedInUser?.role === 'ADMIN') {
+      router.push('/admin/dashboard')
+      return
+    }
     router.push('/browse')
   } catch (error) {
     authError.value = error.message || 'Dang nhap that bai'

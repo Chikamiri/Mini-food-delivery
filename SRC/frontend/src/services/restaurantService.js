@@ -14,6 +14,10 @@ export default {
     return api.get(`/api/restaurants/${id}`)
   },
 
+  async getMyRestaurants() {
+    return api.get('/api/restaurants/my-restaurants')
+  },
+
   async getByCategory(categoryId) {
     return api.post('/api/restaurants/search', { categoryId })
   },
