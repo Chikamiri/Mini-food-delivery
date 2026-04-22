@@ -22,7 +22,7 @@ src/main/java/com/example/server/
 ├── repository/                         # [DONE] Data Access Layer (Spring Data JPA)
 ├── security/                           # [DONE] JWT, CustomUserDetails & Auth Logic
 └── service/                            # [DONE] Business Logic Interfaces
-    └── impl/                           # [DONE] Service Implementations
+    └── impl/                           # [DONE] Service Implementations (Admin, Auth, Delivery, Menu, Notification, Order, Report, Restaurant, User)
 ```
 
 ## Current Implementation Status
@@ -35,7 +35,9 @@ src/main/java/com/example/server/
   - `V2`: Fixed missing `is_deleted` in `categories`.
   - `V3`: Seeded initial `RestaurantCategory` data (Rice, Fast Food, etc.).
 - **Auditing**: Manual JPA auditing via `@PrePersist` and `@PreUpdate` fixed to ensure `updated_at` is never null on creation.
-- **API**: Added `GET /api/restaurant-categories` to support frontend browsing.
+- **API**:
+  - Added `GET /api/restaurant-categories` to support frontend browsing.
+  - Added missing Admin endpoints: `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/restaurants/pending`.
 
 ## Backend Roadmap - Phase 2
 

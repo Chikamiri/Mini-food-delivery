@@ -1,7 +1,10 @@
 package com.example.server.controller;
 
 import com.example.server.dto.report.AdminReportSummaryResponse;
+import com.example.server.dto.report.AdminStatsResponse;
 import com.example.server.dto.restaurant.RestaurantApprovalRequest;
+import com.example.server.dto.restaurant.RestaurantCardResponse;
+import com.example.server.dto.user.UserProfileResponse;
 import com.example.server.dto.user.UserRoleUpdateRequest;
 import com.example.server.dto.user.UserStatusUpdateRequest;
 import com.example.server.exception.AppException;
@@ -18,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -27,6 +31,21 @@ public class AdminController {
 
     private final AdminService adminService;
     private final ReportService reportService;
+
+    @GetMapping("/stats")
+    public ResponseEntity<AdminStatsResponse> getSystemStats() {
+        return ResponseEntity.ok(adminService.getSystemStats());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserProfileResponse>> getAllUsers() {
+        return ResponseEntity.ok(adminService.getAllUsers());
+    }
+
+    @GetMapping("/restaurants/pending")
+    public ResponseEntity<List<RestaurantCardResponse>> getPendingRestaurants() {
+        return ResponseEntity.ok(adminService.getPendingRestaurants());
+    }
 
     @PostMapping("/restaurants/{id}/approve")
     public ResponseEntity<Void> approveRestaurant(@PathVariable Long id,
