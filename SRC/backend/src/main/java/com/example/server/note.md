@@ -8,52 +8,58 @@ A Spring Boot 3.5.13 backend for a multi-actor food delivery system (Customer, O
 
 ```txt
 src/main/java/com/example/server/
-├── ServerApplication.java              # Main entry point
-├── config/                             # [IN-PROGRESS] Application configuration
-│   ├── SecurityConfig.java             # [DONE] Auth, RBAC & CORS
-│   └── WebConfig.java                  # [TODO] MVC configuration
-├── controller/                         # [DONE] REST Endpoints
-├── dto/                                # [DONE] Data Transfer Objects
-├── entity/                             # [DONE] JPA Entities
-├── enums/                              # [DONE] State Definitions
+├── ServerApplication.java              # Main entry point (loads .env variables)
+├── config/                             # Application configuration
+│   └── SecurityConfig.java             # [DONE] Auth, RBAC, CORS & Password Encoding
+├── controller/                         # [DONE] REST Endpoints (Admin, Auth, Delivery, Menu, Order, Restaurant, User, RestaurantCategory)
+├── dto/                                # [DONE] Data Transfer Objects (Request/Response)
+├── entity/                             # [DONE] JPA Entities (12 core entities with JPA auditing)
+├── enums/                              # [DONE] State Definitions (Role, OrderStatus, etc.)
+├── event/                              # [DONE] Application Events (OrderReadyEvent)
 ├── exception/                          # [DONE] Error Handling & GlobalAdvice
+├── listener/                           # [DONE] Event Listeners (OrderEventListener)
 ├── mapper/                             # [DONE] MapStruct Object Mappers
-├── repository/                         # [DONE] Data Access Layer (JPA)
-├── security/                           # [DONE] JWT & Security Logic
-└── service/                            # [DONE] Business Logic
-    ├── UserService.java                # [DONE]
-    ├── RestaurantService.java          # [DONE]
-    ├── MenuService.java                # [DONE]
-    ├── OrderService.java               # [DONE]
-    ├── DeliveryService.java            # [DONE]
-    ├── AdminService.java               # [DONE]
-    ├── ReportService.java              # [DONE]
-    ├── NotificationService.java        # [DONE]
-    ├── AuthService.java                # [DONE]
-    └── impl/                           # [DONE] Implementations
+├── repository/                         # [DONE] Data Access Layer (Spring Data JPA)
+├── security/                           # [DONE] JWT, CustomUserDetails & Auth Logic
+└── service/                            # [DONE] Business Logic Interfaces
+    └── impl/                           # [DONE] Service Implementations (Admin, Auth, Delivery, Menu, Notification, Order, Report, Restaurant, User)
 ```
 
 ## Current Implementation Status
 
-- **Dependencies**: Web, Data JPA, Security 6.4, Validation, MySQL, Lombok, MapStruct, JJWT, Testcontainers.
-- **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC) implemented.
-- **Auth**: `AuthServiceImpl` with BCrypt hashing and JWT token issuance is functional.
-- **Testing**: 28 tests passing (Unit + Integration).
-- **Database**: 13-table schema mapped (added MenuCategory.is_deleted); Role strings refactored to type-safe constants.
+- **Dependencies**: Web, Actuator, Data JPA, Security 6.4, Validation, Flyway (MySQL), Lombok, MapStruct 1.6.3, JJWT 0.13.0, Testcontainers, **Dotenv-java 3.1.0**.
+- **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC). **JWT Secret minimum size (256-bit) enforced.**
+- **Environment**: Dynamic configuration supported via `.env` files in root or `SRC/backend/`.
+- **Auth**: `AuthServiceImpl` functional. Fixed `updated_at` null constraint during registration.
+- **Database**: 12-table schema managed via Flyway.
+  - `V2`: Fixed missing `is_deleted` in `categories`.
+  - `V3`: Seeded initial `RestaurantCategory` data (Rice, Fast Food, etc.).
+- **Auditing**: Manual JPA auditing via `@PrePersist` and `@PreUpdate` fixed to ensure `updated_at` is never null on creation.
+- **API**:
+  - Added `GET /api/restaurant-categories` to support frontend browsing.
+  - Added missing Admin endpoints: `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/restaurants/pending`.
 
-## Immediate Backend Roadmap
+## Backend Roadmap - Phase 2
 
-1. **Controllers [DONE]**:
-    - Build REST endpoints for all major modules: Auth, Admin, User, Restaurant, Menu, Order, Delivery.
-    - Annotate with `@RestController` and utilize `@PreAuthorize` for fine-grained security.
-2. **Order-Delivery Integration [DONE]**: Automate `DeliveryAssignment` triggering within `OrderServiceImpl` via `OrderReadyEvent`.
-3. **Audit History [DONE]**: Record all status transitions in `OrderStatusHistory` for both orders and deliveries.
-4. **Validation [DONE]**: Ensure all DTOs are strictly validated with detailed feedback via `GlobalExceptionHandler`.
-5. **Ownership Security [DONE]**: Enforce restaurant ownership for all menu management operations.
+1. **Reporting Enhancement [IN-PROGRESS]**:
+    - [DONE] Basic Admin Report Summary.
+    - [TODO] Export reports to CSV/Excel.
+    - [TODO] Restaurant-specific revenue reports.
+2. **Real-time Updates [TODO]**:
+    - Integrate WebSocket or Server-Sent Events (SSE) for order status updates to Customers.
+    - Shipper location tracking (continuous updates).
+3. **Advanced Security [TODO]**:
+    - Implement Token Refresh mechanism.
+    - Account lockout after multiple failed login attempts.
+4. **DevOps & Infrastructure [TODO]**:
+    - Multi-stage Dockerfile for optimized builds.
+    - GitHub Actions for CI/CD pipeline.
+    - API Documentation (Swagger/OpenAPI).
 
 ## Design Constraints
 
-- **READY**: Order status used when food is ready for delivery.
-- **UNASSIGNED**: Default status for new delivery assignments.
-- **COD**: Only Cash on Delivery is supported.
-- **Terminal Status**: `DELIVERED` is the final success state.
+- **READY**: Order status used when food is ready for delivery; triggers `DeliveryAssignment` creation.
+- **UNASSIGNED**: Default status for new delivery assignments before a shipper accepts.
+- **COD**: Only Cash on Delivery is supported (PaymentMethod enum).
+- **Terminal Status**: `DELIVERED` for orders; `COMPLETED` for deliveries.
+- **Soft Delete**: Implemented for `User`, `Restaurant`, `MenuCategory`, and `MenuItem`.

@@ -150,4 +150,15 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setIsDeleted(true);
         restaurantRepository.save(restaurant);
     }
+
+    @Override
+    public List<RestaurantCategoryResponse> getAllCategories() {
+        return categoryRepository.findAllByOrderByNameAsc().stream()
+                .map(cat -> RestaurantCategoryResponse.builder()
+                        .id(cat.getId())
+                        .name(cat.getName())
+                        .iconUrl(cat.getIconUrl())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

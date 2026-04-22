@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,30 @@ import com.example.server.repository.UserRepository;
 public class ServerApplication {
 
 	public static void main(String[] args) {
+		// Load .env variables into system properties if .env exists
+		try {
+			// Check current directory first, then SRC/backend/
+			Dotenv dotenv = Dotenv.configure()
+					.ignoreIfMissing()
+					.load();
+			
+			// If no entries found in current dir, try SRC/backend
+			if (dotenv.entries().isEmpty()) {
+				dotenv = Dotenv.configure()
+						.directory("SRC/backend")
+						.ignoreIfMissing()
+						.load();
+			}
+
+			dotenv.entries().forEach(entry -> {
+				if (System.getProperty(entry.getKey()) == null) {
+					System.setProperty(entry.getKey(), entry.getValue());
+				}
+			});
+		} catch (Exception e) {
+			System.err.println("Warning: Could not load .env file: " + e.getMessage());
+		}
+
 		SpringApplication app = new SpringApplication(ServerApplication.class);
 
 		// Optional smoke mode for quick startup checks without requiring MySQL.
@@ -39,7 +64,8 @@ public class ServerApplication {
 			Environment env) {
 		return args -> {
 			String port = env.getProperty("local.server.port");
-			if (port == null) port = env.getProperty("server.port", "8080");
+			if (port == null)
+				port = env.getProperty("server.port", "8080");
 			String baseUrl = "http://localhost:" + port;
 
 			System.out.println("\n====================================================================");
@@ -53,16 +79,16 @@ public class ServerApplication {
 			} else {
 				dataSourceProvider.ifAvailable(dataSource -> {
 					try (Connection conn = dataSource.getConnection()) {
-						System.out.println("✅  Database: CONNECTED (" + conn.getMetaData().getDatabaseProductName() + ")");
-						userRepositoryProvider.ifAvailable(repo -> 
-							System.out.println("📊  Statistics: " + repo.count() + " users registered")
-						);
+						System.out.println(
+								"✅  Database: CONNECTED (" + conn.getMetaData().getDatabaseProductName() + ")");
+						userRepositoryProvider.ifAvailable(
+								repo -> System.out.println("📊  Statistics: " + repo.count() + " users registered"));
 					} catch (Exception e) {
 						System.err.println("❌  Database: CONNECTION FAILED!");
 						System.err.println("    Error: " + e.getMessage());
 					}
 				});
-				
+
 				if (dataSourceProvider.getIfAvailable() == null) {
 					System.err.println("❌  Database: NOT CONFIGURED!");
 				}

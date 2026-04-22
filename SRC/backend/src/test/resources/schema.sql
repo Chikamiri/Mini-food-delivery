@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS categories (
     restaurant_id   BIGINT NOT NULL,
     name            VARCHAR(100) NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0,
+    is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_categories_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

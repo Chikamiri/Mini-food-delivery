@@ -22,6 +22,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
         Page<Restaurant> findByIsApprovedFalse(Pageable pageable);
 
+        List<Restaurant> findByIsApprovedFalseAndIsDeletedFalse();
+
         @Modifying
         @Query("UPDATE Restaurant r SET r.isApproved = true WHERE r.id = :id")
         void approveRestaurant(@Param("id") Long id);
