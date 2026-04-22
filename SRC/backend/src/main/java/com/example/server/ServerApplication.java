@@ -2,6 +2,7 @@ package com.example.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,20 @@ import com.example.server.repository.UserRepository;
 public class ServerApplication {
 
 	public static void main(String[] args) {
+		// Load .env variables into system properties if .env exists
+		try {
+			Dotenv dotenv = Dotenv.configure()
+					.ignoreIfMissing()
+					.load();
+			dotenv.entries().forEach(entry -> {
+				if (System.getProperty(entry.getKey()) == null) {
+					System.setProperty(entry.getKey(), entry.getValue());
+				}
+			});
+		} catch (Exception e) {
+			System.err.println("Warning: Could not load .env file: " + e.getMessage());
+		}
+
 		SpringApplication app = new SpringApplication(ServerApplication.class);
 
 		// Optional smoke mode for quick startup checks without requiring MySQL.
