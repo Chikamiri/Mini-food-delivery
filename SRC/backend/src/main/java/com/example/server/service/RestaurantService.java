@@ -12,4 +12,5 @@ public interface RestaurantService {
     RestaurantDetailResponse createRestaurant(Long ownerId, RestaurantRequest request);
     RestaurantDetailResponse updateRestaurant(Long ownerId, Long id, RestaurantRequest request);
     void deleteRestaurant(Long ownerId, Long id);
+    List<RestaurantCategoryResponse> getAllCategories();
 }

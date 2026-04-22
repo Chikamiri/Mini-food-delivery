@@ -8,12 +8,12 @@ A Spring Boot 3.5.13 backend for a multi-actor food delivery system (Customer, O
 
 ```txt
 src/main/java/com/example/server/
-├── ServerApplication.java              # Main entry point
+├── ServerApplication.java              # Main entry point (loads .env variables)
 ├── config/                             # Application configuration
 │   └── SecurityConfig.java             # [DONE] Auth, RBAC, CORS & Password Encoding
-├── controller/                         # [DONE] REST Endpoints (Admin, Auth, Delivery, Menu, Order, Restaurant, User)
+├── controller/                         # [DONE] REST Endpoints (Admin, Auth, Delivery, Menu, Order, Restaurant, User, RestaurantCategory)
 ├── dto/                                # [DONE] Data Transfer Objects (Request/Response)
-├── entity/                             # [DONE] JPA Entities (12 core entities)
+├── entity/                             # [DONE] JPA Entities (12 core entities with JPA auditing)
 ├── enums/                              # [DONE] State Definitions (Role, OrderStatus, etc.)
 ├── event/                              # [DONE] Application Events (OrderReadyEvent)
 ├── exception/                          # [DONE] Error Handling & GlobalAdvice
@@ -27,12 +27,15 @@ src/main/java/com/example/server/
 
 ## Current Implementation Status
 
-- **Dependencies**: Web, Actuator, Data JPA, Security 6.4, Validation, Flyway (MySQL), Lombok, MapStruct 1.6.3, JJWT 0.13.0, Testcontainers.
-- **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC) implemented. CORS configured in `SecurityConfig`.
-- **Auth**: `AuthServiceImpl` with BCrypt hashing and JWT token issuance is functional.
-- **Testing**: Integrated JaCoCo for coverage; 30+ tests (Unit + Integration) covering core logic.
-- **Database**: 12-table schema managed via Flyway (`V1__init_schema.sql`). `MenuCategory.is_deleted` mapped in entity.
-- **Messaging**: Event-driven decoupled logic for order-to-delivery handoff via `OrderReadyEvent`.
+- **Dependencies**: Web, Actuator, Data JPA, Security 6.4, Validation, Flyway (MySQL), Lombok, MapStruct 1.6.3, JJWT 0.13.0, Testcontainers, **Dotenv-java 3.1.0**.
+- **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC). **JWT Secret minimum size (256-bit) enforced.**
+- **Environment**: Dynamic configuration supported via `.env` files in root or `SRC/backend/`.
+- **Auth**: `AuthServiceImpl` functional. Fixed `updated_at` null constraint during registration.
+- **Database**: 12-table schema managed via Flyway.
+  - `V2`: Fixed missing `is_deleted` in `categories`.
+  - `V3`: Seeded initial `RestaurantCategory` data (Rice, Fast Food, etc.).
+- **Auditing**: Manual JPA auditing via `@PrePersist` and `@PreUpdate` fixed to ensure `updated_at` is never null on creation.
+- **API**: Added `GET /api/restaurant-categories` to support frontend browsing.
 
 ## Backend Roadmap - Phase 2
 
