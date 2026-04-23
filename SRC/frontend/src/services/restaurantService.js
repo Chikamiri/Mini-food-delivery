@@ -7,7 +7,8 @@ import api from '@/services/api'
 export default {
   // --- Restaurant ---
   async getAll() {
-    return api.post('/api/restaurants/search', {})
+    const response = await api.post('/api/restaurants/search', {})
+    return Array.isArray(response) ? response : response?.items || []
   },
 
   async getById(id) {
@@ -19,7 +20,8 @@ export default {
   },
 
   async getByCategory(categoryId) {
-    return api.post('/api/restaurants/search', { categoryId })
+    const response = await api.post('/api/restaurants/search', { categoryId })
+    return Array.isArray(response) ? response : response?.items || []
   },
 
   // --- Restaurant Categories ---
