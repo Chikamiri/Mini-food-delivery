@@ -11,7 +11,7 @@ export default {
   },
 
   async toggleUserActive(userId, isActive) {
-    return api.patch(`/api/admin/users/${userId}/status`, { isActive })
+    return api.patch(`/api/admin/users/${userId}/status`, { active: isActive })
   },
 
   // --- Restaurant Approval ---
@@ -22,14 +22,14 @@ export default {
   async approveRestaurant(restaurantId) {
     return api.post(`/api/admin/restaurants/${restaurantId}/approve`, {
       approved: true,
-      reason: null,
+      note: null,
     })
   },
 
   async rejectRestaurant(restaurantId, reason) {
     return api.post(`/api/admin/restaurants/${restaurantId}/approve`, {
       approved: false,
-      reason: reason || null,
+      note: reason || null,
     })
   },
 

@@ -31,23 +31,25 @@ export default {
 
   // --- Menu Items ---
   async getMenuByRestaurant(restaurantId) {
-    return api.get(`/api/restaurants/${restaurantId}/menu-items`)
+    // Backend currently exposes menu items inside restaurant detail response.
+    const detail = await api.get(`/api/restaurants/${restaurantId}`)
+    return Array.isArray(detail?.menuItems) ? detail.menuItems : []
   },
 
-  async getMenuItem(id) {
-    return api.get(`/api/menu-items/${id}`)
+  async getMenuItem(restaurantId, itemId) {
+    return api.get(`/api/restaurants/${restaurantId}/menu/items/${itemId}`)
   },
 
   // --- Restaurant Owner: CRUD ---
-  async createMenuItem(restaurantId, itemData) {
-    return api.post(`/api/restaurants/${restaurantId}/menu-items`, itemData)
+  async createMenuItem(restaurantId, categoryId, itemData) {
+    return api.post(`/api/restaurants/${restaurantId}/menu/categories/${categoryId}/items`, itemData)
   },
 
-  async updateMenuItem(itemId, itemData) {
-    return api.put(`/api/menu-items/${itemId}`, itemData)
+  async updateMenuItem(restaurantId, itemId, itemData) {
+    return api.put(`/api/restaurants/${restaurantId}/menu/items/${itemId}`, itemData)
   },
 
-  async deleteMenuItem(itemId) {
-    return api.delete(`/api/menu-items/${itemId}`)
+  async deleteMenuItem(restaurantId, itemId) {
+    return api.delete(`/api/restaurants/${restaurantId}/menu/items/${itemId}`)
   },
 }

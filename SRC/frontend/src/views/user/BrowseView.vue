@@ -106,6 +106,7 @@ function mapMenuItem(item, restaurantMap) {
       item.imageUrl ||
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
     restaurant: restaurant?.name || 'Nha hang',
+    restaurantId: item.restaurantId || restaurant?.id || null,
     restaurantLogo:
       restaurant?.imageUrl ||
       'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
@@ -120,6 +121,7 @@ function addToCart(item) {
       name: item.name,
       price: Number(String(item.price).replace('$', '')) || 0,
       imageUrl: item.image,
+      restaurantId: item.restaurantId || null,
       restaurantName: item.restaurant || 'Nha hang',
       note: dishNote.value,
       size: selectedSize.value,

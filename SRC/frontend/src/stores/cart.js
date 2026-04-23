@@ -25,6 +25,7 @@ export const useCartStore = defineStore('cart', () => {
       name: menuItem.name,
       price: menuItem.price,
       imageUrl: menuItem.imageUrl ?? null,
+      restaurantId: menuItem.restaurantId ?? null,
       restaurantName: menuItem.restaurantName ?? null,
       note: menuItem.note ?? '',
       size: menuItem.size ?? 'Vừa',

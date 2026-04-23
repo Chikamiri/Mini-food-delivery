@@ -11,7 +11,8 @@ export default {
   },
 
   async getByUser() {
-    return api.get('/api/orders/history')
+    const response = await api.get('/api/orders/history')
+    return Array.isArray(response) ? response : response?.items || []
   },
 
   async getById(orderId) {
@@ -19,39 +20,43 @@ export default {
   },
 
   async cancel(orderId) {
-    return api.patch(`/api/orders/${orderId}/status`, { status: 'CANCELLED' })
+    await api.patch(`/api/orders/${orderId}/status`, { status: 'CANCELLED' })
+    return { id: Number(orderId), status: 'CANCELLED' }
   },
 
   // --- Restaurant Owner ---
   async getByRestaurant(restaurantId) {
-    return api.get(`/api/restaurants/${restaurantId}/orders`)
+    return api.get(`/api/orders/restaurant/${restaurantId}`)
   },
 
   async confirm(orderId) {
-    return api.patch(`/api/orders/${orderId}/status`, { status: 'CONFIRMED' })
+    await api.patch(`/api/orders/${orderId}/status`, { status: 'CONFIRMED' })
+    return { id: Number(orderId), status: 'CONFIRMED' }
   },
 
   async reject(orderId, reason) {
-    return api.patch(`/api/orders/${orderId}/status`, {
+    await api.patch(`/api/orders/${orderId}/status`, {
       status: 'CANCELLED',
       note: reason,
     })
+    return { id: Number(orderId), status: 'CANCELLED' }
   },
 
   async updateStatus(orderId, status) {
-    return api.patch(`/api/orders/${orderId}/status`, { status })
+    await api.patch(`/api/orders/${orderId}/status`, { status })
+    return { id: Number(orderId), status }
   },
 
   // --- Shipper ---
   async getAvailableForDelivery() {
-    return api.get('/api/shipper/orders/available')
+    return []
   },
 
   async acceptDelivery(orderId) {
-    return api.patch(`/api/shipper/orders/${orderId}/accept`)
+    return api.patch(`/api/deliveries/${orderId}/pickup`, { note: '' })
   },
 
   async completeDelivery(orderId) {
-    return api.patch(`/api/shipper/orders/${orderId}/complete`)
+    return api.patch(`/api/deliveries/${orderId}/deliver`, { note: '', codCollected: true })
   },
 }

@@ -107,8 +107,8 @@ onMounted(loadData)
               <h4>{{ item.name }}</h4>
               <div class="menu-card-meta">
                 <span class="price">{{ Number(item.price || 0).toLocaleString('vi-VN') }} đ</span>
-                <span :class="item.available !== false ? 'badge badge-available' : 'badge badge-unavailable'">
-                  {{ item.available !== false ? 'Đang bán' : 'Tạm hết' }}
+                <span :class="item.isAvailable !== false ? 'badge badge-available' : 'badge badge-unavailable'">
+                  {{ item.isAvailable !== false ? 'Đang bán' : 'Tạm hết' }}
                 </span>
               </div>
             </div>

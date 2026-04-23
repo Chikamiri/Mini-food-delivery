@@ -62,18 +62,26 @@ async function submitOrder() {
 
   isSubmitting.value = true
   try {
+    const firstRestaurantId = cartItems.value.find((item) => item.restaurantId)?.restaurantId
     const payload = {
+      restaurantId: firstRestaurantId,
       addressId: selectedAddress.value.id,
       deliveryAddress: selectedAddress.value.addressLine || selectedAddress.value.detail || '',
+      deliveryLat: Number(selectedAddress.value.latitude ?? 0),
+      deliveryLng: Number(selectedAddress.value.longitude ?? 0),
+      paymentMethod: 'COD',
       note: orderNote.value,
-      orderType: selectedOrderType.value,
-      subscriptionType: selectedSubscriptionType.value,
-      deliveryPlan: selectedDeliveryPlan.value,
       items: cartItems.value.map((item) => ({
         menuItemId: item.id,
         quantity: item.quantity,
         note: item.note || '',
       })),
+    }
+
+    if (!payload.restaurantId) {
+      errorMessage.value = 'Không tìm thấy nhà hàng của món ăn trong giỏ hàng'
+      isSubmitting.value = false
+      return
     }
     await orderStore.createOrder(payload)
     cartStore.clearCart()
@@ -188,7 +196,7 @@ onMounted(() => {
 
         <div class="summary-items">
           <article v-for="item in cartItems" :key="item.id" class="summary-item">
-            <p class="restaurant-name">Từ {{ item.restaurant }}</p>
+            <p class="restaurant-name">Từ {{ item.restaurantName || 'Nhà hàng' }}</p>
             <div class="item-row">
               <span>{{ item.name }}</span>
               <strong>{{ formatPrice(item.price) }}</strong>
