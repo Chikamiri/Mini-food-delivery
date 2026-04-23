@@ -5,6 +5,13 @@ import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import orderService from '@/services/orderService'
 
+import iconDashboard from '@/assets/icon/dashbroad.svg'
+import iconMenu from '@/assets/icon/menu.svg'
+import iconTag from '@/assets/icon/tag.svg'
+import iconReceipt from '@/assets/icon/reciept.svg'
+import iconDollar from '@/assets/icon/dollar-sign.svg'
+import iconSignOut from '@/assets/icon/sign-out.svg'
+
 const router = useRouter()
 const authStore = useAuthStore()
 
@@ -18,17 +25,17 @@ const activeRestaurant = computed(() => myRestaurants.value[0] || null)
 
 const stats = computed(() => {
   const orders = recentOrders.value
-  const pending = orders.filter((order) => ['PENDING', 'CONFIRMED'].includes(String(order.status || '').toUpperCase())).length
-  const delivered = orders.filter((order) => String(order.status || '').toUpperCase() === 'DELIVERED').length
+  const pending = orders.filter((o) => ['PENDING', 'CONFIRMED'].includes(String(o.status || '').toUpperCase())).length
+  const delivered = orders.filter((o) => String(o.status || '').toUpperCase() === 'DELIVERED').length
   const revenue = orders
-    .filter((order) => String(order.status || '').toUpperCase() === 'DELIVERED')
-    .reduce((sum, order) => sum + Number(order.totalAmount || 0), 0)
+    .filter((o) => String(o.status || '').toUpperCase() === 'DELIVERED')
+    .reduce((sum, o) => sum + Number(o.totalAmount || 0), 0)
 
   return [
-    { label: 'Đơn cần xử lý', value: String(pending) },
-    { label: 'Đơn giao thành công', value: String(delivered) },
-    { label: 'Món trong menu', value: String(menuItems.value.length) },
-    { label: 'Doanh thu (tạm tính)', value: `${revenue.toLocaleString('vi-VN')} đ` },
+    { label: 'Đơn cần xử lý', value: String(pending), accent: '' },
+    { label: 'Giao thành công', value: String(delivered), accent: 'accent-green' },
+    { label: 'Món trong menu', value: String(menuItems.value.length), accent: 'accent-blue' },
+    { label: 'Doanh thu', value: `${revenue.toLocaleString('vi-VN')} đ`, accent: 'accent-purple' },
   ]
 })
 
@@ -41,10 +48,17 @@ async function logout() {
   router.push('/')
 }
 
+function statusBadge(status) {
+  const s = String(status || '').toUpperCase()
+  if (s === 'DELIVERED') return 'badge badge-delivered'
+  if (s === 'CANCELLED') return 'badge badge-cancelled'
+  if (s === 'CONFIRMED') return 'badge badge-confirmed'
+  return 'badge badge-pending'
+}
+
 async function loadDashboard() {
   isLoading.value = true
   pageError.value = ''
-
   try {
     const restaurants = await restaurantService.getMyRestaurants()
     myRestaurants.value = Array.isArray(restaurants) ? restaurants : []
@@ -61,7 +75,7 @@ async function loadDashboard() {
     ])
 
     recentOrders.value =
-      ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value) ? ordersResult.value.slice(0, 6) : []
+      ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value) ? ordersResult.value.slice(0, 8) : []
     menuItems.value = menuResult.status === 'fulfilled' && Array.isArray(menuResult.value) ? menuResult.value : []
   } catch (error) {
     pageError.value = error.message || 'Không thể tải dashboard nhà hàng'
@@ -75,22 +89,50 @@ onMounted(loadDashboard)
 
 <template>
   <section class="restaurant-shell">
+    <!-- Sidebar -->
     <aside class="restaurant-sidebar">
-      <h2>Nhà hàng</h2>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/dashboard')">Tổng quan</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">Quản lý menu</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">Danh mục</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">Đơn hàng</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">Doanh thu</button>
-      <button class="logout-btn" type="button" @click="logout">Đăng xuất</button>
+      <div class="sidebar-brand">
+        <div class="logo-box">FD</div>
+        <span>Nhà hàng</span>
+      </div>
+
+      <span class="sidebar-section-label">Điều hướng</span>
+      <button class="nav-btn active" type="button" @click="go('/restaurant/dashboard')">
+        <img :src="iconDashboard" alt="" />Tổng quan
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">
+        <img :src="iconMenu" alt="" />Quản lý menu
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
+        <img :src="iconTag" alt="" />Danh mục
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">
+        <img :src="iconReceipt" alt="" />Đơn hàng
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">
+        <img :src="iconDollar" alt="" />Doanh thu
+      </button>
+
+      <div class="sidebar-spacer"></div>
+
+      <div v-if="activeRestaurant" class="sidebar-restaurant-name">
+        <strong>{{ activeRestaurant.name }}</strong>
+        {{ activeRestaurant.address || 'Chưa có địa chỉ' }}
+      </div>
+
+      <button class="logout-btn" type="button" @click="logout">
+        <img :src="iconSignOut" alt="" />Đăng xuất
+      </button>
     </aside>
 
+    <!-- Main -->
     <main class="restaurant-main">
       <header class="page-head">
         <div>
+          <span class="page-tag">Tổng quan</span>
           <h1>Dashboard nhà hàng</h1>
-          <p v-if="activeRestaurant">{{ activeRestaurant.name }}</p>
-          <p v-else>Chưa có nhà hàng được liên kết tài khoản này.</p>
+          <p v-if="activeRestaurant" class="subtitle">Xin chào! Dưới đây là tình hình hoạt động của <strong>{{ activeRestaurant.name }}</strong>.</p>
+          <p v-else class="subtitle">Chưa có nhà hàng nào được liên kết với tài khoản này.</p>
         </div>
         <button class="refresh-btn" type="button" :disabled="isLoading" @click="loadDashboard">
           {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
@@ -99,22 +141,31 @@ onMounted(loadDashboard)
 
       <p v-if="pageError" class="error-text">{{ pageError }}</p>
 
+      <!-- KPI cards -->
       <section class="stats-grid">
-        <article v-for="item in stats" :key="item.label" class="stat-card">
+        <article v-for="item in stats" :key="item.label" class="stat-card" :class="item.accent">
           <p>{{ item.label }}</p>
           <strong>{{ item.value }}</strong>
         </article>
       </section>
 
+      <!-- Recent orders -->
       <section class="panel">
-        <h3>Đơn gần đây</h3>
-        <p v-if="!recentOrders.length" class="muted">Chưa có đơn hàng gần đây.</p>
+        <div class="panel-head">
+          <h3>Đơn hàng gần đây</h3>
+          <button class="outline-btn" type="button" @click="go('/restaurant/orders')">Xem tất cả</button>
+        </div>
+
+        <div v-if="!recentOrders.length" class="empty-state">
+          <p>Chưa có đơn hàng gần đây.</p>
+        </div>
+
         <ul v-else class="simple-list">
           <li v-for="order in recentOrders" :key="order.id">
             <span>#{{ order.id }}</span>
             <span>{{ order.customerName || 'Khách hàng' }}</span>
-            <span>{{ order.totalAmount?.toLocaleString('vi-VN') || 0 }} đ</span>
-            <b>{{ order.status }}</b>
+            <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
+            <b :class="statusBadge(order.status)">{{ order.status }}</b>
           </li>
         </ul>
       </section>

@@ -4,6 +4,12 @@ import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 import orderService from '@/services/orderService'
 
+import iconDashboard from '@/assets/icon/dashbroad.svg'
+import iconMenu from '@/assets/icon/menu.svg'
+import iconTag from '@/assets/icon/tag.svg'
+import iconReceipt from '@/assets/icon/reciept.svg'
+import iconDollar from '@/assets/icon/dollar-sign.svg'
+
 const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
@@ -12,10 +18,10 @@ const orders = ref([])
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 const deliveredOrders = computed(() =>
-  orders.value.filter((order) => String(order.status || '').toUpperCase() === 'DELIVERED'),
+  orders.value.filter((o) => String(o.status || '').toUpperCase() === 'DELIVERED'),
 )
 const totalRevenue = computed(() =>
-  deliveredOrders.value.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0),
+  deliveredOrders.value.reduce((sum, o) => sum + Number(o.totalAmount || 0), 0),
 )
 
 function go(path) {
@@ -47,19 +53,36 @@ onMounted(loadData)
 <template>
   <section class="restaurant-shell">
     <aside class="restaurant-sidebar">
-      <h2>Nhà hàng</h2>
-      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">Tổng quan</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">Quản lý menu</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">Danh mục</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">Đơn hàng</button>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/revenue')">Doanh thu</button>
+      <div class="sidebar-brand">
+        <div class="logo-box">FD</div>
+        <span>Nhà hàng</span>
+      </div>
+
+      <span class="sidebar-section-label">Điều hướng</span>
+      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">
+        <img :src="iconDashboard" alt="" />Tổng quan
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">
+        <img :src="iconMenu" alt="" />Quản lý menu
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
+        <img :src="iconTag" alt="" />Danh mục
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">
+        <img :src="iconReceipt" alt="" />Đơn hàng
+      </button>
+      <button class="nav-btn active" type="button" @click="go('/restaurant/revenue')">
+        <img :src="iconDollar" alt="" />Doanh thu
+      </button>
+      <div class="sidebar-spacer"></div>
     </aside>
 
     <main class="restaurant-main">
       <header class="page-head">
         <div>
-          <h1>Doanh thu nhà hàng</h1>
-          <p>Báo cáo nhanh theo đơn đã giao.</p>
+          <span class="page-tag">Doanh thu</span>
+          <h1>Báo cáo doanh thu</h1>
+          <p class="subtitle">Tổng hợp doanh thu dựa trên đơn hàng đã giao thành công.</p>
         </div>
         <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
           {{ loading ? 'Đang tải...' : 'Làm mới' }}
@@ -68,26 +91,36 @@ onMounted(loadData)
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
-      <section class="stats-grid">
-        <article class="stat-card">
-          <p>Tổng đơn đã giao</p>
-          <strong>{{ deliveredOrders.length }}</strong>
-        </article>
-        <article class="stat-card">
-          <p>Tổng doanh thu</p>
-          <strong>{{ totalRevenue.toLocaleString('vi-VN') }} đ</strong>
-        </article>
+      <!-- Revenue highlight -->
+      <section class="revenue-hero">
+        <div class="revenue-total-card">
+          <span class="page-tag">Tổng doanh thu</span>
+          <p class="big-number">{{ totalRevenue.toLocaleString('vi-VN') }} đ</p>
+          <p class="sub-label">Từ {{ deliveredOrders.length }} đơn đã giao</p>
+        </div>
+        <div class="revenue-total-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);">
+          <span class="page-tag" style="color: #1bb45f;">Đơn thành công</span>
+          <p class="big-number">{{ deliveredOrders.length }}</p>
+          <p class="sub-label">trên tổng {{ orders.length }} đơn</p>
+        </div>
       </section>
 
+      <!-- Delivered orders list -->
       <section class="panel">
-        <h3>Đơn đã giao</h3>
-        <p v-if="!deliveredOrders.length" class="muted">Chưa có đơn đã giao.</p>
+        <div class="panel-head">
+          <h3>Chi tiết đơn đã giao</h3>
+        </div>
+
+        <div v-if="!deliveredOrders.length" class="empty-state">
+          <p>Chưa có đơn nào được giao thành công.</p>
+        </div>
+
         <ul v-else class="simple-list">
           <li v-for="order in deliveredOrders" :key="order.id">
             <span>#{{ order.id }}</span>
             <span>{{ order.customerName || 'Khách hàng' }}</span>
             <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
-            <b>{{ order.status }}</b>
+            <b class="badge badge-delivered">{{ order.status }}</b>
           </li>
         </ul>
       </section>

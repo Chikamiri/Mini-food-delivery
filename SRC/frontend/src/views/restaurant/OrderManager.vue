@@ -4,16 +4,43 @@ import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 import orderService from '@/services/orderService'
 
+import iconDashboard from '@/assets/icon/dashbroad.svg'
+import iconMenu from '@/assets/icon/menu.svg'
+import iconTag from '@/assets/icon/tag.svg'
+import iconReceipt from '@/assets/icon/reciept.svg'
+import iconDollar from '@/assets/icon/dollar-sign.svg'
+
 const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
 const restaurants = ref([])
 const orders = ref([])
+const filterStatus = ref('ALL')
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 
+const statusOptions = ['ALL', 'PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED']
+
+const filteredOrders = computed(() => {
+  if (filterStatus.value === 'ALL') return orders.value
+  return orders.value.filter((o) => String(o.status || '').toUpperCase() === filterStatus.value)
+})
+
 function go(path) {
   router.push(path)
+}
+
+function statusBadge(status) {
+  const s = String(status || '').toUpperCase()
+  if (s === 'DELIVERED') return 'badge badge-delivered'
+  if (s === 'CANCELLED') return 'badge badge-cancelled'
+  if (s === 'CONFIRMED') return 'badge badge-confirmed'
+  return 'badge badge-pending'
+}
+
+function statusLabel(key) {
+  const labels = { ALL: 'Tất cả', PENDING: 'Chờ xử lý', CONFIRMED: 'Đã xác nhận', DELIVERED: 'Đã giao', CANCELLED: 'Đã huỷ' }
+  return labels[key] || key
 }
 
 async function loadData() {
@@ -41,19 +68,36 @@ onMounted(loadData)
 <template>
   <section class="restaurant-shell">
     <aside class="restaurant-sidebar">
-      <h2>Nhà hàng</h2>
-      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">Tổng quan</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">Quản lý menu</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">Danh mục</button>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/orders')">Đơn hàng</button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">Doanh thu</button>
+      <div class="sidebar-brand">
+        <div class="logo-box">FD</div>
+        <span>Nhà hàng</span>
+      </div>
+
+      <span class="sidebar-section-label">Điều hướng</span>
+      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">
+        <img :src="iconDashboard" alt="" />Tổng quan
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">
+        <img :src="iconMenu" alt="" />Quản lý menu
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
+        <img :src="iconTag" alt="" />Danh mục
+      </button>
+      <button class="nav-btn active" type="button" @click="go('/restaurant/orders')">
+        <img :src="iconReceipt" alt="" />Đơn hàng
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">
+        <img :src="iconDollar" alt="" />Doanh thu
+      </button>
+      <div class="sidebar-spacer"></div>
     </aside>
 
     <main class="restaurant-main">
       <header class="page-head">
         <div>
+          <span class="page-tag">Đơn hàng</span>
           <h1>Quản lý đơn hàng</h1>
-          <p>Theo dõi trạng thái và xử lý đơn mới.</p>
+          <p class="subtitle">Theo dõi trạng thái và xử lý đơn mới từ khách hàng.</p>
         </div>
         <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
           {{ loading ? 'Đang tải...' : 'Làm mới' }}
@@ -62,15 +106,36 @@ onMounted(loadData)
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
+      <!-- Status filter tabs -->
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+        <button
+          v-for="s in statusOptions"
+          :key="s"
+          type="button"
+          :class="['outline-btn', { 'active-filter': filterStatus === s }]"
+          style="border-radius:999px; padding:0.45rem 1rem; font-size:0.85rem; cursor:pointer;"
+          :style="filterStatus === s ? 'background:#f8143f; color:#fff; border-color:#f8143f;' : 'background:#fff; color:#3f4552; border:1px solid #e2e5eb;'"
+          @click="filterStatus = s"
+        >
+          {{ statusLabel(s) }}
+        </button>
+      </div>
+
       <section class="panel">
-        <h3>Danh sách đơn</h3>
-        <p v-if="!orders.length" class="muted">Chưa có đơn hàng.</p>
+        <div class="panel-head">
+          <h3>Danh sách đơn ({{ filteredOrders.length }})</h3>
+        </div>
+
+        <div v-if="!filteredOrders.length" class="empty-state">
+          <p>Không có đơn hàng nào{{ filterStatus !== 'ALL' ? ' ở trạng thái này' : '' }}.</p>
+        </div>
+
         <ul v-else class="simple-list">
-          <li v-for="order in orders" :key="order.id">
+          <li v-for="order in filteredOrders" :key="order.id">
             <span>#{{ order.id }}</span>
             <span>{{ order.customerName || 'Khách hàng' }}</span>
             <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
-            <b>{{ order.status }}</b>
+            <b :class="statusBadge(order.status)">{{ order.status }}</b>
           </li>
         </ul>
       </section>
