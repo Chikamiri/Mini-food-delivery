@@ -14,6 +14,7 @@ import iconOpenRestaurant from '@/assets/icon/home.svg'
 import iconSetting from '@/assets/icon/setting.svg'
 import iconHelp from '@/assets/icon/info.svg'
 import userService from '@/services/userService'
+import orderService from '@/services/orderService'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 
@@ -55,20 +56,20 @@ function saveProfile() {
 }
 
 const stats = ref([
-  { label: 'Đơn hàng', value: '24', icon: iconOrder },
-  { label: 'Đã giao', value: '21', icon: iconCheck },
-  { label: 'Yêu thích', value: '8', icon: iconFavorite },
-  { label: 'Địa chỉ', value: '3', icon: iconLocation },
+  { label: 'Đơn hàng', value: '0', icon: iconOrder },
+  { label: 'Đã giao', value: '0', icon: iconCheck },
+  { label: 'Yêu thích', value: '0', icon: iconFavorite },
+  { label: 'Địa chỉ', value: '0', icon: iconLocation },
 ])
 
 const menuItems = [
-  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders' },
+  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders/history' },
   { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
-  { icon: iconNotification, label: 'Thông báo', route: '/notifications' },
-  { icon: iconPayment, label: 'Phương thức thanh toán', route: '/payment' },
-  { icon: iconOpenRestaurant, label: 'Mở nhà hàng', route: 'open-restaurant' },
-  { icon: iconSetting, label: 'Cài đặt', route: '/settings' },
-  { icon: iconHelp, label: 'Trợ giúp', route: '/help' },
+  { icon: iconNotification, label: 'Thông báo', action: 'coming-soon' },
+  { icon: iconPayment, label: 'Phương thức thanh toán', action: 'coming-soon' },
+  { icon: iconOpenRestaurant, label: 'Mở nhà hàng', action: 'open-restaurant' },
+  { icon: iconSetting, label: 'Cài đặt', action: 'coming-soon' },
+  { icon: iconHelp, label: 'Trợ giúp', action: 'coming-soon' },
 ]
 
 const restaurantModalOpen = ref(false)
@@ -105,7 +106,21 @@ async function openRestaurantModal() {
     restaurants.value = Array.isArray(data) ? data : []
   } catch (error) {
     restaurants.value = []
-    restaurantMessage.value = error.message || 'Chưa thể tải danh sách nhà hàng'
+    const message = String(error?.message || '')
+    const isAccessDenied =
+      message.toLowerCase().includes('access denied') ||
+      message.toLowerCase().includes('forbidden') ||
+      message.includes('403')
+
+    if (isAccessDenied) {
+      // USER role usually cannot read owner restaurant list; keep the flow usable.
+      restaurantMessage.value =
+        'Bạn chưa có quyền xem danh sách nhà hàng. Vui lòng gửi yêu cầu mở quán để admin xét duyệt.'
+      showOpenRestaurantForm.value = true
+      return
+    }
+
+    restaurantMessage.value = message || 'Chưa thể tải danh sách nhà hàng'
   } finally {
     restaurantLoading.value = false
   }
@@ -121,11 +136,17 @@ function openRestaurantForm() {
 }
 
 function handleMenuClick(item) {
-  if (item.route === 'open-restaurant') {
+  if (item.action === 'open-restaurant') {
     openRestaurantModal()
     return
   }
-  router.push(item.route)
+  if (item.route) {
+    router.push(item.route)
+    return
+  }
+  restaurantMessage.value = `"${item.label}" sẽ được cập nhật trong bản sau.`
+  restaurantModalOpen.value = true
+  showOpenRestaurantForm.value = false
 }
 
 function submitOpenRestaurant() {
@@ -166,6 +187,34 @@ async function loadProfile() {
   }
 }
 
+async function loadStats() {
+  const [ordersResult, addressesResult] = await Promise.allSettled([
+    orderService.getByUser(),
+    userService.getAddresses(),
+  ])
+
+  const orders =
+    ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value) ? ordersResult.value : []
+  const addresses =
+    addressesResult.status === 'fulfilled' && Array.isArray(addressesResult.value)
+      ? addressesResult.value
+      : []
+
+  const deliveredCount = orders.filter((order) => String(order?.status || '').toUpperCase() === 'DELIVERED').length
+  const favoriteCount = new Set(
+    orders
+      .map((order) => order?.restaurantName || order?.restaurant?.name || '')
+      .filter((name) => Boolean(name)),
+  ).size
+
+  stats.value = [
+    { label: 'Đơn hàng', value: String(orders.length), icon: iconOrder },
+    { label: 'Đã giao', value: String(deliveredCount), icon: iconCheck },
+    { label: 'Yêu thích', value: String(favoriteCount), icon: iconFavorite },
+    { label: 'Địa chỉ', value: String(addresses.length), icon: iconLocation },
+  ]
+}
+
 async function updateProfile() {
   isLoading.value = true
   errorMessage.value = ''
@@ -194,6 +243,7 @@ onMounted(() => {
     profile.value.role = authStore.user.role || profile.value.role
   }
   loadProfile()
+  loadStats()
 })
 
 watch(restaurantModalOpen, (value) => {
