@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import restaurantService from '@/services/restaurantService'
@@ -14,15 +14,21 @@ import iconYoutube from '@/assets/icon/youtube.svg'
 import iconTwitter from '@/assets/icon/twitter.svg'
 import iconSearch from '@/assets/icon/search.svg'
 import iconCart from '@/assets/icon/shopping-cart.svg'
+import iconHome from '@/assets/icon/home.svg'
+import iconTag from '@/assets/icon/tag.svg'
+import iconLove from '@/assets/icon/love.svg'
+import iconFlash from '@/assets/icon/monet-bill.svg'
+import iconReceipt from '@/assets/icon/reciept.svg'
 
 const sidebarMenus = [
-  'Trang tổng quan',
-  'Ưu đãi',
-  'Yêu thích',
-  'Flash sale',
-  'Đơn hàng',
-  'Cài đặt',
+  { key: 'overview', label: 'Trang tổng quan', icon: iconHome, scrollTo: null },
+  { key: 'promo', label: 'Ưu đãi', icon: iconTag, scrollTo: 'voucher-section' },
+  { key: 'favorites', label: 'Yêu thích', icon: iconLove, scrollTo: 'recommend-section' },
+  { key: 'flashsale', label: 'Flash sale', icon: iconFlash, scrollTo: 'popular-section' },
+  { key: 'orders', label: 'Đơn hàng', icon: iconReceipt, route: '/orders/history' },
 ]
+
+const activeMenu = ref('overview')
 
 const categories = ref([])
 
@@ -43,7 +49,22 @@ const profileAvatar = ref(
 )
 const authStore = useAuthStore()
 const cartStore = useCartStore()
+const router = useRouter()
 const cartCount = computed(() => cartStore.itemCount)
+
+function handleSidebarClick(menu) {
+  activeMenu.value = menu.key
+  if (menu.route) {
+    router.push(menu.route)
+    return
+  }
+  if (menu.scrollTo) {
+    const el = document.getElementById(menu.scrollTo)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+}
 
 const selectedDish = ref(null)
 const dishNote = ref('')
@@ -165,12 +186,14 @@ onMounted(() => {
 
       <nav class="menu-list">
         <a
-          v-for="(menu, index) in sidebarMenus"
-          :key="menu"
+          v-for="menu in sidebarMenus"
+          :key="menu.key"
           href="#"
-          :class="{ active: index === 0 }"
+          :class="{ active: activeMenu === menu.key }"
+          @click.prevent="handleSidebarClick(menu)"
         >
-          {{ menu }}
+          <img :src="menu.icon" alt="" width="18" height="18" class="menu-icon-img" />
+          {{ menu.label }}
         </a>
       </nav>
 
@@ -216,7 +239,7 @@ onMounted(() => {
       <p v-if="isLoading">Dang tai du lieu...</p>
       <p v-if="loadError">{{ loadError }}</p>
 
-      <section class="voucher-banner">
+      <section id="voucher-section" class="voucher-banner">
         <div>
           <h2>Ưu đãi trong ngày đến 20%</h2>
           <p>Áp dụng cho đơn từ 100.000đ tại các nhà hàng đối tác.</p>
@@ -241,7 +264,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <section class="section-block">
+      <section id="popular-section" class="section-block">
         <div class="section-head">
           <h3>Món mới ra</h3>
           <a href="#">Xem tất cả</a>
@@ -285,7 +308,7 @@ onMounted(() => {
         </div>
       </section>
 
-      <section class="section-block">
+      <section id="recommend-section" class="section-block">
         <div class="section-head">
           <h3>Có thể bạn thích</h3>
           <a href="#">Xem tất cả</a>
