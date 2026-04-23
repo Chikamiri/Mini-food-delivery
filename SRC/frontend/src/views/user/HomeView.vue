@@ -54,6 +54,10 @@ async function onLoginSubmit() {
       router.push('/admin/dashboard')
       return
     }
+    if (['OWNER', 'RESTAURANT_OWNER'].includes(String(loggedInUser?.role || '').toUpperCase())) {
+      router.push('/restaurant/dashboard')
+      return
+    }
     router.push('/browse')
   } catch (error) {
     authError.value = error.message || 'Dang nhap that bai'
