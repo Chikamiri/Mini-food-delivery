@@ -101,7 +101,8 @@ function mapMenuItem(item, restaurantMap) {
     reviews: 'new',
     price: `$${Number(item.price || 0).toFixed(2)}`,
     oldPrice: `$${Math.max(Number(item.price || 0) - 1, 0).toFixed(2)}`,
-    badge: item.isAvailable ? 'SAN SANG' : 'HET MON',
+    badge: 'NEW',
+    isAvailable: Boolean(item.isAvailable),
     image:
       item.imageUrl ||
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
@@ -115,6 +116,7 @@ function mapMenuItem(item, restaurantMap) {
 }
 
 function addToCart(item) {
+  if (!item?.isAvailable) return
   cartStore.addItem(
     {
       id: item.menuItemId || item.id,
@@ -272,7 +274,16 @@ onMounted(() => {
           <a href="#">Xem tất cả</a>
         </div>
         <div class="popular-grid">
-          <article v-for="dish in popularDishes" :key="dish.id" class="popular-card">
+          <article
+            v-for="dish in popularDishes"
+            :key="dish.id"
+            class="popular-card"
+            role="button"
+            tabindex="0"
+            @click="openDishDetail(dish)"
+            @keydown.enter="openDishDetail(dish)"
+            @keydown.space.prevent="openDishDetail(dish)"
+          >
             <div class="popular-image-wrap">
               <img :src="dish.image" :alt="dish.name" class="popular-image" />
               <span class="popular-badge">{{ dish.badge }}</span>
@@ -287,8 +298,6 @@ onMounted(() => {
             </div>
             <div class="popular-price-row">
               <strong>{{ dish.price }}</strong>
-              <span class="dot">•</span>
-              <small>{{ dish.oldPrice }}</small>
               <button type="button" class="favorite-btn" aria-label="Yêu thích">♡</button>
             </div>
           </article>
@@ -421,6 +430,12 @@ onMounted(() => {
               <span>{{ selectedDish.rating }}</span>
               <span class="muted">({{ selectedDish.reviews }})</span>
             </div>
+            <p class="dish-availability">
+              Tình trạng:
+              <strong :class="selectedDish.isAvailable ? 'available-text' : 'soldout-text'">
+                {{ selectedDish.isAvailable ? 'Còn món' : 'Hết món' }}
+              </strong>
+            </p>
             <p>
               Món ăn nổi bật được gợi ý cho bạn hôm nay. Vị ngon cân bằng, nguyên liệu tươi,
               phù hợp cho bữa ăn nhanh nhưng vẫn đầy đủ dinh dưỡng.
@@ -465,7 +480,9 @@ onMounted(() => {
 
             <div class="dish-detail-footer">
               <strong>{{ selectedDish.price }}</strong>
-              <button type="button" @click="addToCart(selectedDish)">Thêm vào giỏ</button>
+              <button type="button" :disabled="!selectedDish.isAvailable" @click="addToCart(selectedDish)">
+                {{ selectedDish.isAvailable ? 'Thêm vào giỏ' : 'Tạm hết món' }}
+              </button>
             </div>
           </div>
         </article>

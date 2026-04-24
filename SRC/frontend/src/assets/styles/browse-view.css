@@ -630,7 +630,7 @@
 }
 
 .popular-price-row strong {
-  font-size: 1.2rem;
+  font-size: 1rem;
   line-height: 1;
   color: #1a9f44;
 }
@@ -642,7 +642,7 @@
 
 .popular-price-row small {
   color: #7d8593;
-  font-size: 1.12rem;
+  font-size: 1rem;
 }
 
 .favorite-btn {
@@ -961,6 +961,25 @@
   padding: 0.68rem 1rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.dish-detail-footer button:disabled {
+  background: #c8ced9;
+  cursor: not-allowed;
+}
+
+.dish-availability {
+  margin: 0.55rem 0 0;
+  color: #647085;
+  font-size: 0.9rem;
+}
+
+.available-text {
+  color: #1a9f44;
+}
+
+.soldout-text {
+  color: #d91541;
 }
 
 @media (max-width: 1200px) {
