@@ -11,9 +11,9 @@ src/main/java/com/example/server/
 ├── ServerApplication.java              # Main entry point (loads .env variables)
 ├── config/                             # Application configuration
 │   └── SecurityConfig.java             # [DONE] Auth, RBAC, CORS & Password Encoding
-├── controller/                         # [DONE] REST Endpoints (Admin, Auth, Delivery, Menu, Order, Restaurant, User, RestaurantCategory)
+├── controller/                         # [DONE] REST Endpoints (Admin, Auth, Delivery, Menu, Order, Restaurant, User, RestaurantCategory, OwnerRequest)
 ├── dto/                                # [DONE] Data Transfer Objects (Request/Response)
-├── entity/                             # [DONE] JPA Entities (12 core entities with JPA auditing)
+├── entity/                             # [DONE] JPA Entities (13 core entities with JPA auditing)
 ├── enums/                              # [DONE] State Definitions (Role, OrderStatus, etc.)
 ├── event/                              # [DONE] Application Events (OrderReadyEvent)
 ├── exception/                          # [DONE] Error Handling & GlobalAdvice
@@ -31,27 +31,33 @@ src/main/java/com/example/server/
 - **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC). **JWT Secret minimum size (256-bit) enforced.**
 - **Environment**: Dynamic configuration supported via `.env` files in root or `SRC/backend/`.
 - **Auth**: `AuthServiceImpl` functional. Fixed `updated_at` null constraint during registration.
-- **Database**: 12-table schema managed via Flyway.
+- **Database**: 13-table schema managed via Flyway.
   - `V2`: Fixed missing `is_deleted` in `categories`.
   - `V3`: Seeded initial `RestaurantCategory` data (Rice, Fast Food, etc.).
+  - `V4`: Added `owner_requests` table.
 - **Auditing**: Manual JPA auditing via `@PrePersist` and `@PreUpdate` fixed to ensure `updated_at` is never null on creation.
 - **API**:
   - Added `GET /api/restaurant-categories` to support frontend browsing.
   - Added missing Admin endpoints: `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/restaurants/pending`.
+  - Added `OwnerRequest` endpoints for User promotion workflow.
 
 ## Backend Roadmap - Phase 2
 
-1. **Reporting Enhancement [IN-PROGRESS]**:
+1. **Owner Promotion [DONE]**:
+    - [DONE] User request to become Owner.
+    - [DONE] Admin review and approval system.
+    - [DONE] Automatic role update and restaurant creation.
+2. Reporting Enhancement [IN-PROGRESS]:
     - [DONE] Basic Admin Report Summary.
     - [TODO] Export reports to CSV/Excel.
     - [TODO] Restaurant-specific revenue reports.
-2. **Real-time Updates [TODO]**:
+3. Real-time Updates [TODO]:
     - Integrate WebSocket or Server-Sent Events (SSE) for order status updates to Customers.
     - Shipper location tracking (continuous updates).
-3. **Advanced Security [TODO]**:
+4. Advanced Security [TODO]:
     - Implement Token Refresh mechanism.
     - Account lockout after multiple failed login attempts.
-4. **DevOps & Infrastructure [TODO]**:
+5. DevOps & Infrastructure [TODO]:
     - Multi-stage Dockerfile for optimized builds.
     - GitHub Actions for CI/CD pipeline.
     - API Documentation (Swagger/OpenAPI).
