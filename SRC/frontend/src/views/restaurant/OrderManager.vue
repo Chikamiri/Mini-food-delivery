@@ -9,6 +9,12 @@ import iconMenu from '@/assets/icon/menu.svg'
 import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
+import {
+  goRestaurantPath,
+  restaurantStatusBadge,
+  restaurantStatusLabel,
+} from '@/utils/restaurantViewUtils'
+import { loadRestaurantOrdersDataAction } from '@/utils/restaurantDataUtils'
 
 const router = useRouter()
 const loading = ref(false)
@@ -26,41 +32,19 @@ const filteredOrders = computed(() => {
   return orders.value.filter((o) => String(o.status || '').toUpperCase() === filterStatus.value)
 })
 
-function go(path) {
-  router.push(path)
-}
-
-function statusBadge(status) {
-  const s = String(status || '').toUpperCase()
-  if (s === 'DELIVERED') return 'badge badge-delivered'
-  if (s === 'CANCELLED') return 'badge badge-cancelled'
-  if (s === 'CONFIRMED') return 'badge badge-confirmed'
-  return 'badge badge-pending'
-}
-
-function statusLabel(key) {
-  const labels = { ALL: 'Tất cả', PENDING: 'Chờ xử lý', CONFIRMED: 'Đã xác nhận', DELIVERED: 'Đã giao', CANCELLED: 'Đã huỷ' }
-  return labels[key] || key
-}
-
-async function loadData() {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const mine = await restaurantService.getMyRestaurants()
-    restaurants.value = Array.isArray(mine) ? mine : []
-    if (!activeRestaurantId.value) {
-      orders.value = []
-      return
-    }
-    const data = await orderService.getByRestaurant(activeRestaurantId.value)
-    orders.value = Array.isArray(data) ? data : []
-  } catch (error) {
-    errorMessage.value = error.message || 'Không thể tải đơn hàng'
-  } finally {
-    loading.value = false
-  }
-}
+const go = (path) => goRestaurantPath(router, path)
+const statusBadge = (status) => restaurantStatusBadge(status)
+const statusLabel = (key) => restaurantStatusLabel(key)
+const loadData = () =>
+  loadRestaurantOrdersDataAction({
+    loading,
+    errorMessage,
+    restaurantService,
+    restaurants,
+    activeRestaurantIdRef: activeRestaurantId,
+    orderService,
+    orders,
+  })
 
 onMounted(loadData)
 </script>

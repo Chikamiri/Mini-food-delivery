@@ -8,28 +8,17 @@ import iconMenu from '@/assets/icon/menu.svg'
 import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
+import { goRestaurantPath } from '@/utils/restaurantViewUtils'
+import { loadRestaurantCategoriesDataAction } from '@/utils/restaurantDataUtils'
 
 const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
 const categories = ref([])
 
-function go(path) {
-  router.push(path)
-}
-
-async function loadData() {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const data = await restaurantService.getCategories()
-    categories.value = Array.isArray(data) ? data : []
-  } catch (error) {
-    errorMessage.value = error.message || 'Không thể tải danh mục'
-  } finally {
-    loading.value = false
-  }
-}
+const go = (path) => goRestaurantPath(router, path)
+const loadData = () =>
+  loadRestaurantCategoriesDataAction(loading, errorMessage, restaurantService, categories)
 
 onMounted(loadData)
 </script>

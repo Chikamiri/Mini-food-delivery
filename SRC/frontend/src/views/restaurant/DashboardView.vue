@@ -11,6 +11,12 @@ import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
 import iconSignOut from '@/assets/icon/sign-out.svg'
+import { goRestaurantPath, restaurantStatusBadge } from '@/utils/restaurantViewUtils'
+import {
+  logoutRestaurantAction,
+  backToProfileAction,
+  loadRestaurantDashboardAction,
+} from '@/utils/restaurantDashboardUtils'
 
 const router = useRouter()
 const route = useRoute()
@@ -47,54 +53,21 @@ const stats = computed(() => {
   ]
 })
 
-function go(path) {
-  router.push(path)
-}
-
-async function logout() {
-  await authStore.logout()
-  router.push('/')
-}
-
-function backToProfile() {
-  router.push('/profile')
-}
-
-function statusBadge(status) {
-  const s = String(status || '').toUpperCase()
-  if (s === 'DELIVERED') return 'badge badge-delivered'
-  if (s === 'CANCELLED') return 'badge badge-cancelled'
-  if (s === 'CONFIRMED') return 'badge badge-confirmed'
-  return 'badge badge-pending'
-}
-
-async function loadDashboard() {
-  isLoading.value = true
-  pageError.value = ''
-  try {
-    const restaurants = await restaurantService.getMyRestaurants()
-    myRestaurants.value = Array.isArray(restaurants) ? restaurants : []
-
-    if (!activeRestaurant.value?.id) {
-      recentOrders.value = []
-      menuItems.value = []
-      return
-    }
-
-    const [ordersResult, menuResult] = await Promise.allSettled([
-      orderService.getByRestaurant(activeRestaurant.value.id),
-      restaurantService.getMenuByRestaurant(activeRestaurant.value.id),
-    ])
-
-    recentOrders.value =
-      ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value) ? ordersResult.value.slice(0, 8) : []
-    menuItems.value = menuResult.status === 'fulfilled' && Array.isArray(menuResult.value) ? menuResult.value : []
-  } catch (error) {
-    pageError.value = error.message || 'Không thể tải dashboard nhà hàng'
-  } finally {
-    isLoading.value = false
-  }
-}
+const go = (path) => goRestaurantPath(router, path)
+const logout = () => logoutRestaurantAction(authStore, router)
+const backToProfile = () => backToProfileAction(router)
+const statusBadge = (status) => restaurantStatusBadge(status)
+const loadDashboard = () =>
+  loadRestaurantDashboardAction({
+    isLoading,
+    pageError,
+    restaurantService,
+    myRestaurants,
+    activeRestaurantRef: activeRestaurant,
+    orderService,
+    recentOrders,
+    menuItems,
+  })
 
 onMounted(loadDashboard)
 </script>

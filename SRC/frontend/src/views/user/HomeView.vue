@@ -7,6 +7,15 @@ import iconInstagram from '@/assets/icon/instagram.svg'
 import iconYoutube from '@/assets/icon/youtube.svg'
 import iconTwitter from '@/assets/icon/twitter.svg'
 import iconClose from '@/assets/icon/close.svg'
+import {
+  openLoginModalAction,
+  closeLoginModalAction,
+  showRegisterPanelAction,
+  showLoginPanelAction,
+  onLoginSubmitAction,
+  onRegisterSubmitAction,
+  onKeydownEscapeAction,
+} from '@/utils/homeViewUtils'
 
 const navLinks = ['Vì sao chọn chúng tôi', 'Dịch vụ', 'Thực đơn', 'Liên hệ']
 
@@ -26,71 +35,30 @@ const router = useRouter()
 const authStore = useAuthStore()
 const authError = ref('')
 
-function openLoginModal() {
-  authTab.value = 'login'
-  loginOpen.value = true
-}
-
-function closeLoginModal() {
-  loginOpen.value = false
-}
-
-function showRegisterPanel() {
-  authError.value = ''
-  authTab.value = 'register'
-}
-
-function showLoginPanel() {
-  authError.value = ''
-  authTab.value = 'login'
-}
-
-async function onLoginSubmit() {
-  authError.value = ''
-  try {
-    const loggedInUser = await authStore.login(loginEmail.value, loginPassword.value)
-    closeLoginModal()
-    if (loggedInUser?.role === 'ADMIN') {
-      router.push('/admin/dashboard')
-      return
-    }
-    if (['OWNER', 'RESTAURANT_OWNER'].includes(String(loggedInUser?.role || '').toUpperCase())) {
-      router.push('/restaurant/dashboard')
-      return
-    }
-    router.push('/browse')
-  } catch (error) {
-    authError.value = error.message || 'Dang nhap that bai'
-  }
-}
-
-async function onRegisterSubmit() {
-  authError.value = ''
-  if (!regFullName.value || !regEmail.value || !regPassword.value) {
-    authError.value = 'Vui long dien day du thong tin dang ky'
-    return
-  }
-  if (regPassword.value.length < 8) {
-    authError.value = 'Mat khau phai co it nhat 8 ky tu'
-    return
-  }
-  if (regPassword.value !== regConfirm.value) {
-    authError.value = 'Mat khau xac nhan khong khop'
-    return
-  }
-
-  try {
-    await authStore.register({
-      fullName: regFullName.value,
-      email: regEmail.value,
-      password: regPassword.value,
-    })
-    closeLoginModal()
-    router.push('/browse')
-  } catch (error) {
-    authError.value = error.message || 'Dang ky that bai'
-  }
-}
+const openLoginModal = () => openLoginModalAction(authTab, loginOpen)
+const closeLoginModal = () => closeLoginModalAction(loginOpen)
+const showRegisterPanel = () => showRegisterPanelAction(authError, authTab)
+const showLoginPanel = () => showLoginPanelAction(authError, authTab)
+const onLoginSubmit = () =>
+  onLoginSubmitAction({
+    authError,
+    authStore,
+    loginEmail,
+    loginPassword,
+    closeLoginModal,
+    router,
+  })
+const onRegisterSubmit = () =>
+  onRegisterSubmitAction({
+    authError,
+    regFullName,
+    regEmail,
+    regPassword,
+    regConfirm,
+    authStore,
+    closeLoginModal,
+    router,
+  })
 
 watch(loginOpen, (open) => {
   document.body.style.overflow = open ? 'hidden' : ''
@@ -98,9 +66,7 @@ watch(loginOpen, (open) => {
   if (!open) authError.value = ''
 })
 
-function onKeydownEscape(e) {
-  if (e.key === 'Escape' && loginOpen.value) closeLoginModal()
-}
+const onKeydownEscape = (e) => onKeydownEscapeAction(e, loginOpen, closeLoginModal)
 
 onMounted(() => window.addEventListener('keydown', onKeydownEscape))
 onUnmounted(() => {

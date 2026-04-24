@@ -3,6 +3,14 @@ import { computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
 import { useCartStore } from '@/stores/cart'
+import {
+  incrementCartItem,
+  decrementCartItem,
+  removeCartItem,
+  formatCartPrice,
+  groupCartByRestaurant,
+  goBrowseFromCart,
+} from '@/utils/cartViewUtils'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -10,17 +18,9 @@ const cartItems = computed(() => cartStore.items)
 
 const deliveryFee = 18000
 
-function increment(item) {
-  cartStore.updateQuantity(item.id, item.quantity + 1)
-}
-
-function decrement(item) {
-  cartStore.updateQuantity(item.id, item.quantity - 1)
-}
-
-function removeItem(id) {
-  cartStore.removeItem(id)
-}
+const increment = (item) => incrementCartItem(cartStore, item)
+const decrement = (item) => decrementCartItem(cartStore, item)
+const removeItem = (id) => removeCartItem(cartStore, id)
 
 const subtotal = computed(() => cartStore.subtotal)
 
@@ -28,25 +28,13 @@ const discount = computed(() => (subtotal.value >= 100000 ? 20000 : 0))
 
 const total = computed(() => subtotal.value + deliveryFee - discount.value)
 
-function formatPrice(value) {
-  return value.toLocaleString('vi-VN') + 'đ'
-}
+const formatPrice = (value) => formatCartPrice(value)
 
 const groupedByRestaurant = computed(() => {
-  const groups = {}
-  cartItems.value.forEach((item) => {
-    const key = item.restaurantName || 'Nhà hàng'
-    if (!groups[key]) {
-      groups[key] = []
-    }
-    groups[key].push(item)
-  })
-  return groups
+  return groupCartByRestaurant(cartItems.value)
 })
 
-function goBrowse() {
-  router.push('/browse')
-}
+const goBrowse = () => goBrowseFromCart(router)
 </script>
 
 <template>

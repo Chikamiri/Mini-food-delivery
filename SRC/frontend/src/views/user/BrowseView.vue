@@ -20,6 +20,15 @@ import iconTag from '@/assets/icon/tag.svg'
 import iconLove from '@/assets/icon/love.svg'
 import iconFlash from '@/assets/icon/monet-bill.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
+import {
+  isItemFavorite,
+  toggleFavoriteItem,
+  handleBrowseSidebarClick,
+  openDishDetailModal,
+  closeDishDetailModal,
+  addItemToCartFromDish,
+  loadBrowseDataAction,
+} from '@/utils/browseViewUtils'
 
 const sidebarMenus = [
   { key: 'overview', label: 'Trang tổng quan', icon: iconHome, scrollTo: null },
@@ -63,163 +72,31 @@ const promoItems = computed(() => {
 })
 const favoriteItems = computed(() => promoItems.value.filter((item) => favoriteIds.value.includes(item.id)))
 
-function isFavorite(itemId) {
-  return favoriteIds.value.includes(itemId)
-}
-
-function toggleFavorite(item) {
-  if (!item?.id) return
-  const exists = favoriteIds.value.includes(item.id)
-  favoriteIds.value = exists
-    ? favoriteIds.value.filter((id) => id !== item.id)
-    : [...favoriteIds.value, item.id]
-  localStorage.setItem('browse_favorite_ids', JSON.stringify(favoriteIds.value))
-}
-
-function handleSidebarClick(menu) {
-  activeMenu.value = menu.key
-  if (['promo', 'favorites', 'flashsale'].includes(menu.key)) return
-  if (menu.route) {
-    router.push(menu.route)
-    return
-  }
-  if (menu.scrollTo) {
-    const el = document.getElementById(menu.scrollTo)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
-
 const selectedDish = ref(null)
 const dishNote = ref('')
 const selectedSize = ref('Vừa')
-
-function openDishDetail(item) {
-  selectedDish.value = item
-  dishNote.value = ''
-  selectedSize.value = 'Vừa'
-}
-
-function closeDishDetail() {
-  selectedDish.value = null
-}
-
-function mapCategory(item) {
-  return {
-    icon: '🍽️',
-    label: item.name || 'Danh mục',
-    subtitle: 'Mon an noi bat',
-    image:
-      item.iconUrl ||
-      'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80',
-  }
-}
-
-function mapMenuItem(item, restaurantMap) {
-  const restaurant = restaurantMap.get(item.restaurantId)
-  return {
-    id: item.id,
-    name: item.name,
-    distance: restaurant?.address ? 'Gan ban' : '---',
-    rating: String(restaurant?.rating ?? 4.7),
-    reviews: 'new',
-    price: `$${Number(item.price || 0).toFixed(2)}`,
-    oldPrice: `$${Math.max(Number(item.price || 0) - 1, 0).toFixed(2)}`,
-    badge: 'NEW',
-    isAvailable: Boolean(item.isAvailable),
-    image:
-      item.imageUrl ||
-      'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
-    restaurant: restaurant?.name || 'Nha hang',
-    restaurantId: item.restaurantId || restaurant?.id || null,
-    restaurantLogo:
-      restaurant?.imageUrl ||
-      'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
-    menuItemId: item.id,
-  }
-}
-
-function formatRecentOrderTime(value) {
-  if (!value) return 'Vừa đặt'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Vừa đặt'
-  return date.toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
+const isFavorite = (itemId) => isItemFavorite(favoriteIds, itemId)
+const toggleFavorite = (item) => toggleFavoriteItem(favoriteIds, item)
+const handleSidebarClick = (menu) => handleBrowseSidebarClick(activeMenu, menu, router)
+const openDishDetail = (item) => openDishDetailModal(selectedDish, dishNote, selectedSize, item)
+const closeDishDetail = () => closeDishDetailModal(selectedDish)
+const addToCart = (item) =>
+  addItemToCartFromDish(cartStore, closeDishDetail, dishNote, selectedSize, item)
+const loadBrowseData = () =>
+  loadBrowseDataAction({
+    isLoading,
+    loadError,
+    authStore,
+    profileName,
+    categories,
+    popularDishes,
+    recommendedItems,
+    recentOrders,
+    restaurantService,
+    orderService,
+    userService,
+    profileAvatar,
   })
-}
-
-function mapRecentOrder(order) {
-  return {
-    id: order.id,
-    name: order.restaurantName || `Đơn hàng #${order.id}`,
-    price: `${Number(order.totalAmount || 0).toLocaleString('vi-VN')}đ`,
-    eta: formatRecentOrderTime(order.createdAt),
-  }
-}
-
-function addToCart(item) {
-  if (!item?.isAvailable) return
-  cartStore.addItem(
-    {
-      id: item.menuItemId || item.id,
-      name: item.name,
-      price: Number(String(item.price).replace('$', '')) || 0,
-      imageUrl: item.image,
-      restaurantId: item.restaurantId || null,
-      restaurantName: item.restaurant || 'Nha hang',
-      note: dishNote.value,
-      size: selectedSize.value,
-    },
-    1,
-  )
-  closeDishDetail()
-}
-
-async function loadBrowseData() {
-  isLoading.value = true
-  loadError.value = ''
-  try {
-    if (authStore.token && !authStore.user) {
-      await authStore.fetchProfile()
-    }
-    if (authStore.user?.fullName) {
-      profileName.value = authStore.user.fullName
-    }
-    const [categoryData, restaurants] = await Promise.all([
-      restaurantService.getCategories(),
-      restaurantService.getAll(),
-    ])
-    categories.value = (categoryData || []).slice(0, 6).map(mapCategory)
-    const restaurantMap = new Map((restaurants || []).map((restaurant) => [restaurant.id, restaurant]))
-    const menus = await Promise.all(
-      (restaurants || []).slice(0, 4).map((restaurant) => restaurantService.getMenuByRestaurant(restaurant.id)),
-    )
-    const flatMenus = menus.flat().slice(0, 12).map((item) => mapMenuItem(item, restaurantMap))
-    popularDishes.value = flatMenus.slice(0, 6)
-    recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
-    const orderHistory = await orderService.getByUser()
-    recentOrders.value = (Array.isArray(orderHistory) ? orderHistory : [])
-      .filter((order) => String(order?.status || '').toUpperCase() === 'DELIVERED')
-      .slice(0, 6)
-      .map(mapRecentOrder)
-    try {
-      const profile = await userService.getProfile()
-      profileName.value = profile.fullName || authStore.user?.fullName || 'Người dùng'
-      if (profile.avatarUrl) profileAvatar.value = profile.avatarUrl
-    } catch {
-      profileName.value = authStore.user?.fullName || profileName.value || 'Người dùng'
-    }
-  } catch (error) {
-    loadError.value = error.message || 'Khong the tai du lieu mon an'
-    profileName.value = authStore.user?.fullName || profileName.value || 'Người dùng'
-  } finally {
-    isLoading.value = false
-  }
-}
 
 watch(selectedDish, (value) => {
   document.body.style.overflow = value ? 'hidden' : ''

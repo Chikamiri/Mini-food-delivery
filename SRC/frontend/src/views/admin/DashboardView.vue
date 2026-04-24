@@ -3,6 +3,14 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminService from '@/services/adminService'
+import {
+  logoutAdminAction,
+  formatAdminCurrency,
+  loadAdminDashboardDataAction,
+  approveAdminRestaurantAction,
+  rejectAdminRestaurantAction,
+  toggleAdminUserAction,
+} from '@/utils/adminDashboardUtils'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -54,80 +62,37 @@ const filteredUsers = computed(() =>
   ),
 )
 
-async function logout() {
-  await authStore.logout()
-  router.push('/')
-}
-
-function formatCurrency(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
-
-async function loadDashboardData() {
-  isLoading.value = true
-  errorMessage.value = ''
-  const [statsResult, pendingResult, usersResult] = await Promise.allSettled([
-    adminService.getSystemStats(),
-    adminService.getPendingRestaurants(),
-    adminService.getAllUsers(),
-  ])
-
-  if (statsResult.status === 'fulfilled' && statsResult.value) {
-    stats.value = statsResult.value
-  }
-  approvalQueue.value =
-    pendingResult.status === 'fulfilled' && Array.isArray(pendingResult.value) ? pendingResult.value : []
-  users.value =
-    usersResult.status === 'fulfilled' && Array.isArray(usersResult.value) ? usersResult.value : []
-  isLoading.value = false
-}
-
-async function approveRestaurant(restaurantId) {
-  actionLoading.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
-  try {
-    await adminService.approveRestaurant(restaurantId)
-    successMessage.value = 'Đã duyệt nhà hàng thành công'
-    await loadDashboardData()
-  } catch (error) {
-    errorMessage.value = error.message || 'Duyệt nhà hàng thất bại'
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-async function rejectRestaurant(restaurantId) {
-  const reason = window.prompt('Nhập lý do từ chối nhà hàng:', 'Thiếu thông tin hồ sơ')
-  if (reason === null) return
-  actionLoading.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
-  try {
-    await adminService.rejectRestaurant(restaurantId, reason)
-    successMessage.value = 'Đã từ chối nhà hàng'
-    await loadDashboardData()
-  } catch (error) {
-    errorMessage.value = error.message || 'Từ chối nhà hàng thất bại'
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-async function toggleUser(user) {
-  actionLoading.value = true
-  successMessage.value = ''
-  errorMessage.value = ''
-  try {
-    await adminService.toggleUserActive(user.id, !user.active)
-    successMessage.value = `Đã ${user.active ? 'khóa' : 'mở'} tài khoản ${user.fullName || user.email}`
-    await loadDashboardData()
-  } catch (error) {
-    errorMessage.value = error.message || 'Không thể cập nhật trạng thái người dùng'
-  } finally {
-    actionLoading.value = false
-  }
-}
+const logout = () => logoutAdminAction(authStore, router)
+const formatCurrency = (value) => formatAdminCurrency(value)
+const loadDashboardData = () =>
+  loadAdminDashboardDataAction(isLoading, errorMessage, adminService, stats, approvalQueue, users)
+const approveRestaurant = (restaurantId) =>
+  approveAdminRestaurantAction(
+    restaurantId,
+    actionLoading,
+    successMessage,
+    errorMessage,
+    adminService,
+    loadDashboardData,
+  )
+const rejectRestaurant = (restaurantId) =>
+  rejectAdminRestaurantAction(
+    restaurantId,
+    actionLoading,
+    successMessage,
+    errorMessage,
+    adminService,
+    loadDashboardData,
+  )
+const toggleUser = (user) =>
+  toggleAdminUserAction(
+    user,
+    actionLoading,
+    successMessage,
+    errorMessage,
+    adminService,
+    loadDashboardData,
+  )
 
 onMounted(() => {
   loadDashboardData()

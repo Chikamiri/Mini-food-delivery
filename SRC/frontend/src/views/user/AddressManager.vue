@@ -1,32 +1,14 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import userService from '@/services/userService'
+import { fetchAddressesAction, setDefaultAddressAction } from '@/utils/addressManagerUtils'
 
 const addresses = ref([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 
-async function fetchAddresses() {
-  isLoading.value = true
-  errorMessage.value = ''
-  try {
-    const data = await userService.getAddresses()
-    addresses.value = Array.isArray(data) ? data : []
-  } catch (error) {
-    errorMessage.value = error.message || 'Khong the tai dia chi'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function setDefault(id) {
-  try {
-    await userService.setDefaultAddress(id)
-    await fetchAddresses()
-  } catch (error) {
-    errorMessage.value = error.message || 'Khong the dat mac dinh'
-  }
-}
+const fetchAddresses = () => fetchAddressesAction(userService, addresses, isLoading, errorMessage)
+const setDefault = (id) => setDefaultAddressAction(userService, id, fetchAddresses, errorMessage)
 
 onMounted(fetchAddresses)
 </script>

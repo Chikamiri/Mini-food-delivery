@@ -17,6 +17,21 @@ import userService from '@/services/userService'
 import orderService from '@/services/orderService'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
+import {
+  startEditingProfileAction,
+  cancelEditingProfileAction,
+  logoutProfileAction,
+  goBackToBrowseAction,
+  openRestaurantModalAction,
+  closeRestaurantModalAction,
+  openRestaurantFormAction,
+  openRestaurantDashboardAction,
+  handleProfileMenuClickAction,
+  submitOpenRestaurantAction,
+  loadProfileAction,
+  loadProfileStatsAction,
+  updateProfileAction,
+} from '@/utils/profileViewUtils'
 
 const isEditing = ref(false)
 const isLoading = ref(false)
@@ -38,22 +53,9 @@ const form = ref({
   phone: profile.value.phone,
 })
 
-function startEditing() {
-  form.value = {
-    full_name: profile.value.full_name,
-    email: profile.value.email,
-    phone: profile.value.phone,
-  }
-  isEditing.value = true
-}
-
-function cancelEditing() {
-  isEditing.value = false
-}
-
-function saveProfile() {
-  updateProfile()
-}
+const startEditing = () => startEditingProfileAction(form, profile, isEditing)
+const cancelEditing = () => cancelEditingProfileAction(isEditing)
+const saveProfile = () => updateProfile()
 
 const stats = ref([
   { label: 'Đơn hàng', value: '0', icon: iconOrder },
@@ -87,206 +89,48 @@ const openingForm = ref({
 
 const router = useRouter()
 
-function logout() {
-  authStore.logout()
-  router.push('/')
-}
-
-function goBackToBrowse() {
-  router.push('/browse')
-}
-
-async function openRestaurantModal() {
-  restaurantModalOpen.value = true
-  showOpenRestaurantForm.value = false
-  restaurantMessage.value = ''
-  restaurantLoading.value = true
-  const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
-  if (role !== 'OWNER') {
-    restaurants.value = []
-    showOpenRestaurantForm.value = true
-    restaurantMessage.value =
-      'Tài khoản của bạn hiện là USER. Bạn có thể điền form mở quán, sau khi được admin cấp OWNER và duyệt quán thì mới vào dashboard nhà hàng.'
-    restaurantLoading.value = false
-    return
-  }
-  try {
-    const data = await restaurantService.getMyRestaurants()
-    restaurants.value = Array.isArray(data) ? data : []
-  } catch (error) {
-    restaurants.value = []
-    const message = String(error?.message || '')
-    const isAccessDenied =
-      message.toLowerCase().includes('access denied') ||
-      message.toLowerCase().includes('forbidden') ||
-      message.includes('403')
-
-    if (isAccessDenied) {
-      // USER role usually cannot read owner restaurant list; keep the flow usable.
-      restaurantMessage.value =
-        'Bạn chưa có quyền xem danh sách nhà hàng. Vui lòng gửi yêu cầu mở quán để admin xét duyệt.'
-      showOpenRestaurantForm.value = true
-      return
-    }
-
-    restaurantMessage.value = message || 'Chưa thể tải danh sách nhà hàng'
-  } finally {
-    restaurantLoading.value = false
-  }
-}
-
-function closeRestaurantModal() {
-  restaurantModalOpen.value = false
-  showOpenRestaurantForm.value = false
-}
-
-function openRestaurantForm() {
-  showOpenRestaurantForm.value = true
-}
-
-function openRestaurantDashboard(restaurant) {
-  if (!restaurant?.id) return
-  if (!restaurant.isApproved) {
-    restaurantMessage.value = 'Nhà hàng này chưa được admin duyệt nên chưa thể vào dashboard.'
-    return
-  }
-  closeRestaurantModal()
-  router.push(`/restaurant/dashboard?restaurantId=${restaurant.id}`)
-}
-
-function handleMenuClick(item) {
-  if (item.action === 'open-restaurant') {
-    openRestaurantModal()
-    return
-  }
-  if (item.route) {
-    router.push(item.route)
-    return
-  }
-  restaurantMessage.value = `"${item.label}" sẽ được cập nhật trong bản sau.`
-  restaurantModalOpen.value = true
-  showOpenRestaurantForm.value = false
-}
-
-async function submitOpenRestaurant() {
-  restaurantMessage.value = ''
-  restaurantLoading.value = true
-  try {
-    const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
-    if (role !== 'OWNER') {
-      restaurantMessage.value =
-        'Hiện backend chưa có API để USER gửi đơn xin quyền OWNER trực tiếp. Tạm thời bạn cần nhờ admin cấp role OWNER, sau đó mới gửi mở quán và vào dashboard được.'
-      return
-    }
-
-    await restaurantService.createRestaurant({
-      name: openingForm.value.name,
-      description: openingForm.value.description || '',
-      phone: openingForm.value.phone,
-      address: openingForm.value.address,
-      latitude: 10.776889,
-      longitude: 106.700806,
-      imageUrl: null,
-      openingTime: '08:00:00',
-      closingTime: '22:00:00',
-      categoryId: null,
-      isOpen: true,
-    })
-
-    restaurantMessage.value =
-      'Đã gửi yêu cầu mở quán thành công. Quán đang ở trạng thái chờ admin duyệt.'
-    openingForm.value = {
-      name: '',
-      phone: '',
-      address: '',
-      description: '',
-      noteToAdmin: '',
-    }
-    showOpenRestaurantForm.value = false
-
-    const data = await restaurantService.getMyRestaurants()
-    restaurants.value = Array.isArray(data) ? data : []
-  } catch (error) {
-    restaurantMessage.value = error.message || 'Không thể gửi yêu cầu mở quán'
-  } finally {
-    restaurantLoading.value = false
-  }
-}
-
-async function loadProfile() {
-  isLoading.value = true
-  errorMessage.value = ''
-  try {
-    const data = await userService.getProfile()
-    profile.value = {
-      ...profile.value,
-      full_name: data.fullName || profile.value.full_name,
-      email: data.email || profile.value.email,
-      phone: data.phone || '',
-      avatar_url: data.avatarUrl || '',
-      role: data.role || profile.value.role,
-      created_at: data.createdAt ? String(data.createdAt).slice(0, 10) : profile.value.created_at,
-    }
-    form.value = {
-      full_name: profile.value.full_name,
-      email: profile.value.email,
-      phone: profile.value.phone,
-    }
-  } catch (error) {
-    errorMessage.value = error.message || 'Khong the tai thong tin tai khoan'
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function loadStats() {
-  const [ordersResult, addressesResult] = await Promise.allSettled([
-    orderService.getByUser(),
-    userService.getAddresses(),
-  ])
-
-  const orders =
-    ordersResult.status === 'fulfilled' && Array.isArray(ordersResult.value) ? ordersResult.value : []
-  const addresses =
-    addressesResult.status === 'fulfilled' && Array.isArray(addressesResult.value)
-      ? addressesResult.value
-      : []
-
-  const deliveredCount = orders.filter((order) => String(order?.status || '').toUpperCase() === 'DELIVERED').length
-  const favoriteCount = new Set(
-    orders
-      .map((order) => order?.restaurantName || order?.restaurant?.name || '')
-      .filter((name) => Boolean(name)),
-  ).size
-
-  stats.value = [
-    { label: 'Đơn hàng', value: String(orders.length), icon: iconOrder },
-    { label: 'Đã giao', value: String(deliveredCount), icon: iconCheck },
-    { label: 'Yêu thích', value: String(favoriteCount), icon: iconFavorite },
-    { label: 'Địa chỉ', value: String(addresses.length), icon: iconLocation },
-  ]
-}
-
-async function updateProfile() {
-  isLoading.value = true
-  errorMessage.value = ''
-  try {
-    const updated = await userService.updateProfile({
-      fullName: form.value.full_name,
-      phone: form.value.phone,
-    })
-    profile.value = {
-      ...profile.value,
-      full_name: updated.fullName || form.value.full_name,
-      phone: updated.phone || form.value.phone,
-    }
-    isEditing.value = false
-  } catch (error) {
-    errorMessage.value = error.message || 'Khong the cap nhat thong tin'
-  } finally {
-    isLoading.value = false
-  }
-}
+const logout = () => logoutProfileAction(authStore, router)
+const goBackToBrowse = () => goBackToBrowseAction(router)
+const closeRestaurantModal = () => closeRestaurantModalAction(restaurantModalOpen, showOpenRestaurantForm)
+const openRestaurantForm = () => openRestaurantFormAction(showOpenRestaurantForm)
+const openRestaurantDashboard = (restaurant) =>
+  openRestaurantDashboardAction(restaurant, restaurantMessage, closeRestaurantModal, router)
+const openRestaurantModal = () =>
+  openRestaurantModalAction({
+    restaurantModalOpen,
+    showOpenRestaurantForm,
+    restaurantMessage,
+    restaurantLoading,
+    authStore,
+    profile,
+    restaurants,
+    restaurantService,
+  })
+const handleMenuClick = (item) =>
+  handleProfileMenuClickAction(
+    item,
+    openRestaurantModal,
+    router,
+    restaurantMessage,
+    restaurantModalOpen,
+    showOpenRestaurantForm,
+  )
+const submitOpenRestaurant = () =>
+  submitOpenRestaurantAction({
+    restaurantMessage,
+    restaurantLoading,
+    authStore,
+    profile,
+    restaurantService,
+    openingForm,
+    showOpenRestaurantForm,
+    restaurants,
+  })
+const loadProfile = () => loadProfileAction(isLoading, errorMessage, userService, profile, form)
+const loadStats = () =>
+  loadProfileStatsAction(orderService, userService, stats, iconOrder, iconCheck, iconFavorite, iconLocation)
+const updateProfile = () =>
+  updateProfileAction(isLoading, errorMessage, userService, form, profile, isEditing)
 
 onMounted(() => {
   if (authStore.user) {

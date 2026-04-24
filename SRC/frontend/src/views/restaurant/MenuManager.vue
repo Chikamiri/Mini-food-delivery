@@ -8,6 +8,8 @@ import iconMenu from '@/assets/icon/menu.svg'
 import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
+import { goRestaurantPath } from '@/utils/restaurantViewUtils'
+import { loadRestaurantMenuDataAction } from '@/utils/restaurantDataUtils'
 
 const router = useRouter()
 const loading = ref(false)
@@ -17,28 +19,16 @@ const menuItems = ref([])
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 
-function go(path) {
-  router.push(path)
-}
-
-async function loadData() {
-  loading.value = true
-  errorMessage.value = ''
-  try {
-    const mine = await restaurantService.getMyRestaurants()
-    restaurants.value = Array.isArray(mine) ? mine : []
-    if (!activeRestaurantId.value) {
-      menuItems.value = []
-      return
-    }
-    const menu = await restaurantService.getMenuByRestaurant(activeRestaurantId.value)
-    menuItems.value = Array.isArray(menu) ? menu : []
-  } catch (error) {
-    errorMessage.value = error.message || 'Không thể tải menu'
-  } finally {
-    loading.value = false
-  }
-}
+const go = (path) => goRestaurantPath(router, path)
+const loadData = () =>
+  loadRestaurantMenuDataAction({
+    loading,
+    errorMessage,
+    restaurantService,
+    restaurants,
+    activeRestaurantIdRef: activeRestaurantId,
+    menuItems,
+  })
 
 onMounted(loadData)
 </script>
