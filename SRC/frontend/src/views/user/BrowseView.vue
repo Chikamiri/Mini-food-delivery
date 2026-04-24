@@ -23,7 +23,7 @@ import iconReceipt from '@/assets/icon/reciept.svg'
 
 const sidebarMenus = [
   { key: 'overview', label: 'Trang tổng quan', icon: iconHome, scrollTo: null },
-  { key: 'promo', label: 'Ưu đãi', icon: iconTag, scrollTo: 'voucher-section' },
+  { key: 'promo', label: 'Ưu đãi', icon: iconTag, scrollTo: null },
   { key: 'favorites', label: 'Yêu thích', icon: iconLove, scrollTo: 'recommend-section' },
   { key: 'flashsale', label: 'Flash sale', icon: iconFlash, scrollTo: 'popular-section' },
   { key: 'orders', label: 'Đơn hàng', icon: iconReceipt, route: '/orders/history' },
@@ -48,9 +48,20 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
 const cartCount = computed(() => cartStore.itemCount)
+const isPromoView = computed(() => activeMenu.value === 'promo')
+const promoItems = computed(() => {
+  const merged = [...popularDishes.value, ...recommendedItems.value]
+  const seen = new Set()
+  return merged.filter((item) => {
+    if (!item?.id || seen.has(item.id)) return false
+    seen.add(item.id)
+    return true
+  })
+})
 
 function handleSidebarClick(menu) {
   activeMenu.value = menu.key
+  if (menu.key === 'promo') return
   if (menu.route) {
     router.push(menu.route)
     return
@@ -266,6 +277,58 @@ onMounted(() => {
       <p v-if="isLoading">Dang tai du lieu...</p>
       <p v-if="loadError">{{ loadError }}</p>
 
+      <template v-if="isPromoView">
+        <section id="voucher-section" class="voucher-banner">
+          <div>
+            <h2>Ưu đãi hot trong ngày</h2>
+            <p>Chỉ hiển thị các món ưu đãi, giảm giá sâu cho bạn.</p>
+          </div>
+          <button>Nhận mã ngay</button>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Toàn bộ món ưu đãi</h3>
+            <a href="#">Xem điều kiện</a>
+          </div>
+          <div class="recommend-list">
+            <article
+              v-for="item in promoItems"
+              :key="item.id"
+              class="recommend-card"
+              role="button"
+              tabindex="0"
+              @click="openDishDetail(item)"
+              @keydown.enter="openDishDetail(item)"
+              @keydown.space.prevent="openDishDetail(item)"
+            >
+              <img :src="item.image" :alt="item.name" class="recommend-thumb" />
+              <div class="recommend-content">
+                <h4>{{ item.name }}</h4>
+                <div class="recommend-meta">
+                  <span>{{ item.distance }}</span>
+                  <span class="dot">|</span>
+                  <span class="star">★</span>
+                  <span>{{ item.rating }}</span>
+                </div>
+                <div class="recommend-price-row">
+                  <strong>{{ item.price }}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="recommend-fav"
+                aria-label="Yêu thích"
+                @click.stop
+              >
+                ♥
+              </button>
+            </article>
+          </div>
+        </section>
+      </template>
+
+      <template v-else>
       <section id="voucher-section" class="voucher-banner">
         <div>
           <h2>Ưu đãi trong ngày đến 20%</h2>
@@ -418,6 +481,7 @@ onMounted(() => {
 
         <p class="footer-copy">© 2026 Giao Đồ Ăn. Bảo lưu mọi quyền.</p>
       </footer>
+      </template>
     </main>
 
     <Teleport to="body">
