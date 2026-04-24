@@ -49,6 +49,8 @@ const cartStore = useCartStore()
 const router = useRouter()
 const cartCount = computed(() => cartStore.itemCount)
 const isPromoView = computed(() => activeMenu.value === 'promo')
+const isFavoritesView = computed(() => activeMenu.value === 'favorites')
+const isFlashSaleView = computed(() => activeMenu.value === 'flashsale')
 const promoItems = computed(() => {
   const merged = [...popularDishes.value, ...recommendedItems.value]
   const seen = new Set()
@@ -61,7 +63,7 @@ const promoItems = computed(() => {
 
 function handleSidebarClick(menu) {
   activeMenu.value = menu.key
-  if (menu.key === 'promo') return
+  if (['promo', 'favorites', 'flashsale'].includes(menu.key)) return
   if (menu.route) {
     router.push(menu.route)
     return
@@ -323,6 +325,94 @@ onMounted(() => {
               >
                 ♥
               </button>
+            </article>
+          </div>
+        </section>
+      </template>
+
+      <template v-else-if="isFavoritesView">
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Món bạn có thể thích</h3>
+            <a href="#">Danh sách gợi ý</a>
+          </div>
+          <div class="recommend-list">
+            <article
+              v-for="item in recommendedItems"
+              :key="item.id"
+              class="recommend-card"
+              role="button"
+              tabindex="0"
+              @click="openDishDetail(item)"
+              @keydown.enter="openDishDetail(item)"
+              @keydown.space.prevent="openDishDetail(item)"
+            >
+              <img :src="item.image" :alt="item.name" class="recommend-thumb" />
+              <div class="recommend-content">
+                <h4>{{ item.name }}</h4>
+                <div class="recommend-meta">
+                  <span>{{ item.distance }}</span>
+                  <span class="dot">|</span>
+                  <span class="star">★</span>
+                  <span>{{ item.rating }}</span>
+                </div>
+                <div class="recommend-price-row">
+                  <strong>{{ item.price }}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="recommend-fav"
+                aria-label="Yêu thích"
+                @click.stop
+              >
+                ♥
+              </button>
+            </article>
+          </div>
+        </section>
+      </template>
+
+      <template v-else-if="isFlashSaleView">
+        <section class="voucher-banner">
+          <div>
+            <h2>Flash Sale đang diễn ra</h2>
+            <p>Số lượng có hạn, ưu đãi kết thúc trong hôm nay.</p>
+          </div>
+          <button>Mua ngay</button>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Danh sách Flash sale</h3>
+            <a href="#">Xem điều kiện</a>
+          </div>
+          <div class="popular-grid">
+            <article
+              v-for="dish in popularDishes"
+              :key="dish.id"
+              class="popular-card"
+              role="button"
+              tabindex="0"
+              @click="openDishDetail(dish)"
+              @keydown.enter="openDishDetail(dish)"
+              @keydown.space.prevent="openDishDetail(dish)"
+            >
+              <div class="popular-image-wrap">
+                <img :src="dish.image" :alt="dish.name" class="popular-image" />
+                <span class="popular-badge">FLASH</span>
+              </div>
+              <h4>{{ dish.name }}</h4>
+              <div class="popular-meta">
+                <span>{{ dish.distance }}</span>
+                <span class="dot">|</span>
+                <span class="star">★</span>
+                <span>{{ dish.rating }}</span>
+              </div>
+              <div class="popular-price-row">
+                <strong>{{ dish.price }}</strong>
+                <button type="button" class="favorite-btn" aria-label="Yêu thích">♡</button>
+              </div>
             </article>
           </div>
         </section>
