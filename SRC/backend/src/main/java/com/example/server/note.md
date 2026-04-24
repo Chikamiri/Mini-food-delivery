@@ -47,10 +47,10 @@ src/main/java/com/example/server/
     - [DONE] User request to become Owner.
     - [DONE] Admin review and approval system.
     - [DONE] Automatic role update and restaurant creation.
-2. Reporting Enhancement [IN-PROGRESS]:
+2. Reporting Enhancement [DONE]:
     - [DONE] Basic Admin Report Summary.
-    - [TODO] Export reports to CSV/Excel.
-    - [TODO] Restaurant-specific revenue reports.
+    - [DONE] Export reports to CSV.
+    - [DONE] Restaurant-specific revenue reports.
 3. Real-time Updates [TODO]:
     - Integrate WebSocket or Server-Sent Events (SSE) for order status updates to Customers.
     - Shipper location tracking (continuous updates).

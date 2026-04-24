@@ -41,4 +41,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt BETWEEN :startDate AND :endDate")
     BigDecimal sumTotalRevenue(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT o.restaurant.id, o.restaurant.name, COUNT(o.id), SUM(o.totalAmount) " +
+           "FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt BETWEEN :startDate AND :endDate " +
+           "GROUP BY o.restaurant.id, o.restaurant.name")
+    List<Object[]> findRestaurantRevenue(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

@@ -2,6 +2,7 @@ package com.example.server.controller;
 
 import com.example.server.dto.report.AdminReportSummaryResponse;
 import com.example.server.dto.report.AdminStatsResponse;
+import com.example.server.dto.report.RestaurantRevenueResponse;
 import com.example.server.dto.restaurant.RestaurantApprovalRequest;
 import com.example.server.dto.restaurant.RestaurantCardResponse;
 import com.example.server.dto.user.UserProfileResponse;
@@ -14,8 +15,11 @@ import com.example.server.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.EnableMethodSecurity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -85,5 +89,25 @@ public class AdminController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(reportService.getAdminReport(startDate, endDate));
+    }
+
+    @GetMapping("/reports/restaurants")
+    public ResponseEntity<List<RestaurantRevenueResponse>> getRestaurantRevenue(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(reportService.getRestaurantRevenue(startDate, endDate));
+    }
+
+    @GetMapping("/reports/export/csv")
+    public ResponseEntity<byte[]> exportRevenueCsv(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        byte[] csvData = reportService.generateRevenueCsv(startDate, endDate);
+        String filename = "revenue_report_" + startDate + "_to_" + endDate + ".csv";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(csvData);
     }
 }
