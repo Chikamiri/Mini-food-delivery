@@ -101,6 +101,15 @@ async function openRestaurantModal() {
   showOpenRestaurantForm.value = false
   restaurantMessage.value = ''
   restaurantLoading.value = true
+  const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
+  if (role !== 'OWNER') {
+    restaurants.value = []
+    showOpenRestaurantForm.value = true
+    restaurantMessage.value =
+      'Tài khoản của bạn hiện là USER. Bạn có thể điền form mở quán, sau khi được admin cấp OWNER và duyệt quán thì mới vào dashboard nhà hàng.'
+    restaurantLoading.value = false
+    return
+  }
   try {
     const data = await restaurantService.getMyRestaurants()
     restaurants.value = Array.isArray(data) ? data : []
@@ -135,6 +144,16 @@ function openRestaurantForm() {
   showOpenRestaurantForm.value = true
 }
 
+function openRestaurantDashboard(restaurant) {
+  if (!restaurant?.id) return
+  if (!restaurant.isApproved) {
+    restaurantMessage.value = 'Nhà hàng này chưa được admin duyệt nên chưa thể vào dashboard.'
+    return
+  }
+  closeRestaurantModal()
+  router.push(`/restaurant/dashboard?restaurantId=${restaurant.id}`)
+}
+
 function handleMenuClick(item) {
   if (item.action === 'open-restaurant') {
     openRestaurantModal()
@@ -149,15 +168,48 @@ function handleMenuClick(item) {
   showOpenRestaurantForm.value = false
 }
 
-function submitOpenRestaurant() {
-  restaurantMessage.value =
-    'Đã ghi nhận thông tin mở quán. Bộ phận admin sẽ liên hệ và duyệt hồ sơ cho bạn.'
-  openingForm.value = {
-    name: '',
-    phone: '',
-    address: '',
-    description: '',
-    noteToAdmin: '',
+async function submitOpenRestaurant() {
+  restaurantMessage.value = ''
+  restaurantLoading.value = true
+  try {
+    const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
+    if (role !== 'OWNER') {
+      restaurantMessage.value =
+        'Hiện backend chưa có API để USER gửi đơn xin quyền OWNER trực tiếp. Tạm thời bạn cần nhờ admin cấp role OWNER, sau đó mới gửi mở quán và vào dashboard được.'
+      return
+    }
+
+    await restaurantService.createRestaurant({
+      name: openingForm.value.name,
+      description: openingForm.value.description || '',
+      phone: openingForm.value.phone,
+      address: openingForm.value.address,
+      latitude: 10.776889,
+      longitude: 106.700806,
+      imageUrl: null,
+      openingTime: '08:00:00',
+      closingTime: '22:00:00',
+      categoryId: null,
+      isOpen: true,
+    })
+
+    restaurantMessage.value =
+      'Đã gửi yêu cầu mở quán thành công. Quán đang ở trạng thái chờ admin duyệt.'
+    openingForm.value = {
+      name: '',
+      phone: '',
+      address: '',
+      description: '',
+      noteToAdmin: '',
+    }
+    showOpenRestaurantForm.value = false
+
+    const data = await restaurantService.getMyRestaurants()
+    restaurants.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    restaurantMessage.value = error.message || 'Không thể gửi yêu cầu mở quán'
+  } finally {
+    restaurantLoading.value = false
   }
 }
 
@@ -375,6 +427,19 @@ watch(restaurantModalOpen, (value) => {
               <li v-for="restaurant in restaurants" :key="restaurant.id">
                 <strong>{{ restaurant.name }}</strong>
                 <small>{{ restaurant.address || 'Chưa có địa chỉ' }}</small>
+                <div class="restaurant-actions">
+                  <small :class="restaurant.isApproved ? 'approved-badge' : 'pending-badge'">
+                    {{ restaurant.isApproved ? 'Đã duyệt' : 'Chờ admin duyệt' }}
+                  </small>
+                  <button
+                    type="button"
+                    class="open-dashboard-btn"
+                    :disabled="!restaurant.isApproved"
+                    @click="openRestaurantDashboard(restaurant)"
+                  >
+                    Vào dashboard
+                  </button>
+                </div>
               </li>
             </ul>
           </section>

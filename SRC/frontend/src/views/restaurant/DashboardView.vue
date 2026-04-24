@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import orderService from '@/services/orderService'
@@ -13,6 +13,7 @@ import iconDollar from '@/assets/icon/dollar-sign.svg'
 import iconSignOut from '@/assets/icon/sign-out.svg'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const isLoading = ref(false)
@@ -21,7 +22,14 @@ const myRestaurants = ref([])
 const recentOrders = ref([])
 const menuItems = ref([])
 
-const activeRestaurant = computed(() => myRestaurants.value[0] || null)
+const selectedRestaurantId = computed(() => Number(route.query.restaurantId || 0))
+const activeRestaurant = computed(() => {
+  if (selectedRestaurantId.value) {
+    const matched = myRestaurants.value.find((item) => Number(item.id) === selectedRestaurantId.value)
+    if (matched) return matched
+  }
+  return myRestaurants.value[0] || null
+})
 
 const stats = computed(() => {
   const orders = recentOrders.value
@@ -46,6 +54,10 @@ function go(path) {
 async function logout() {
   await authStore.logout()
   router.push('/')
+}
+
+function backToProfile() {
+  router.push('/profile')
 }
 
 function statusBadge(status) {
@@ -134,9 +146,12 @@ onMounted(loadDashboard)
           <p v-if="activeRestaurant" class="subtitle">Xin chào! Dưới đây là tình hình hoạt động của <strong>{{ activeRestaurant.name }}</strong>.</p>
           <p v-else class="subtitle">Chưa có nhà hàng nào được liên kết với tài khoản này.</p>
         </div>
-        <button class="refresh-btn" type="button" :disabled="isLoading" @click="loadDashboard">
-          {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
-        </button>
+        <div class="header-actions">
+          <button class="outline-btn" type="button" @click="backToProfile">Quay về hồ sơ</button>
+          <button class="refresh-btn" type="button" :disabled="isLoading" @click="loadDashboard">
+            {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
+          </button>
+        </div>
       </header>
 
       <p v-if="pageError" class="error-text">{{ pageError }}</p>

@@ -164,6 +164,22 @@
   margin-bottom: 1.75rem;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.outline-btn {
+  border: 1px solid #f8143f;
+  background: #fff;
+  color: #f8143f;
+  border-radius: 999px;
+  padding: 0.65rem 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .page-head h1 {
   margin: 0;
   font-size: clamp(1.5rem, 3vw, 2rem);

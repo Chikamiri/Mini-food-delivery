@@ -19,6 +19,10 @@ export default {
     return api.get('/api/restaurants/my-restaurants')
   },
 
+  async createRestaurant(payload) {
+    return api.post('/api/restaurants', payload)
+  },
+
   async getByCategory(categoryId) {
     const response = await api.post('/api/restaurants/search', { categoryId })
     return Array.isArray(response) ? response : response?.items || []

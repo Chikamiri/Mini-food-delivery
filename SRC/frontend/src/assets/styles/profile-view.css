@@ -465,6 +465,41 @@
   gap: 0.2rem;
 }
 
+.restaurant-actions {
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.pending-badge {
+  color: #a16207;
+  font-weight: 600;
+}
+
+.approved-badge {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.open-dashboard-btn {
+  border: 0;
+  border-radius: 8px;
+  background: #ff7f23;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.42rem 0.75rem;
+  cursor: pointer;
+}
+
+.open-dashboard-btn:disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
 .restaurant-list small {
   color: #6b7280;
 }
