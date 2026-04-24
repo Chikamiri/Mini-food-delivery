@@ -48,6 +48,7 @@ const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
 const cartCount = computed(() => cartStore.itemCount)
+const favoriteIds = ref([])
 const isPromoView = computed(() => activeMenu.value === 'promo')
 const isFavoritesView = computed(() => activeMenu.value === 'favorites')
 const isFlashSaleView = computed(() => activeMenu.value === 'flashsale')
@@ -60,6 +61,20 @@ const promoItems = computed(() => {
     return true
   })
 })
+const favoriteItems = computed(() => promoItems.value.filter((item) => favoriteIds.value.includes(item.id)))
+
+function isFavorite(itemId) {
+  return favoriteIds.value.includes(itemId)
+}
+
+function toggleFavorite(item) {
+  if (!item?.id) return
+  const exists = favoriteIds.value.includes(item.id)
+  favoriteIds.value = exists
+    ? favoriteIds.value.filter((id) => id !== item.id)
+    : [...favoriteIds.value, item.id]
+  localStorage.setItem('browse_favorite_ids', JSON.stringify(favoriteIds.value))
+}
 
 function handleSidebarClick(menu) {
   activeMenu.value = menu.key
@@ -211,6 +226,12 @@ watch(selectedDish, (value) => {
 })
 
 onMounted(() => {
+  try {
+    const stored = JSON.parse(localStorage.getItem('browse_favorite_ids') || '[]')
+    favoriteIds.value = Array.isArray(stored) ? stored : []
+  } catch {
+    favoriteIds.value = []
+  }
   loadBrowseData()
 })
 
@@ -320,10 +341,11 @@ onMounted(() => {
               <button
                 type="button"
                 class="recommend-fav"
+                :class="{ 'is-active': isFavorite(item.id) }"
                 aria-label="Yêu thích"
-                @click.stop
+                @click.stop.prevent="toggleFavorite(item)"
               >
-                ♥
+                {{ isFavorite(item.id) ? '♥' : '♡' }}
               </button>
             </article>
           </div>
@@ -333,12 +355,13 @@ onMounted(() => {
       <template v-else-if="isFavoritesView">
         <section class="section-block">
           <div class="section-head">
-            <h3>Món bạn có thể thích</h3>
-            <a href="#">Danh sách gợi ý</a>
+            <h3>Món bạn đã yêu thích</h3>
+            <a href="#">Danh sách đã lưu</a>
           </div>
           <div class="recommend-list">
+            <p v-if="!favoriteItems.length" class="muted">Bạn chưa nhấn yêu thích món nào.</p>
             <article
-              v-for="item in recommendedItems"
+              v-for="item in favoriteItems"
               :key="item.id"
               class="recommend-card"
               role="button"
@@ -363,10 +386,11 @@ onMounted(() => {
               <button
                 type="button"
                 class="recommend-fav"
+                :class="{ 'is-active': isFavorite(item.id) }"
                 aria-label="Yêu thích"
-                @click.stop
+                @click.stop.prevent="toggleFavorite(item)"
               >
-                ♥
+                {{ isFavorite(item.id) ? '♥' : '♡' }}
               </button>
             </article>
           </div>
@@ -411,7 +435,15 @@ onMounted(() => {
               </div>
               <div class="popular-price-row">
                 <strong>{{ dish.price }}</strong>
-                <button type="button" class="favorite-btn" aria-label="Yêu thích">♡</button>
+                <button
+                  type="button"
+                  class="favorite-btn"
+                  :class="{ 'is-active': isFavorite(dish.id) }"
+                  aria-label="Yêu thích"
+                  @click.stop.prevent="toggleFavorite(dish)"
+                >
+                  {{ isFavorite(dish.id) ? '♥' : '♡' }}
+                </button>
               </div>
             </article>
           </div>
@@ -474,7 +506,15 @@ onMounted(() => {
             </div>
             <div class="popular-price-row">
               <strong>{{ dish.price }}</strong>
-              <button type="button" class="favorite-btn" aria-label="Yêu thích">♡</button>
+              <button
+                type="button"
+                class="favorite-btn"
+                :class="{ 'is-active': isFavorite(dish.id) }"
+                aria-label="Yêu thích"
+                @click.stop.prevent="toggleFavorite(dish)"
+              >
+                {{ isFavorite(dish.id) ? '♥' : '♡' }}
+              </button>
             </div>
           </article>
         </div>
@@ -529,10 +569,11 @@ onMounted(() => {
             <button
               type="button"
               class="recommend-fav"
+              :class="{ 'is-active': isFavorite(item.id) }"
               aria-label="Yêu thích"
-              @click.stop
+              @click.stop.prevent="toggleFavorite(item)"
             >
-              ♥
+              {{ isFavorite(item.id) ? '♥' : '♡' }}
             </button>
           </article>
         </div>

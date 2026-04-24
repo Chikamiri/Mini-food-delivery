@@ -665,6 +665,12 @@
   border-color: #f7a2b3;
 }
 
+.favorite-btn.is-active {
+  background: #f25b76;
+  border-color: #f25b76;
+  color: #fff;
+}
+
 /* Recommended section */
 .recommend-list {
   margin-top: 0.75rem;
@@ -756,6 +762,12 @@
 .recommend-fav:hover {
   background: #ffedf1;
   border-color: #f7a2b3;
+}
+
+.recommend-fav.is-active {
+  background: #f25b76;
+  border-color: #f25b76;
+  color: #fff;
 }
 
 /* Dish detail modal */
