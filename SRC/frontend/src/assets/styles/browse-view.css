@@ -733,14 +733,9 @@
   gap: 0.35rem;
 }
 
-.recommend-price-row .leaf {
-  color: #29b756;
-  font-size: 0.96rem;
-}
-
 .recommend-price-row strong {
   color: #6f7683;
-  font-size: 1.48rem;
+  font-size: 1rem;
   line-height: 1;
 }
 

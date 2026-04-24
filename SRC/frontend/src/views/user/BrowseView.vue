@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import restaurantService from '@/services/restaurantService'
+import orderService from '@/services/orderService'
 import userService from '@/services/userService'
 import iconMessage from '@/assets/icon/messaging.svg'
 import iconNotice from '@/assets/icon/notice.svg'
@@ -34,11 +35,7 @@ const categories = ref([])
 
 const popularDishes = ref([])
 
-const recentOrders = [
-  { id: 1, name: 'Pizza Hải Sản', price: '129.000đ', eta: '30 phút' },
-  { id: 2, name: 'Mì Ramen', price: '89.000đ', eta: '22 phút' },
-  { id: 3, name: 'Cơm Gà Nướng', price: '69.000đ', eta: '18 phút' },
-]
+const recentOrders = ref([])
 
 const recommendedItems = ref([])
 const isLoading = ref(false)
@@ -115,6 +112,27 @@ function mapMenuItem(item, restaurantMap) {
   }
 }
 
+function formatRecentOrderTime(value) {
+  if (!value) return 'Vừa đặt'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Vừa đặt'
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function mapRecentOrder(order) {
+  return {
+    id: order.id,
+    name: order.restaurantName || `Đơn hàng #${order.id}`,
+    price: `${Number(order.totalAmount || 0).toLocaleString('vi-VN')}đ`,
+    eta: formatRecentOrderTime(order.createdAt),
+  }
+}
+
 function addToCart(item) {
   if (!item?.isAvailable) return
   cartStore.addItem(
@@ -155,6 +173,11 @@ async function loadBrowseData() {
     const flatMenus = menus.flat().slice(0, 12).map((item) => mapMenuItem(item, restaurantMap))
     popularDishes.value = flatMenus.slice(0, 6)
     recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
+    const orderHistory = await orderService.getByUser()
+    recentOrders.value = (Array.isArray(orderHistory) ? orderHistory : [])
+      .filter((order) => String(order?.status || '').toUpperCase() === 'DELIVERED')
+      .slice(0, 6)
+      .map(mapRecentOrder)
     try {
       const profile = await userService.getProfile()
       profileName.value = profile.fullName || authStore.user?.fullName || 'Người dùng'
@@ -310,11 +333,12 @@ onMounted(() => {
           <a href="#">Xem tất cả</a>
         </div>
         <div class="dish-grid recent">
+          <p v-if="!recentOrders.length" class="muted">Chưa có đơn đã giao thành công.</p>
           <article v-for="dish in recentOrders" :key="dish.id" class="dish-card">
             <div class="dish-img">🍽️</div>
             <h4>{{ dish.name }}</h4>
             <p>{{ dish.price }}</p>
-            <small>Giao dự kiến: {{ dish.eta }}</small>
+            <small>Đặt lúc: {{ dish.eta }}</small>
           </article>
         </div>
       </section>
@@ -346,7 +370,6 @@ onMounted(() => {
                 <span class="muted">({{ item.reviews }})</span>
               </div>
               <div class="recommend-price-row">
-                <span class="leaf">♻</span>
                 <strong>{{ item.price }}</strong>
               </div>
             </div>
