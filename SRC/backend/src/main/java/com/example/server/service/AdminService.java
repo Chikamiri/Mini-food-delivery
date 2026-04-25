@@ -15,4 +15,5 @@ public interface AdminService {
     List<UserProfileResponse> getAllUsers();
     List<RestaurantCardResponse> getPendingRestaurants();
     AdminStatsResponse getSystemStats();
+    void deleteUser(Long userId);
 }

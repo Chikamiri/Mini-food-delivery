@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.EnableMethodSecurity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -82,6 +81,18 @@ public class AdminController {
         }
         adminService.updateUserStatus(id, request);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails adminDetails,
+            @PathVariable Long id) {
+        // Prevent self-deletion
+        if (adminDetails.getId().equals(id)) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Admins cannot delete their own accounts", "SELF_DELETION_DENIED");
+        }
+        adminService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/reports/summary")

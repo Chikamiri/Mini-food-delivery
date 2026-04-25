@@ -89,4 +89,11 @@ class AdminServiceImplTest {
         assertThrows(ResourceNotFoundException.class, 
             () -> adminService.approveRestaurant(restaurantId, request));
     }
+
+    @Test
+    void deleteUser_Success() {
+        Long userId = 1L;
+        adminService.deleteUser(userId);
+        verify(userService).deleteUser(userId);
+    }
 }
