@@ -213,7 +213,7 @@ const deleteUser = async (user) => {
     try {
       await adminService.toggleUserActive(user.id, false)
       successMessage.value =
-        'Không thể xóa cứng do ràng buộc dữ liệu backend. Đã chuyển tài khoản sang trạng thái khóa.'
+        'Không thể xóa vĩnh viễn vì tài khoản đã có dữ liệu liên quan. Tài khoản đã được chuyển sang trạng thái khóa.'
     } catch {
       errorMessage.value = error.message || 'Không thể xóa người dùng'
     }
