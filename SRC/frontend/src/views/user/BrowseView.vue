@@ -136,6 +136,9 @@ const markAllNotificationsRead = async () => {
     // ignore mark-all errors
   }
 }
+const openSettings = () => {
+  router.push('/profile?openSettings=1')
+}
 const formatNoticeTime = (value) => {
   if (!value) return 'Vừa xong'
   const date = new Date(value)
@@ -200,7 +203,7 @@ onMounted(() => {
           >
             <img :src="iconNotice" alt="" width="22" height="22" />
           </button>
-          <button type="button" class="action-btn" aria-label="Cài đặt">
+          <button type="button" class="action-btn" aria-label="Cài đặt" @click="openSettings">
             <img :src="iconSetting" alt="" width="22" height="22" />
           </button>
         </div>

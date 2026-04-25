@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
 import iconEdit from '@/assets/icon/edit.svg'
 import iconOrder from '@/assets/icon/reciept.svg'
@@ -68,10 +68,9 @@ const stats = ref([
 const menuItems = [
   { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders/history' },
   { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
-  { icon: iconNotification, label: 'Thông báo', action: 'coming-soon' },
   { icon: iconPayment, label: 'Phương thức thanh toán', action: 'coming-soon' },
   { icon: iconOpenRestaurant, label: 'Mở nhà hàng', action: 'open-restaurant' },
-  { icon: iconSetting, label: 'Cài đặt', action: 'coming-soon' },
+  { icon: iconSetting, label: 'Cài đặt', action: 'settings' },
   { icon: iconHelp, label: 'Trợ giúp', action: 'coming-soon' },
 ]
 
@@ -87,8 +86,18 @@ const openingForm = ref({
   description: '',
   noteToAdmin: '',
 })
+const settingsModalOpen = ref(false)
+const settingsForm = ref({
+  pushNotifications: true,
+  emailNotifications: true,
+  promoNotifications: false,
+  language: 'vi',
+  theme: 'light',
+  orderPrivacy: 'friends',
+})
 
 const router = useRouter()
+const route = useRoute()
 
 const logout = () => logoutProfileAction(authStore, router)
 const goBackToBrowse = () => goBackToBrowseAction(router)
@@ -109,7 +118,21 @@ const openRestaurantModal = () =>
     ownerRequestService,
     userService,
   })
-const handleMenuClick = (item) =>
+const openSettingsModal = () => {
+  settingsModalOpen.value = true
+}
+const closeSettingsModal = () => {
+  settingsModalOpen.value = false
+}
+const saveSettings = () => {
+  localStorage.setItem('profile_settings', JSON.stringify(settingsForm.value))
+  restaurantMessage.value = 'Đã lưu cài đặt cá nhân.'
+}
+const handleMenuClick = (item) => {
+  if (item.action === 'settings') {
+    openSettingsModal()
+    return
+  }
   handleProfileMenuClickAction(
     item,
     openRestaurantModal,
@@ -118,6 +141,7 @@ const handleMenuClick = (item) =>
     restaurantModalOpen,
     showOpenRestaurantForm,
   )
+}
 const submitOpenRestaurant = () =>
   submitOpenRestaurantAction({
     restaurantMessage,
@@ -144,10 +168,19 @@ onMounted(() => {
   }
   loadProfile()
   loadStats()
+  try {
+    const storedSettings = JSON.parse(localStorage.getItem('profile_settings') || '{}')
+    settingsForm.value = { ...settingsForm.value, ...(storedSettings || {}) }
+  } catch {
+    // keep defaults
+  }
+  if (String(route.query.openSettings || '') === '1') {
+    settingsModalOpen.value = true
+  }
 })
 
-watch(restaurantModalOpen, (value) => {
-  document.body.style.overflow = value ? 'hidden' : ''
+watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen]) => {
+  document.body.style.overflow = restaurantOpen || settingsOpen ? 'hidden' : ''
 })
 </script>
 
@@ -336,6 +369,65 @@ watch(restaurantModalOpen, (value) => {
           </section>
 
           <p v-if="restaurantMessage" class="restaurant-message">{{ restaurantMessage }}</p>
+        </article>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="settingsModalOpen" class="restaurant-overlay" @click.self="closeSettingsModal">
+        <article class="restaurant-modal settings-modal">
+          <div class="restaurant-modal-head">
+            <h3>Cài đặt tài khoản</h3>
+            <button type="button" class="modal-close-btn" @click="closeSettingsModal">✕</button>
+          </div>
+
+          <section class="restaurant-section">
+            <h4>Thông báo</h4>
+            <label class="setting-switch">
+              <span>Thông báo đẩy</span>
+              <input v-model="settingsForm.pushNotifications" type="checkbox" />
+            </label>
+            <label class="setting-switch">
+              <span>Email thông báo đơn hàng</span>
+              <input v-model="settingsForm.emailNotifications" type="checkbox" />
+            </label>
+            <label class="setting-switch">
+              <span>Thông báo khuyến mãi</span>
+              <input v-model="settingsForm.promoNotifications" type="checkbox" />
+            </label>
+          </section>
+
+          <section class="restaurant-section">
+            <h4>Hiển thị & ngôn ngữ</h4>
+            <label class="field">
+              <span>Ngôn ngữ</span>
+              <select v-model="settingsForm.language">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Giao diện</span>
+              <select v-model="settingsForm.theme">
+                <option value="light">Sáng</option>
+                <option value="dark">Tối</option>
+                <option value="system">Theo hệ thống</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Quyền riêng tư lịch sử đơn</span>
+              <select v-model="settingsForm.orderPrivacy">
+                <option value="private">Chỉ mình tôi</option>
+                <option value="friends">Bạn bè</option>
+                <option value="public">Công khai</option>
+              </select>
+            </label>
+          </section>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" @click="closeSettingsModal">Đóng</button>
+            <button type="button" class="save-btn" @click="saveSettings">Lưu cài đặt</button>
+          </div>
         </article>
       </div>
     </Teleport>
