@@ -7,9 +7,6 @@ import {
   logoutAdminAction,
   formatAdminCurrency,
   loadAdminDashboardDataAction,
-  approveAdminRestaurantAction,
-  rejectAdminRestaurantAction,
-  toggleAdminUserAction,
 } from '@/utils/adminDashboardUtils'
 
 const router = useRouter()
@@ -34,12 +31,19 @@ const stats = ref({
   totalRevenue: 0,
 })
 const approvalQueue = ref([])
+const ownerRequestQueue = ref([])
 const users = ref([])
 const isLoading = ref(false)
 const actionLoading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const keyword = ref('')
+const rejectedRestaurantIds = ref([])
+const editUserModalOpen = ref(false)
+const editingUser = ref(null)
+const editRole = ref('ROLE_USER')
+const editActive = ref(true)
+const roleOptions = ['ROLE_USER', 'ROLE_OWNER', 'ROLE_ADMIN', 'ROLE_SHIPPER', 'ROLE_CUSTOMER']
 
 const kpiCards = computed(() => [
   { title: 'Tổng đơn', value: Number(stats.value.totalOrders || 0).toLocaleString('vi-VN'), icon: '🧾' },
@@ -56,6 +60,14 @@ const filteredApprovals = computed(() =>
   ),
 )
 
+const filteredOwnerRequests = computed(() =>
+  ownerRequestQueue.value.filter((item) =>
+    `${item.restaurantName || ''} ${item.userEmail || ''} ${item.restaurantAddress || ''}`
+      .toLowerCase()
+      .includes(keyword.value.trim().toLowerCase()),
+  ),
+)
+
 const filteredUsers = computed(() =>
   users.value.filter((item) =>
     `${item.fullName || ''} ${item.email || ''}`.toLowerCase().includes(keyword.value.trim().toLowerCase()),
@@ -64,37 +76,152 @@ const filteredUsers = computed(() =>
 
 const logout = () => logoutAdminAction(authStore, router)
 const formatCurrency = (value) => formatAdminCurrency(value)
-const loadDashboardData = () =>
-  loadAdminDashboardDataAction(isLoading, errorMessage, adminService, stats, approvalQueue, users)
-const approveRestaurant = (restaurantId) =>
-  approveAdminRestaurantAction(
-    restaurantId,
-    actionLoading,
-    successMessage,
+const persistRejectedRestaurantIds = () => {
+  localStorage.setItem('admin_rejected_restaurant_ids', JSON.stringify(rejectedRestaurantIds.value))
+}
+const loadDashboardData = async () => {
+  await loadAdminDashboardDataAction(
+    isLoading,
     errorMessage,
     adminService,
-    loadDashboardData,
+    stats,
+    approvalQueue,
+    users,
+    ownerRequestQueue,
   )
-const rejectRestaurant = (restaurantId) =>
-  rejectAdminRestaurantAction(
-    restaurantId,
-    actionLoading,
-    successMessage,
-    errorMessage,
-    adminService,
-    loadDashboardData,
-  )
-const toggleUser = (user) =>
-  toggleAdminUserAction(
-    user,
-    actionLoading,
-    successMessage,
-    errorMessage,
-    adminService,
-    loadDashboardData,
-  )
+  if (rejectedRestaurantIds.value.length) {
+    approvalQueue.value = approvalQueue.value.filter(
+      (item) => !rejectedRestaurantIds.value.includes(item.id),
+    )
+  }
+}
+const approveRestaurant = async (restaurantId) => {
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.approveRestaurant(restaurantId)
+    approvalQueue.value = approvalQueue.value.filter((item) => item.id !== restaurantId)
+    successMessage.value = 'Đã duyệt nhà hàng thành công'
+  } catch (error) {
+    errorMessage.value = error.message || 'Duyệt nhà hàng thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+const rejectRestaurant = async (restaurantId) => {
+  const reason = window.prompt('Nhập lý do từ chối nhà hàng:', 'Thiếu thông tin hồ sơ')
+  if (reason === null) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.rejectRestaurant(restaurantId, reason)
+    if (!rejectedRestaurantIds.value.includes(restaurantId)) {
+      rejectedRestaurantIds.value = [...rejectedRestaurantIds.value, restaurantId]
+      persistRejectedRestaurantIds()
+    }
+    approvalQueue.value = approvalQueue.value.filter((item) => item.id !== restaurantId)
+    successMessage.value = 'Đã từ chối nhà hàng'
+  } catch (error) {
+    errorMessage.value = error.message || 'Từ chối nhà hàng thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+const approveOwnerRequest = async (requestId) => {
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.approveOwnerRequest(requestId)
+    ownerRequestQueue.value = ownerRequestQueue.value.filter((item) => item.id !== requestId)
+    successMessage.value = 'Đã duyệt đơn xin quyền OWNER'
+  } catch (error) {
+    errorMessage.value = error.message || 'Duyệt đơn OWNER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const rejectOwnerRequest = async (requestId) => {
+  const reason = window.prompt('Nhập lý do từ chối đơn OWNER:', 'Thiếu thông tin hồ sơ')
+  if (reason === null) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.rejectOwnerRequest(requestId, reason)
+    ownerRequestQueue.value = ownerRequestQueue.value.filter((item) => item.id !== requestId)
+    successMessage.value = 'Đã từ chối đơn xin quyền OWNER'
+  } catch (error) {
+    errorMessage.value = error.message || 'Từ chối đơn OWNER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const openEditUser = (user) => {
+  editingUser.value = user
+  editRole.value = user?.role || 'ROLE_USER'
+  editActive.value = Boolean(user?.active)
+  editUserModalOpen.value = true
+}
+
+const closeEditUser = () => {
+  editUserModalOpen.value = false
+  editingUser.value = null
+}
+
+const saveUserEdit = async () => {
+  if (!editingUser.value?.id) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    const currentRole = String(editingUser.value.role || '').toUpperCase()
+    const nextRole = String(editRole.value || '').toUpperCase()
+    if (currentRole !== nextRole) {
+      await adminService.updateUserRole(editingUser.value.id, editRole.value)
+    }
+    if (Boolean(editingUser.value.active) !== Boolean(editActive.value)) {
+      await adminService.toggleUserActive(editingUser.value.id, editActive.value)
+    }
+    successMessage.value = 'Đã cập nhật thông tin người dùng'
+    closeEditUser()
+    await loadDashboardData()
+  } catch (error) {
+    errorMessage.value = error.message || 'Không thể cập nhật người dùng'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const deleteUser = async (user) => {
+  if (!user?.id) return
+  const ok = window.confirm(`Xác nhận khóa tài khoản ${user.fullName || user.email}?`)
+  if (!ok) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.deleteUser(user.id)
+    successMessage.value = 'Đã khóa tài khoản người dùng'
+    await loadDashboardData()
+  } catch (error) {
+    errorMessage.value = error.message || 'Không thể khóa tài khoản người dùng'
+  } finally {
+    actionLoading.value = false
+  }
+}
 
 onMounted(() => {
+  try {
+    const stored = JSON.parse(localStorage.getItem('admin_rejected_restaurant_ids') || '[]')
+    rejectedRestaurantIds.value = Array.isArray(stored) ? stored : []
+  } catch {
+    rejectedRestaurantIds.value = []
+  }
   loadDashboardData()
 })
 </script>
@@ -122,7 +249,7 @@ onMounted(() => {
 
       <div class="sidebar-note">
         <p>Khuyến nghị</p>
-        <strong>{{ approvalQueue.length }} nhà hàng đang chờ duyệt hồ sơ mới.</strong>
+        <strong>{{ approvalQueue.length + filteredOwnerRequests.length }} yêu cầu đang chờ duyệt.</strong>
       </div>
     </aside>
 
@@ -229,6 +356,25 @@ onMounted(() => {
           <div class="panel-head">
             <h3>Danh sách nhà hàng chờ duyệt ({{ filteredApprovals.length }})</h3>
           </div>
+          <div class="table" style="margin-bottom: 1rem;">
+            <div class="panel-head" style="padding: 0 0 0.5rem;">
+              <h3>Đơn xin quyền OWNER ({{ filteredOwnerRequests.length }})</h3>
+            </div>
+            <div v-if="!filteredOwnerRequests.length" class="empty-row">Không có đơn xin OWNER nào chờ duyệt.</div>
+            <div v-for="request in filteredOwnerRequests" :key="request.id" class="row">
+              <div>
+                <strong>{{ request.restaurantName || 'Đơn xin OWNER' }}</strong>
+                <p>{{ request.userEmail || 'Không có email' }} • {{ request.restaurantAddress || 'Chưa có địa chỉ' }}</p>
+                <small v-if="request.restaurantPhone">SĐT: {{ request.restaurantPhone }}</small>
+              </div>
+              <div class="row-actions">
+                <button type="button" :disabled="actionLoading" @click="approveOwnerRequest(request.id)">Duyệt OWNER</button>
+                <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectOwnerRequest(request.id)">
+                  Từ chối
+                </button>
+              </div>
+            </div>
+          </div>
           <div class="table">
             <div v-if="!filteredApprovals.length" class="empty-row">Không có nhà hàng nào chờ duyệt.</div>
             <div v-for="item in filteredApprovals" :key="item.id" class="row">
@@ -261,8 +407,9 @@ onMounted(() => {
               <p>{{ user.email }}</p>
               <small>Vai trò: {{ user.role }} • Trạng thái: {{ user.active ? 'Đang hoạt động' : 'Đã khóa' }}</small>
               <div class="user-actions">
-                <button type="button" :disabled="actionLoading" @click="toggleUser(user)">
-                  {{ user.active ? 'Khóa' : 'Mở' }} tài khoản
+                <button type="button" :disabled="actionLoading" @click="openEditUser(user)">Chỉnh sửa</button>
+                <button type="button" class="danger-action" :disabled="actionLoading" @click="deleteUser(user)">
+                  Xóa
                 </button>
               </div>
             </div>
@@ -355,6 +502,36 @@ onMounted(() => {
         </section>
       </template>
     </main>
+
+    <Teleport to="body">
+      <div v-if="editUserModalOpen" class="restaurant-overlay" @click.self="closeEditUser">
+        <article class="restaurant-modal">
+          <div class="restaurant-modal-head">
+            <h3>Chỉnh sửa người dùng</h3>
+            <button type="button" class="modal-close-btn" @click="closeEditUser">✕</button>
+          </div>
+          <section class="restaurant-section">
+            <label class="field">
+              <span>Vai trò</span>
+              <select v-model="editRole">
+                <option v-for="role in roleOptions" :key="role" :value="role">{{ role }}</option>
+              </select>
+            </label>
+            <label class="field" style="margin-top: 0.6rem;">
+              <span>Trạng thái</span>
+              <select v-model="editActive">
+                <option :value="true">Đang hoạt động</option>
+                <option :value="false">Đã khóa</option>
+              </select>
+            </label>
+            <div style="display: flex; gap: 0.6rem; margin-top: 1rem;">
+              <button type="button" class="save-btn" :disabled="actionLoading" @click="saveUserEdit">Lưu thay đổi</button>
+              <button type="button" class="danger-action" :disabled="actionLoading" @click="closeEditUser">Hủy</button>
+            </div>
+          </section>
+        </article>
+      </div>
+    </Teleport>
   </section>
 </template>
 

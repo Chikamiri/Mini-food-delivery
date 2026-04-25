@@ -254,6 +254,22 @@
   box-shadow: 0 0 0 3px rgba(255, 127, 35, 0.12);
 }
 
+.field select {
+  width: 100%;
+  border: 1px solid #d7dbe3;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.92rem;
+  background: #fff;
+}
+
+.field select:focus {
+  outline: none;
+  border-color: #ff7f23;
+  box-shadow: 0 0 0 3px rgba(255, 127, 35, 0.12);
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -523,6 +539,34 @@
   margin: 0.3rem 0 0;
   color: #1f7a45;
   font-weight: 600;
+}
+
+.settings-modal {
+  width: min(640px, 100%);
+}
+
+.setting-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid #f2f4f8;
+}
+
+.setting-switch:last-child {
+  border-bottom: 0;
+}
+
+.setting-switch span {
+  font-size: 0.9rem;
+  color: #2b3140;
+}
+
+.setting-switch input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #ff7f23;
 }
 
 @media (max-width: 640px) {

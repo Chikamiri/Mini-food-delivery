@@ -3,6 +3,7 @@
  * Quan ly nguoi dung, duyet nha hang, thong ke
  */
 import api from '@/services/api'
+import ownerRequestService from '@/services/ownerRequestService'
 
 export default {
   // --- User Management ---
@@ -12,6 +13,16 @@ export default {
 
   async toggleUserActive(userId, isActive) {
     return api.patch(`/api/admin/users/${userId}/status`, { active: isActive })
+  },
+
+  async updateUserRole(userId, role) {
+    return api.patch(`/api/admin/users/${userId}/role`, { role })
+  },
+
+  async deleteUser(userId) {
+    // Backend currently has no hard-delete endpoint for users.
+    // Treat delete action as deactivate account.
+    return api.patch(`/api/admin/users/${userId}/status`, { active: false })
   },
 
   // --- Restaurant Approval ---
@@ -36,5 +47,18 @@ export default {
   // --- Stats ---
   async getSystemStats() {
     return api.get('/api/admin/stats')
+  },
+
+  // --- Owner Request Approval ---
+  async getPendingOwnerRequests() {
+    return ownerRequestService.getPendingRequests()
+  },
+
+  async approveOwnerRequest(requestId) {
+    return ownerRequestService.processRequest(requestId, true, null)
+  },
+
+  async rejectOwnerRequest(requestId, reason) {
+    return ownerRequestService.processRequest(requestId, false, reason || null)
   },
 }
