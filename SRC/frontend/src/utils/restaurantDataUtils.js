@@ -25,16 +25,24 @@ export async function loadRestaurantOrdersDataAction({
   }
 }
 
-export async function loadRestaurantCategoriesDataAction(
+export async function loadRestaurantCategoriesDataAction({
   loading,
   errorMessage,
   restaurantService,
+  restaurants,
+  activeRestaurantIdRef,
   categories,
-) {
+}) {
   loading.value = true
   errorMessage.value = ''
   try {
-    const data = await restaurantService.getCategories()
+    const mine = await restaurantService.getMyRestaurants()
+    restaurants.value = Array.isArray(mine) ? mine : []
+    if (!activeRestaurantIdRef.value) {
+      categories.value = []
+      return
+    }
+    const data = await restaurantService.getMenuCategories(activeRestaurantIdRef.value)
     categories.value = Array.isArray(data) ? data : []
   } catch (error) {
     errorMessage.value = error.message || 'Không thể tải danh mục'

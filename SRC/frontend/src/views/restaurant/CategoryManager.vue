@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 
@@ -14,11 +14,20 @@ import { loadRestaurantCategoriesDataAction } from '@/utils/restaurantDataUtils'
 const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
+const restaurants = ref([])
 const categories = ref([])
+const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 
 const go = (path) => goRestaurantPath(router, path)
 const loadData = () =>
-  loadRestaurantCategoriesDataAction(loading, errorMessage, restaurantService, categories)
+  loadRestaurantCategoriesDataAction({
+    loading,
+    errorMessage,
+    restaurantService,
+    restaurants,
+    activeRestaurantIdRef: activeRestaurantId,
+    categories,
+  })
 
 onMounted(loadData)
 </script>
