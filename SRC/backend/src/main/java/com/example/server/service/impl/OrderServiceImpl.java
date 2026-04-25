@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private static final String RESOURCE_NAME = "Order";
@@ -40,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
     private final MenuItemRepository menuItemRepository;
     private final OrderMapper orderMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final com.example.server.service.MapService mapService;
 
     @Override
     @Transactional
@@ -58,7 +60,24 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentMethod(request.getPaymentMethod());
         order.setNote(request.getNote());
         order.setStatus(OrderStatus.PENDING.name());
-        order.setDeliveryFee(new BigDecimal(defaultDeliveryFee));
+        
+        // Calculate delivery fee based on road distance
+        BigDecimal deliveryFee = new BigDecimal(defaultDeliveryFee);
+        try {
+            com.example.server.dto.map.RoutingResponse route = mapService.getRoute(
+                    restaurant.getLatitude(), restaurant.getLongitude(),
+                    request.getDeliveryLat(), request.getDeliveryLng()
+            );
+            if (route != null && !route.getRoutes().isEmpty()) {
+                double distanceKm = route.getRoutes().get(0).getDistance() / 1000.0;
+                // Example: 5.00 base + 2.00 per km
+                deliveryFee = BigDecimal.valueOf(5.00 + (distanceKm * 2.00))
+                        .setScale(2, java.math.RoundingMode.HALF_UP);
+            }
+        } catch (Exception e) {
+            log.error("Failed to calculate distance-based fee, using default: {}", e.getMessage());
+        }
+        order.setDeliveryFee(deliveryFee);
 
         BigDecimal subtotal = BigDecimal.ZERO;
         List<OrderItem> items = request.getItems().stream().map(itemRequest -> {
