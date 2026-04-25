@@ -78,10 +78,42 @@ const removeImage = () => {
 }
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
+const deletedMenuStorageKey = 'restaurant_deleted_menu_items'
+
+const getDeletedMap = () => {
+  try {
+    return JSON.parse(localStorage.getItem(deletedMenuStorageKey) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+const getDeletedIdsForRestaurant = (restaurantId) => {
+  if (!restaurantId) return []
+  const map = getDeletedMap()
+  return Array.isArray(map[String(restaurantId)]) ? map[String(restaurantId)] : []
+}
+
+const rememberDeletedMenuId = (restaurantId, itemId) => {
+  if (!restaurantId || !itemId) return
+  const map = getDeletedMap()
+  const key = String(restaurantId)
+  const current = Array.isArray(map[key]) ? map[key] : []
+  if (!current.includes(itemId)) {
+    map[key] = [...current, itemId]
+    localStorage.setItem(deletedMenuStorageKey, JSON.stringify(map))
+  }
+}
+
+const filterDeletedItemsForActiveRestaurant = () => {
+  if (!activeRestaurantId.value) return
+  const deletedIds = new Set(getDeletedIdsForRestaurant(activeRestaurantId.value))
+  menuItems.value = menuItems.value.filter((item) => !deletedIds.has(item.id))
+}
 
 const go = (path) => goRestaurantPath(router, path)
-const loadData = () =>
-  loadRestaurantMenuDataAction({
+const loadData = async () => {
+  await loadRestaurantMenuDataAction({
     loading,
     errorMessage,
     restaurantService,
@@ -89,6 +121,8 @@ const loadData = () =>
     activeRestaurantIdRef: activeRestaurantId,
     menuItems,
   })
+  filterDeletedItemsForActiveRestaurant()
+}
 const loadCategoryOptions = async () => {
   try {
     if (!activeRestaurantId.value) return
@@ -188,8 +222,9 @@ const deleteMenuItem = async (item) => {
   actionLoading.value = true
   try {
     await restaurantService.deleteMenuItem(activeRestaurantId.value, item.id)
+    rememberDeletedMenuId(activeRestaurantId.value, item.id)
+    menuItems.value = menuItems.value.filter((menuItem) => menuItem.id !== item.id)
     successMessage.value = 'Đã xóa món khỏi menu.'
-    await loadData()
   } catch (error) {
     errorMessage.value = error.message || 'Không thể xóa món.'
   } finally {

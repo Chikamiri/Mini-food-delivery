@@ -4,6 +4,19 @@
  */
 import api from '@/services/api'
 
+const DELETED_MENU_STORAGE_KEY = 'restaurant_deleted_menu_items'
+
+function getDeletedMenuIdsByRestaurant(restaurantId) {
+  if (!restaurantId) return []
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DELETED_MENU_STORAGE_KEY) || '{}')
+    const ids = parsed?.[String(restaurantId)]
+    return Array.isArray(ids) ? ids : []
+  } catch {
+    return []
+  }
+}
+
 export default {
   // --- Restaurant ---
   async getAll() {
@@ -54,7 +67,9 @@ export default {
   async getMenuByRestaurant(restaurantId) {
     // Backend currently exposes menu items inside restaurant detail response.
     const detail = await api.get(`/api/restaurants/${restaurantId}`)
-    return Array.isArray(detail?.menuItems) ? detail.menuItems : []
+    const menuItems = Array.isArray(detail?.menuItems) ? detail.menuItems : []
+    const deletedIds = new Set(getDeletedMenuIdsByRestaurant(restaurantId))
+    return menuItems.filter((item) => !deletedIds.has(item?.id))
   },
 
   async getMenuItem(restaurantId, itemId) {
