@@ -2,6 +2,7 @@ package com.example.server.security;
 
 import com.example.server.entity.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.Collections;
 
 @AllArgsConstructor
 @Getter
+@Builder
 public class CustomUserDetails implements UserDetails {
 
     private final Long id;

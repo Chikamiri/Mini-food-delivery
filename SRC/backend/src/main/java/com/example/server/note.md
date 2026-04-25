@@ -27,7 +27,7 @@ src/main/java/com/example/server/
 
 ## Current Implementation Status
 
-- **Dependencies**: Web, Actuator, Data JPA, Security 6.4, Validation, Flyway (MySQL), Lombok, MapStruct 1.6.3, JJWT 0.13.0, Testcontainers, **Dotenv-java 3.1.0**.
+- **Dependencies**: Web, Actuator, Data JPA, Security 6.4, Validation, Flyway (MySQL), Lombok, MapStruct 1.6.3, JJWT 0.13.0, Testcontainers, Dotenv-java 3.1.0, Spring Security Test.
 - **Security**: Full JWT Stateless Authentication & Role-Based Access Control (RBAC). **JWT Secret minimum size (256-bit) enforced.**
 - **Environment**: Dynamic configuration supported via `.env` files in root or `SRC/backend/`.
 - **Auth**: `AuthServiceImpl` functional. Fixed `updated_at` null constraint during registration.
@@ -35,7 +35,12 @@ src/main/java/com/example/server/
   - `V2`: Fixed missing `is_deleted` in `categories`.
   - `V3`: Seeded initial `RestaurantCategory` data (Rice, Fast Food, etc.).
   - `V4`: Added `owner_requests` table.
+  - `V5`: Enforced `ON DELETE CASCADE` on all user-related foreign keys for hard-delete reliability.
 - **Auditing**: Manual JPA auditing via `@PrePersist` and `@PreUpdate` fixed to ensure `updated_at` is never null on creation.
+- **Testing**:
+  - Added `AdminControllerTest` (verifies RBAC safety and self-deletion blocks).
+  - Added `UserServiceImplTest` (verifies hard-delete logic).
+  - Modernized test suite using `@MockitoBean` (Spring Boot 3.4+ standard).
 - **API**:
   - Added `GET /api/restaurant-categories` to support frontend browsing.
   - Added missing Admin endpoints: `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/restaurants/pending`.
