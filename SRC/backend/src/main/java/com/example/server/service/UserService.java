@@ -13,4 +13,5 @@ public interface UserService {
     AddressResponse updateAddress(Long userId, Long addressId, AddressRequest request);
     void deleteAddress(Long userId, Long addressId);
     void setDefaultAddress(Long userId, Long addressId);
+    void deleteUser(Long id);
 }

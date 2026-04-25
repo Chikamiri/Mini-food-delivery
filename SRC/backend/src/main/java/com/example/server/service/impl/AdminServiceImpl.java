@@ -108,4 +108,10 @@ public class AdminServiceImpl implements AdminService {
                 .totalRevenue(totalRevenue != null ? totalRevenue.doubleValue() : 0.0)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        userService.deleteUser(userId);
+    }
 }

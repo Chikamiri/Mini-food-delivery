@@ -134,6 +134,14 @@ public class UserServiceImpl implements UserService {
         addressRepository.save(address);
     }
 
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", id));
+        userRepository.delete(user);
+    }
+
     private void resetDefaultAddress(Long userId) {
         addressRepository.findByUserIdAndIsDefaultTrue(userId)
                 .ifPresent(addr -> {

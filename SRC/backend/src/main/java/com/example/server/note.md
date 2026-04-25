@@ -68,4 +68,5 @@ src/main/java/com/example/server/
 - **UNASSIGNED**: Default status for new delivery assignments before a shipper accepts.
 - **COD**: Only Cash on Delivery is supported (PaymentMethod enum).
 - **Terminal Status**: `DELIVERED` for orders; `COMPLETED` for deliveries.
-- **Soft Delete**: Implemented for `User`, `Restaurant`, `MenuCategory`, and `MenuItem`.
+- **Soft Delete**: Implemented for `Restaurant`, `MenuCategory`, and `MenuItem`.
+- **Hard Delete**: Available for `User` (Admin or Self-deletion) and `Address`.

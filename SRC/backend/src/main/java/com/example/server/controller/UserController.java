@@ -37,6 +37,12 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUserProfile(userDetails.getId(), request));
     }
 
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUser(userDetails.getId());
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/me/addresses")
     public ResponseEntity<List<AddressResponse>> getMyAddresses(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getUserAddresses(userDetails.getId()));

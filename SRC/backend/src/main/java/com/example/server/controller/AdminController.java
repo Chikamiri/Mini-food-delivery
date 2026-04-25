@@ -83,6 +83,18 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails adminDetails,
+            @PathVariable Long id) {
+        // Prevent self-deletion
+        if (adminDetails.getId().equals(id)) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Admins cannot delete their own accounts", "SELF_DELETION_DENIED");
+        }
+        adminService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/reports/summary")
     public ResponseEntity<AdminReportSummaryResponse> getAdminReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
