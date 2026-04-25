@@ -69,6 +69,9 @@ public class Restaurant {
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<MenuItem> menuItems = new ArrayList<>();
 
+	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<MenuCategory> menuCategories = new ArrayList<>();
+
 	@PrePersist
 	protected void onCreate() {
 		createdAt = LocalDateTime.now();

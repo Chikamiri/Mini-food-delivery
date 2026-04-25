@@ -69,4 +69,13 @@ public class User {
 
 	@OneToMany(mappedBy = "changedBy", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Notification> notifications = new ArrayList<>();
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<OwnerRequest> ownerRequests = new ArrayList<>();
+
+	@OneToOne(mappedBy = "shipper", cascade = CascadeType.ALL, orphanRemoval = true)
+	private ShipperLocation shipperLocation;
 }
