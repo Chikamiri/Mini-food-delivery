@@ -40,6 +40,7 @@ src/main/java/com/example/server/
   - Added `GET /api/restaurant-categories` to support frontend browsing.
   - Added missing Admin endpoints: `GET /api/admin/stats`, `GET /api/admin/users`, `GET /api/admin/restaurants/pending`.
   - Added `OwnerRequest` endpoints for User promotion workflow.
+  - Added `POST /api/dev/db/reset` for rapid database re-initialization (Dev profile only).
 
 ## Backend Roadmap - Phase 2
 
