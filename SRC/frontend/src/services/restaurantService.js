@@ -42,6 +42,14 @@ export default {
     return api.post(`/api/restaurants/${restaurantId}/menu/categories`, payload)
   },
 
+  async updateMenuCategory(restaurantId, categoryId, payload) {
+    return api.put(`/api/restaurants/${restaurantId}/menu/categories/${categoryId}`, payload)
+  },
+
+  async deleteMenuCategory(restaurantId, categoryId) {
+    return api.delete(`/api/restaurants/${restaurantId}/menu/categories/${categoryId}`)
+  },
+
   // --- Menu Items ---
   async getMenuByRestaurant(restaurantId) {
     // Backend currently exposes menu items inside restaurant detail response.

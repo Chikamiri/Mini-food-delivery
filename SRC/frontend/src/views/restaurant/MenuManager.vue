@@ -30,7 +30,6 @@ const menuForm = ref({
   isAvailable: true,
   categoryId: null,
 })
-const newCategoryName = ref('')
 const imagePreview = ref('')
 const fileInputRef = ref(null)
 
@@ -113,7 +112,6 @@ const resetMenuForm = () => {
   }
   imagePreview.value = ''
   if (fileInputRef.value) fileInputRef.value.value = ''
-  newCategoryName.value = ''
 }
 const openAddMenu = () => {
   menuModalMode.value = 'add'
@@ -159,22 +157,6 @@ const saveMenuItem = async () => {
   actionLoading.value = true
   try {
     if (menuModalMode.value === 'add') {
-      if (!menuForm.value.categoryId && !newCategoryName.value.trim()) {
-        errorMessage.value = 'Vui lòng chọn danh mục hoặc nhập danh mục mới.'
-        return
-      }
-      if (!menuForm.value.categoryId && newCategoryName.value.trim()) {
-        const created = await restaurantService.createMenuCategory(activeRestaurantId.value, {
-          name: newCategoryName.value.trim(),
-        })
-        const createdId = created?.id
-        if (!createdId) {
-          errorMessage.value = 'Tạo danh mục mới thất bại.'
-          return
-        }
-        menuForm.value.categoryId = createdId
-        await loadCategoryOptions()
-      }
       if (!menuForm.value.categoryId) {
         errorMessage.value = 'Vui lòng chọn danh mục trước khi thêm món.'
         return
@@ -333,11 +315,6 @@ onMounted(async () => {
                 </option>
               </select>
             </label>
-            <label v-if="menuModalMode === 'add' && !categoryOptions.length">
-              <span>Tên danh mục mới</span>
-              <input v-model="newCategoryName" type="text" placeholder="Ví dụ: Món chính" />
-              <small class="hint-text">Nhà hàng chưa có danh mục, sẽ tạo mới khi lưu món.</small>
-            </label>
             <label>
               <span>Hình ảnh món</span>
               <div class="image-upload-area">
@@ -431,13 +408,6 @@ onMounted(async () => {
   color: #2f3748;
   font-size: 0.84rem;
   font-weight: 600;
-}
-
-.hint-text {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 0.78rem;
-  color: #7b8394;
 }
 
 .menu-form input,
