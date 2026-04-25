@@ -53,10 +53,15 @@ const profileName = ref('')
 const profileAvatar = ref(
   'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80',
 )
+const notifications = ref([])
+const isNoticeOpen = ref(false)
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
 const cartCount = computed(() => cartStore.itemCount)
+const unreadNoticeCount = computed(
+  () => notifications.value.filter((item) => item?.isRead === false).length,
+)
 const favoriteIds = ref([])
 const isPromoView = computed(() => activeMenu.value === 'promo')
 const isFavoritesView = computed(() => activeMenu.value === 'favorites')
@@ -97,6 +102,51 @@ const loadBrowseData = () =>
     userService,
     profileAvatar,
   })
+const loadNotifications = async () => {
+  try {
+    const data = await userService.getNotifications()
+    notifications.value = Array.isArray(data) ? data : []
+  } catch {
+    notifications.value = []
+  }
+}
+const toggleNoticePanel = async () => {
+  const next = !isNoticeOpen.value
+  isNoticeOpen.value = next
+  if (next) {
+    await loadNotifications()
+  }
+}
+const markNotificationRead = async (notice) => {
+  if (!notice?.id || notice?.isRead) return
+  try {
+    await userService.markNotificationRead(notice.id)
+    notifications.value = notifications.value.map((item) =>
+      item.id === notice.id ? { ...item, isRead: true } : item,
+    )
+  } catch {
+    // ignore mark-read errors to keep UI responsive
+  }
+}
+const markAllNotificationsRead = async () => {
+  try {
+    await userService.markAllNotificationsRead(null)
+    notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
+  } catch {
+    // ignore mark-all errors
+  }
+}
+const formatNoticeTime = (value) => {
+  if (!value) return 'Vừa xong'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Vừa xong'
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
 watch(selectedDish, (value) => {
   document.body.style.overflow = value ? 'hidden' : ''
@@ -110,6 +160,7 @@ onMounted(() => {
     favoriteIds.value = []
   }
   loadBrowseData()
+  loadNotifications()
 })
 
 </script>
@@ -140,11 +191,36 @@ onMounted(() => {
           <button type="button" class="action-btn has-dot" aria-label="Tin nhắn">
             <img :src="iconMessage" alt="" width="22" height="22" />
           </button>
-          <button type="button" class="action-btn has-dot" aria-label="Thông báo">
+          <button
+            type="button"
+            class="action-btn"
+            :class="{ 'has-dot': unreadNoticeCount > 0 }"
+            aria-label="Thông báo"
+            @click="toggleNoticePanel"
+          >
             <img :src="iconNotice" alt="" width="22" height="22" />
           </button>
           <button type="button" class="action-btn" aria-label="Cài đặt">
             <img :src="iconSetting" alt="" width="22" height="22" />
+          </button>
+        </div>
+        <div v-if="isNoticeOpen" class="notice-panel">
+          <div class="notice-panel-head">
+            <strong>Thông báo</strong>
+            <button type="button" @click="markAllNotificationsRead">Đọc tất cả</button>
+          </div>
+          <p v-if="!notifications.length" class="notice-empty">Chưa có thông báo nào.</p>
+          <button
+            v-for="notice in notifications"
+            :key="notice.id"
+            type="button"
+            class="notice-item"
+            :class="{ unread: notice.isRead === false }"
+            @click="markNotificationRead(notice)"
+          >
+            <strong>{{ notice.title || 'Thông báo hệ thống' }}</strong>
+            <span>{{ notice.message || 'Bạn có cập nhật mới.' }}</span>
+            <small>{{ formatNoticeTime(notice.createdAt) }}</small>
           </button>
         </div>
         <RouterLink to="/profile" class="profile-shortcut" aria-label="Trang cá nhân">

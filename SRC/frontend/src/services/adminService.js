@@ -15,6 +15,16 @@ export default {
     return api.patch(`/api/admin/users/${userId}/status`, { active: isActive })
   },
 
+  async updateUserRole(userId, role) {
+    return api.patch(`/api/admin/users/${userId}/role`, { role })
+  },
+
+  async deleteUser(userId) {
+    // Backend currently has no hard-delete endpoint for users.
+    // Treat delete action as deactivate account.
+    return api.patch(`/api/admin/users/${userId}/status`, { active: false })
+  },
+
   // --- Restaurant Approval ---
   async getPendingRestaurants() {
     return api.get('/api/admin/restaurants/pending')

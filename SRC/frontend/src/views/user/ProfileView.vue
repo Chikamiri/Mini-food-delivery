@@ -107,6 +107,7 @@ const openRestaurantModal = () =>
     restaurants,
     restaurantService,
     ownerRequestService,
+    userService,
   })
 const handleMenuClick = (item) =>
   handleProfileMenuClickAction(

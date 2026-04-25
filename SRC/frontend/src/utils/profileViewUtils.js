@@ -49,6 +49,7 @@ export async function openRestaurantModalAction({
   restaurants,
   restaurantService,
   ownerRequestService,
+  userService,
 }) {
   restaurantModalOpen.value = true
   showOpenRestaurantForm.value = false
@@ -83,8 +84,28 @@ export async function openRestaurantModalAction({
     return
   }
   try {
-    const data = await restaurantService.getMyRestaurants()
-    restaurants.value = Array.isArray(data) ? data : []
+    const [data, notifications] = await Promise.all([
+      restaurantService.getMyRestaurants(),
+      userService.getNotifications().catch(() => []),
+    ])
+    const allRestaurants = Array.isArray(data) ? data : []
+    const rejectedNames = new Set(
+      (Array.isArray(notifications) ? notifications : [])
+        .filter((item) =>
+          String(item?.message || '')
+            .toLowerCase()
+            .includes('has been rejected'),
+        )
+        .map((item) => {
+          const message = String(item?.message || '')
+          const matched = message.match(/'([^']+)'/)
+          return matched?.[1]?.trim()?.toLowerCase() || ''
+        })
+        .filter(Boolean),
+    )
+    restaurants.value = allRestaurants.filter(
+      (item) => item?.isApproved || !rejectedNames.has(String(item?.name || '').trim().toLowerCase()),
+    )
   } catch (error) {
     restaurants.value = []
     const message = String(error?.message || '')

@@ -17,8 +17,6 @@ import ShipperDashboard from '@/views/shipper/DashboardView.vue'
 import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
 import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
 import AdminDashboard from '@/views/admin/DashboardView.vue'
-import UserManager from '@/views/admin/UserManager.vue'
-import RestaurantApproval from '@/views/admin/RestaurantApproval.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -49,8 +47,8 @@ const router = createRouter({
 
     // Admin routes
     { path: '/admin/dashboard', name: 'admin-dashboard', component: AdminDashboard },
-    { path: '/admin/users', name: 'admin-users', component: UserManager },
-    { path: '/admin/restaurants/approval', name: 'admin-restaurants-approval', component: RestaurantApproval },
+    { path: '/admin/users', name: 'admin-users', component: AdminDashboard },
+    { path: '/admin/restaurants/approval', name: 'admin-restaurants-approval', component: AdminDashboard },
   ],
 })
 

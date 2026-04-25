@@ -196,6 +196,7 @@
 }
 
 .header-actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -238,6 +239,82 @@
   height: 8px;
   border-radius: 999px;
   background: #f7b500;
+}
+
+.notice-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48px;
+  z-index: 30;
+  background: #fff;
+  border: 1px solid #e8ecf3;
+  border-radius: 12px;
+  box-shadow: 0 16px 28px rgba(17, 28, 46, 0.12);
+  max-height: 320px;
+  overflow: auto;
+  padding: 0.55rem;
+}
+
+.notice-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.42rem;
+}
+
+.notice-panel-head strong {
+  font-size: 0.92rem;
+  color: #202838;
+}
+
+.notice-panel-head button {
+  border: 0;
+  background: transparent;
+  color: #f8143f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notice-empty {
+  margin: 0.65rem 0.3rem;
+  font-size: 0.84rem;
+  color: #7e8795;
+}
+
+.notice-item {
+  width: 100%;
+  border: 0;
+  background: #f8f9fc;
+  border-radius: 10px;
+  padding: 0.55rem 0.62rem;
+  margin-top: 0.4rem;
+  text-align: left;
+  display: grid;
+  gap: 0.14rem;
+  cursor: pointer;
+}
+
+.notice-item.unread {
+  background: #fff1f4;
+}
+
+.notice-item strong {
+  color: #263043;
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+
+.notice-item span {
+  color: #647085;
+  font-size: 0.79rem;
+  line-height: 1.32;
+}
+
+.notice-item small {
+  color: #8c95a4;
+  font-size: 0.74rem;
 }
 
 .profile-shortcut {

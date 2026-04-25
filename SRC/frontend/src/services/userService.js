@@ -34,4 +34,17 @@ export default {
   async setDefaultAddress(addressId) {
     return api.patch(`/api/users/me/addresses/${addressId}/default`)
   },
+
+  // --- Notifications ---
+  async getNotifications() {
+    return api.get('/api/users/me/notifications')
+  },
+
+  async markNotificationRead(notificationId) {
+    return api.patch('/api/users/me/notifications/read', { notificationId })
+  },
+
+  async markAllNotificationsRead(type = null) {
+    return api.patch('/api/users/me/notifications/read-all', { type })
+  },
 }
