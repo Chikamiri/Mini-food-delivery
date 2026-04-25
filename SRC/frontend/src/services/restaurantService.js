@@ -33,6 +33,15 @@ export default {
     return api.get('/api/restaurant-categories')
   },
 
+  // --- Menu Categories (per restaurant) ---
+  async getMenuCategories(restaurantId) {
+    return api.get(`/api/restaurants/${restaurantId}/menu/categories`)
+  },
+
+  async createMenuCategory(restaurantId, payload) {
+    return api.post(`/api/restaurants/${restaurantId}/menu/categories`, payload)
+  },
+
   // --- Menu Items ---
   async getMenuByRestaurant(restaurantId) {
     // Backend currently exposes menu items inside restaurant detail response.

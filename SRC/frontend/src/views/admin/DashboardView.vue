@@ -199,18 +199,26 @@ const saveUserEdit = async () => {
 
 const deleteUser = async (user) => {
   if (!user?.id) return
-  const ok = window.confirm(`Xác nhận khóa tài khoản ${user.fullName || user.email}?`)
+  const ok = window.confirm(
+    `Xác nhận xóa vĩnh viễn người dùng ${user.fullName || user.email}? Hành động này không thể hoàn tác.`,
+  )
   if (!ok) return
   actionLoading.value = true
   successMessage.value = ''
   errorMessage.value = ''
   try {
     await adminService.deleteUser(user.id)
-    successMessage.value = 'Đã khóa tài khoản người dùng'
-    await loadDashboardData()
+    successMessage.value = 'Đã xóa người dùng khỏi hệ thống'
   } catch (error) {
-    errorMessage.value = error.message || 'Không thể khóa tài khoản người dùng'
+    try {
+      await adminService.toggleUserActive(user.id, false)
+      successMessage.value =
+        'Không thể xóa cứng do ràng buộc dữ liệu backend. Đã chuyển tài khoản sang trạng thái khóa.'
+    } catch {
+      errorMessage.value = error.message || 'Không thể xóa người dùng'
+    }
   } finally {
+    await loadDashboardData()
     actionLoading.value = false
   }
 }

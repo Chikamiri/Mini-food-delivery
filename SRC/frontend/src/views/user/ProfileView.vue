@@ -377,57 +377,105 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
       <div v-if="settingsModalOpen" class="restaurant-overlay" @click.self="closeSettingsModal">
         <article class="restaurant-modal settings-modal">
           <div class="restaurant-modal-head">
-            <h3>Cài đặt tài khoản</h3>
+            <h3>⚙️ Cài đặt tài khoản</h3>
             <button type="button" class="modal-close-btn" @click="closeSettingsModal">✕</button>
           </div>
 
-          <section class="restaurant-section">
-            <h4>Thông báo</h4>
-            <label class="setting-switch">
-              <span>Thông báo đẩy</span>
-              <input v-model="settingsForm.pushNotifications" type="checkbox" />
-            </label>
-            <label class="setting-switch">
-              <span>Email thông báo đơn hàng</span>
-              <input v-model="settingsForm.emailNotifications" type="checkbox" />
-            </label>
-            <label class="setting-switch">
-              <span>Thông báo khuyến mãi</span>
-              <input v-model="settingsForm.promoNotifications" type="checkbox" />
-            </label>
+          <!-- Thông báo -->
+          <section class="settings-group">
+            <div class="settings-group-title">
+              <span class="settings-group-icon">🔔</span>
+              <h4>Thông báo</h4>
+            </div>
+            <div class="settings-items">
+              <label class="settings-toggle-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Thông báo đẩy</span>
+                  <span class="toggle-desc">Nhận thông báo đơn hàng, trạng thái giao hàng</span>
+                </div>
+                <div class="toggle-switch" :class="{ active: settingsForm.pushNotifications }" @click="settingsForm.pushNotifications = !settingsForm.pushNotifications">
+                  <div class="toggle-knob"></div>
+                </div>
+              </label>
+              <label class="settings-toggle-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Gửi email đơn hàng</span>
+                  <span class="toggle-desc">Nhận xác nhận đơn qua email</span>
+                </div>
+                <div class="toggle-switch" :class="{ active: settingsForm.emailNotifications }" @click="settingsForm.emailNotifications = !settingsForm.emailNotifications">
+                  <div class="toggle-knob"></div>
+                </div>
+              </label>
+              <label class="settings-toggle-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Khuyến mãi & ưu đãi</span>
+                  <span class="toggle-desc">Nhận tin về mã giảm giá, Flash Sale</span>
+                </div>
+                <div class="toggle-switch" :class="{ active: settingsForm.promoNotifications }" @click="settingsForm.promoNotifications = !settingsForm.promoNotifications">
+                  <div class="toggle-knob"></div>
+                </div>
+              </label>
+            </div>
           </section>
 
-          <section class="restaurant-section">
-            <h4>Hiển thị & ngôn ngữ</h4>
-            <label class="field">
-              <span>Ngôn ngữ</span>
-              <select v-model="settingsForm.language">
-                <option value="vi">Tiếng Việt</option>
-                <option value="en">English</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Giao diện</span>
-              <select v-model="settingsForm.theme">
-                <option value="light">Sáng</option>
-                <option value="dark">Tối</option>
-                <option value="system">Theo hệ thống</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Quyền riêng tư lịch sử đơn</span>
-              <select v-model="settingsForm.orderPrivacy">
-                <option value="private">Chỉ mình tôi</option>
-                <option value="friends">Bạn bè</option>
-                <option value="public">Công khai</option>
-              </select>
-            </label>
+          <!-- Hiển thị -->
+          <section class="settings-group">
+            <div class="settings-group-title">
+              <span class="settings-group-icon">🎨</span>
+              <h4>Hiển thị & ngôn ngữ</h4>
+            </div>
+            <div class="settings-items">
+              <div class="settings-select-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Ngôn ngữ</span>
+                  <span class="toggle-desc">Chọn ngôn ngữ hiển thị ứng dụng</span>
+                </div>
+                <select v-model="settingsForm.language" class="settings-select">
+                  <option value="vi">🇻🇳 Tiếng Việt</option>
+                  <option value="en">🇬🇧 English</option>
+                </select>
+              </div>
+              <div class="settings-select-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Giao diện</span>
+                  <span class="toggle-desc">Chọn chế độ sáng, tối hoặc theo hệ thống</span>
+                </div>
+                <select v-model="settingsForm.theme" class="settings-select">
+                  <option value="light">☀️ Sáng</option>
+                  <option value="dark">🌙 Tối</option>
+                  <option value="system">💻 Theo hệ thống</option>
+                </select>
+              </div>
+            </div>
           </section>
 
-          <div class="form-actions">
-            <button type="button" class="cancel-btn" @click="closeSettingsModal">Đóng</button>
-            <button type="button" class="save-btn" @click="saveSettings">Lưu cài đặt</button>
+          <!-- Riêng tư -->
+          <section class="settings-group">
+            <div class="settings-group-title">
+              <span class="settings-group-icon">🔒</span>
+              <h4>Quyền riêng tư</h4>
+            </div>
+            <div class="settings-items">
+              <div class="settings-select-row">
+                <div class="settings-toggle-info">
+                  <span class="toggle-label">Lịch sử đơn hàng</span>
+                  <span class="toggle-desc">Ai có thể xem lịch sử đặt hàng của bạn</span>
+                </div>
+                <select v-model="settingsForm.orderPrivacy" class="settings-select">
+                  <option value="private">🔒 Chỉ mình tôi</option>
+                  <option value="friends">👥 Bạn bè</option>
+                  <option value="public">🌐 Công khai</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <div class="settings-actions">
+            <button type="button" class="settings-cancel-btn" @click="closeSettingsModal">Đóng</button>
+            <button type="button" class="settings-save-btn" @click="saveSettings">💾 Lưu cài đặt</button>
           </div>
+
+          <p v-if="restaurantMessage" class="settings-saved-msg">{{ restaurantMessage }}</p>
         </article>
       </div>
     </Teleport>

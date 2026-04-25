@@ -20,9 +20,7 @@ export default {
   },
 
   async deleteUser(userId) {
-    // Backend currently has no hard-delete endpoint for users.
-    // Treat delete action as deactivate account.
-    return api.patch(`/api/admin/users/${userId}/status`, { active: false })
+    return api.delete(`/api/admin/users/${userId}`)
   },
 
   // --- Restaurant Approval ---
