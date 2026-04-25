@@ -48,17 +48,37 @@ export async function openRestaurantModalAction({
   profile,
   restaurants,
   restaurantService,
+  ownerRequestService,
 }) {
   restaurantModalOpen.value = true
   showOpenRestaurantForm.value = false
   restaurantMessage.value = ''
   restaurantLoading.value = true
+  if (authStore.token) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore profile refresh errors; fallback to current local profile state
+    }
+  }
   const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
   if (role !== 'OWNER') {
     restaurants.value = []
     showOpenRestaurantForm.value = true
-    restaurantMessage.value =
-      'Tài khoản của bạn hiện là USER. Bạn có thể điền form mở quán, sau khi được admin cấp OWNER và duyệt quán thì mới vào dashboard nhà hàng.'
+    try {
+      const myRequests = await ownerRequestService.getMyRequests()
+      const pendingRequest = (Array.isArray(myRequests) ? myRequests : []).find(
+        (item) => String(item?.status || '').toUpperCase() === 'PENDING',
+      )
+      if (pendingRequest) {
+        restaurantMessage.value =
+          'Bạn đã gửi đơn xin quyền OWNER và đang chờ admin duyệt. Sau khi duyệt, hãy đăng nhập lại để vào dashboard nhà hàng.'
+      } else {
+        restaurantMessage.value = 'Bạn có thể gửi đơn xin quyền OWNER để admin xét duyệt.'
+      }
+    } catch {
+      restaurantMessage.value = 'Bạn có thể gửi đơn xin quyền OWNER để admin xét duyệt.'
+    }
     restaurantLoading.value = false
     return
   }
@@ -105,6 +125,7 @@ export async function submitOpenRestaurantAction({
   authStore,
   profile,
   restaurantService,
+  ownerRequestService,
   openingForm,
   showOpenRestaurantForm,
   restaurants,
@@ -114,8 +135,16 @@ export async function submitOpenRestaurantAction({
   try {
     const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
     if (role !== 'OWNER') {
+      await ownerRequestService.submitRequest({
+        restaurantName: openingForm.value.name,
+        restaurantAddress: openingForm.value.address,
+        restaurantPhone: openingForm.value.phone,
+        description: openingForm.value.description || openingForm.value.noteToAdmin || '',
+      })
       restaurantMessage.value =
-        'Hiện backend chưa có API để USER gửi đơn xin quyền OWNER trực tiếp. Tạm thời bạn cần nhờ admin cấp role OWNER, sau đó mới gửi mở quán và vào dashboard được.'
+        'Đã gửi đơn xin quyền OWNER cho admin. Khi được duyệt, tài khoản của bạn sẽ trở thành OWNER.'
+      openingForm.value = { name: '', phone: '', address: '', description: '', noteToAdmin: '' }
+      showOpenRestaurantForm.value = false
       return
     }
 

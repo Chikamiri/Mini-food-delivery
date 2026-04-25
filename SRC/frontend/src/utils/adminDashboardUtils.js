@@ -14,13 +14,15 @@ export async function loadAdminDashboardDataAction(
   stats,
   approvalQueue,
   users,
+  ownerRequestQueue,
 ) {
   isLoading.value = true
   errorMessage.value = ''
-  const [statsResult, pendingResult, usersResult] = await Promise.allSettled([
+  const [statsResult, pendingResult, usersResult, ownerRequestsResult] = await Promise.allSettled([
     adminService.getSystemStats(),
     adminService.getPendingRestaurants(),
     adminService.getAllUsers(),
+    adminService.getPendingOwnerRequests(),
   ])
 
   if (statsResult.status === 'fulfilled' && statsResult.value) {
@@ -29,6 +31,10 @@ export async function loadAdminDashboardDataAction(
   approvalQueue.value =
     pendingResult.status === 'fulfilled' && Array.isArray(pendingResult.value) ? pendingResult.value : []
   users.value = usersResult.status === 'fulfilled' && Array.isArray(usersResult.value) ? usersResult.value : []
+  ownerRequestQueue.value =
+    ownerRequestsResult.status === 'fulfilled' && Array.isArray(ownerRequestsResult.value)
+      ? ownerRequestsResult.value
+      : []
   isLoading.value = false
 }
 

@@ -34,6 +34,7 @@ const stats = ref({
   totalRevenue: 0,
 })
 const approvalQueue = ref([])
+const ownerRequestQueue = ref([])
 const users = ref([])
 const isLoading = ref(false)
 const actionLoading = ref(false)
@@ -56,6 +57,14 @@ const filteredApprovals = computed(() =>
   ),
 )
 
+const filteredOwnerRequests = computed(() =>
+  ownerRequestQueue.value.filter((item) =>
+    `${item.restaurantName || ''} ${item.userEmail || ''} ${item.restaurantAddress || ''}`
+      .toLowerCase()
+      .includes(keyword.value.trim().toLowerCase()),
+  ),
+)
+
 const filteredUsers = computed(() =>
   users.value.filter((item) =>
     `${item.fullName || ''} ${item.email || ''}`.toLowerCase().includes(keyword.value.trim().toLowerCase()),
@@ -65,7 +74,15 @@ const filteredUsers = computed(() =>
 const logout = () => logoutAdminAction(authStore, router)
 const formatCurrency = (value) => formatAdminCurrency(value)
 const loadDashboardData = () =>
-  loadAdminDashboardDataAction(isLoading, errorMessage, adminService, stats, approvalQueue, users)
+  loadAdminDashboardDataAction(
+    isLoading,
+    errorMessage,
+    adminService,
+    stats,
+    approvalQueue,
+    users,
+    ownerRequestQueue,
+  )
 const approveRestaurant = (restaurantId) =>
   approveAdminRestaurantAction(
     restaurantId,
@@ -93,6 +110,37 @@ const toggleUser = (user) =>
     adminService,
     loadDashboardData,
   )
+const approveOwnerRequest = async (requestId) => {
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.approveOwnerRequest(requestId)
+    successMessage.value = 'Đã duyệt đơn xin quyền OWNER'
+    await loadDashboardData()
+  } catch (error) {
+    errorMessage.value = error.message || 'Duyệt đơn OWNER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const rejectOwnerRequest = async (requestId) => {
+  const reason = window.prompt('Nhập lý do từ chối đơn OWNER:', 'Thiếu thông tin hồ sơ')
+  if (reason === null) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.rejectOwnerRequest(requestId, reason)
+    successMessage.value = 'Đã từ chối đơn xin quyền OWNER'
+    await loadDashboardData()
+  } catch (error) {
+    errorMessage.value = error.message || 'Từ chối đơn OWNER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
 
 onMounted(() => {
   loadDashboardData()
@@ -122,7 +170,7 @@ onMounted(() => {
 
       <div class="sidebar-note">
         <p>Khuyến nghị</p>
-        <strong>{{ approvalQueue.length }} nhà hàng đang chờ duyệt hồ sơ mới.</strong>
+        <strong>{{ approvalQueue.length + filteredOwnerRequests.length }} yêu cầu đang chờ duyệt.</strong>
       </div>
     </aside>
 
@@ -228,6 +276,25 @@ onMounted(() => {
         <section class="panel full-panel">
           <div class="panel-head">
             <h3>Danh sách nhà hàng chờ duyệt ({{ filteredApprovals.length }})</h3>
+          </div>
+          <div class="table" style="margin-bottom: 1rem;">
+            <div class="panel-head" style="padding: 0 0 0.5rem;">
+              <h3>Đơn xin quyền OWNER ({{ filteredOwnerRequests.length }})</h3>
+            </div>
+            <div v-if="!filteredOwnerRequests.length" class="empty-row">Không có đơn xin OWNER nào chờ duyệt.</div>
+            <div v-for="request in filteredOwnerRequests" :key="request.id" class="row">
+              <div>
+                <strong>{{ request.restaurantName || 'Đơn xin OWNER' }}</strong>
+                <p>{{ request.userEmail || 'Không có email' }} • {{ request.restaurantAddress || 'Chưa có địa chỉ' }}</p>
+                <small v-if="request.restaurantPhone">SĐT: {{ request.restaurantPhone }}</small>
+              </div>
+              <div class="row-actions">
+                <button type="button" :disabled="actionLoading" @click="approveOwnerRequest(request.id)">Duyệt OWNER</button>
+                <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectOwnerRequest(request.id)">
+                  Từ chối
+                </button>
+              </div>
+            </div>
           </div>
           <div class="table">
             <div v-if="!filteredApprovals.length" class="empty-row">Không có nhà hàng nào chờ duyệt.</div>

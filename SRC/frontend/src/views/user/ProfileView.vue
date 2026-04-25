@@ -17,6 +17,7 @@ import userService from '@/services/userService'
 import orderService from '@/services/orderService'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
+import ownerRequestService from '@/services/ownerRequestService'
 import {
   startEditingProfileAction,
   cancelEditingProfileAction,
@@ -105,6 +106,7 @@ const openRestaurantModal = () =>
     profile,
     restaurants,
     restaurantService,
+    ownerRequestService,
   })
 const handleMenuClick = (item) =>
   handleProfileMenuClickAction(
@@ -122,6 +124,7 @@ const submitOpenRestaurant = () =>
     authStore,
     profile,
     restaurantService,
+    ownerRequestService,
     openingForm,
     showOpenRestaurantForm,
     restaurants,

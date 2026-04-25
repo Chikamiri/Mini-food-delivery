@@ -3,6 +3,7 @@
  * Quan ly nguoi dung, duyet nha hang, thong ke
  */
 import api from '@/services/api'
+import ownerRequestService from '@/services/ownerRequestService'
 
 export default {
   // --- User Management ---
@@ -36,5 +37,18 @@ export default {
   // --- Stats ---
   async getSystemStats() {
     return api.get('/api/admin/stats')
+  },
+
+  // --- Owner Request Approval ---
+  async getPendingOwnerRequests() {
+    return ownerRequestService.getPendingRequests()
+  },
+
+  async approveOwnerRequest(requestId) {
+    return ownerRequestService.processRequest(requestId, true, null)
+  },
+
+  async rejectOwnerRequest(requestId, reason) {
+    return ownerRequestService.processRequest(requestId, false, reason || null)
   },
 }
