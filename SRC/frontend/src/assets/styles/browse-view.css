@@ -919,6 +919,18 @@
   white-space: nowrap;
 }
 
+.dish-restaurant-btn {
+  border: 1px solid #e8ecf2;
+  cursor: pointer;
+  font: inherit;
+}
+
+.dish-restaurant-btn:hover {
+  border-color: #ff8b2c;
+  color: #ff8b2c;
+  background: #fff7ef;
+}
+
 .dish-restaurant img {
   width: 18px;
   height: 18px;

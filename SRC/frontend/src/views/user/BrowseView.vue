@@ -145,6 +145,10 @@ const markAllNotificationsRead = async () => {
 const openSettings = () => {
   router.push('/profile?openSettings=1')
 }
+const openRestaurantDetail = (dish) => {
+  if (!dish?.restaurantId) return
+  router.push(`/restaurants/${dish.restaurantId}`)
+}
 const formatNoticeTime = (value) => {
   if (!value) return 'Vừa xong'
   const date = new Date(value)
@@ -598,10 +602,10 @@ onMounted(() => {
           <div class="dish-detail-body">
             <div class="dish-detail-head">
               <h3>{{ selectedDish.name }}</h3>
-              <span class="dish-restaurant">
+              <button type="button" class="dish-restaurant dish-restaurant-btn" @click="openRestaurantDetail(selectedDish)">
                 <img :src="selectedDish.restaurantLogo" :alt="selectedDish.restaurant" />
                 {{ selectedDish.restaurant }}
-              </span>
+              </button>
             </div>
             <div class="dish-detail-meta">
               <span>{{ selectedDish.distance }}</span>
