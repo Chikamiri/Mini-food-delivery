@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
@@ -147,6 +147,8 @@ const openSettings = () => {
 }
 const openRestaurantDetail = (dish) => {
   if (!dish?.restaurantId) return
+  selectedDish.value = null
+  document.body.style.overflow = ''
   router.push(`/restaurants/${dish.restaurantId}`)
 }
 const formatNoticeTime = (value) => {
@@ -174,6 +176,10 @@ onMounted(() => {
   }
   loadBrowseData()
   loadNotifications()
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 
 </script>
