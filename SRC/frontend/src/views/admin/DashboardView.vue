@@ -41,9 +41,11 @@ const keyword = ref('')
 const rejectedRestaurantIds = ref([])
 const editUserModalOpen = ref(false)
 const editingUser = ref(null)
-const editRole = ref('ROLE_USER')
+const editRole = ref('USER')
 const editActive = ref(true)
-const roleOptions = ['ROLE_USER', 'ROLE_OWNER', 'ROLE_ADMIN', 'ROLE_SHIPPER', 'ROLE_CUSTOMER']
+const roleOptions = ['USER', 'OWNER', 'ADMIN', 'SHIPPER', 'CUSTOMER']
+
+const normalizeRole = (value) => String(value || '').toUpperCase().replace(/^ROLE_/, '')
 
 const kpiCards = computed(() => [
   { title: 'Tổng đơn', value: Number(stats.value.totalOrders || 0).toLocaleString('vi-VN'), icon: '🧾' },
@@ -163,7 +165,7 @@ const rejectOwnerRequest = async (requestId) => {
 
 const openEditUser = (user) => {
   editingUser.value = user
-  editRole.value = user?.role || 'ROLE_USER'
+  editRole.value = normalizeRole(user?.role || 'USER')
   editActive.value = Boolean(user?.active)
   editUserModalOpen.value = true
 }
@@ -179,10 +181,10 @@ const saveUserEdit = async () => {
   successMessage.value = ''
   errorMessage.value = ''
   try {
-    const currentRole = String(editingUser.value.role || '').toUpperCase()
-    const nextRole = String(editRole.value || '').toUpperCase()
+    const currentRole = normalizeRole(editingUser.value.role)
+    const nextRole = normalizeRole(editRole.value)
     if (currentRole !== nextRole) {
-      await adminService.updateUserRole(editingUser.value.id, editRole.value)
+      await adminService.updateUserRole(editingUser.value.id, nextRole)
     }
     if (Boolean(editingUser.value.active) !== Boolean(editActive.value)) {
       await adminService.toggleUserActive(editingUser.value.id, editActive.value)

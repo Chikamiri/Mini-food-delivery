@@ -8,7 +8,6 @@ import iconCheck from '@/assets/icon/check.svg'
 import iconFavorite from '@/assets/icon/love.svg'
 import iconLocation from '@/assets/icon/home.svg'
 import iconHistory from '@/assets/icon/time.svg'
-import iconNotification from '@/assets/icon/notice.svg'
 import iconPayment from '@/assets/icon/credit-card.svg'
 import iconOpenRestaurant from '@/assets/icon/home.svg'
 import iconSetting from '@/assets/icon/setting.svg'
@@ -170,7 +169,7 @@ onMounted(() => {
   loadStats()
   try {
     const storedSettings = JSON.parse(localStorage.getItem('profile_settings') || '{}')
-    settingsForm.value = { ...settingsForm.value, ...(storedSettings || {}) }
+    settingsForm.value = { ...settingsForm.value, ...storedSettings }
   } catch {
     // keep defaults
   }

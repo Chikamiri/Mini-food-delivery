@@ -35,6 +35,37 @@ export async function loadAdminDashboardDataAction(
     ownerRequestsResult.status === 'fulfilled' && Array.isArray(ownerRequestsResult.value)
       ? ownerRequestsResult.value
       : []
+
+  // Fallback: if /stats does not return full counters, derive from loaded lists.
+  if (!stats.value || typeof stats.value !== 'object') {
+    stats.value = {}
+  }
+  if (!Number.isFinite(Number(stats.value.totalUsers)) || Number(stats.value.totalUsers) <= 0) {
+    stats.value.totalUsers = users.value.length
+  }
+  if (!Number.isFinite(Number(stats.value.pendingRestaurants)) || Number(stats.value.pendingRestaurants) < 0) {
+    stats.value.pendingRestaurants = approvalQueue.value.length
+  }
+  if (!Number.isFinite(Number(stats.value.totalRestaurants)) || Number(stats.value.totalRestaurants) < 0) {
+    stats.value.totalRestaurants = Math.max(Number(stats.value.totalRestaurants || 0), approvalQueue.value.length)
+  }
+  if (!Number.isFinite(Number(stats.value.totalOrders))) {
+    stats.value.totalOrders = 0
+  }
+  if (!Number.isFinite(Number(stats.value.totalRevenue))) {
+    stats.value.totalRevenue = 0
+  }
+
+  // Keep UI clean: only surface a hard error when all critical sources fail.
+  const allFailed =
+    statsResult.status !== 'fulfilled' &&
+    pendingResult.status !== 'fulfilled' &&
+    usersResult.status !== 'fulfilled'
+  if (allFailed) {
+    errorMessage.value = 'Không thể tải dữ liệu dashboard admin.'
+  } else {
+    errorMessage.value = ''
+  }
   isLoading.value = false
 }
 
