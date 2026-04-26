@@ -94,6 +94,8 @@ const settingsForm = ref({
   theme: 'light',
   orderPrivacy: 'friends',
 })
+const getSettingsStorageKey = () =>
+  `profile_settings_${String(authStore.user?.id || authStore.user?.email || profile.value.email || 'guest')}`
 
 const router = useRouter()
 const route = useRoute()
@@ -124,7 +126,7 @@ const closeSettingsModal = () => {
   settingsModalOpen.value = false
 }
 const saveSettings = () => {
-  localStorage.setItem('profile_settings', JSON.stringify(settingsForm.value))
+  localStorage.setItem(getSettingsStorageKey(), JSON.stringify(settingsForm.value))
   restaurantMessage.value = 'Đã lưu cài đặt cá nhân.'
 }
 const handleMenuClick = (item) => {
@@ -168,7 +170,7 @@ onMounted(() => {
   loadProfile()
   loadStats()
   try {
-    const storedSettings = JSON.parse(localStorage.getItem('profile_settings') || '{}')
+    const storedSettings = JSON.parse(localStorage.getItem(getSettingsStorageKey()) || '{}')
     settingsForm.value = { ...settingsForm.value, ...storedSettings }
   } catch {
     // keep defaults

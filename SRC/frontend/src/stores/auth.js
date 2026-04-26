@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import authService from '@/services/authService'
+import { useCartStore } from '@/stores/cart'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
@@ -15,6 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = null
     try {
+      const cartStore = useCartStore()
+      cartStore.clearCart()
       const result = await authService.login(email, password)
       user.value = result.user
       token.value = result.token
@@ -32,6 +35,8 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = null
     try {
+      const cartStore = useCartStore()
+      cartStore.clearCart()
       const result = await authService.register(payload)
       user.value = result.user
       token.value = result.token
@@ -66,6 +71,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.logout()
     } finally {
+      const cartStore = useCartStore()
+      cartStore.clearCart()
       user.value = null
       token.value = null
       error.value = null

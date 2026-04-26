@@ -65,6 +65,9 @@ const unreadNoticeCount = computed(
   () => notifications.value.filter((item) => item?.isRead === false).length,
 )
 const favoriteIds = ref([])
+const favoriteStorageKey = computed(
+  () => `browse_favorite_ids_${String(authStore.user?.id || authStore.user?.email || 'guest')}`,
+)
 const activeCategoryKeyword = ref('')
 const searchKeyword = ref('')
 const isSearchOpen = ref(false)
@@ -123,7 +126,7 @@ const selectedDishDisplayPrice = computed(() => {
   return formatDishPrice(getSizeAdjustedPrice(selectedDish.value, selectedSize.value))
 })
 const isFavorite = (itemId) => isItemFavorite(favoriteIds, itemId)
-const toggleFavorite = (item) => toggleFavoriteItem(favoriteIds, item)
+const toggleFavorite = (item) => toggleFavoriteItem(favoriteIds, item, favoriteStorageKey.value)
 const handleSidebarClick = (menu) => handleBrowseSidebarClick(activeMenu, menu, router)
 const openDishDetail = (item) => openDishDetailModal(selectedDish, dishNote, selectedSize, item)
 const closeDishDetail = () => closeDishDetailModal(selectedDish)
@@ -232,7 +235,7 @@ watch(selectedDish, (value) => {
 
 onMounted(() => {
   try {
-    const stored = JSON.parse(localStorage.getItem('browse_favorite_ids') || '[]')
+    const stored = JSON.parse(localStorage.getItem(favoriteStorageKey.value) || '[]')
     favoriteIds.value = Array.isArray(stored) ? stored : []
   } catch {
     favoriteIds.value = []
@@ -240,6 +243,18 @@ onMounted(() => {
   loadBrowseData()
   loadNotifications()
 })
+
+watch(
+  () => favoriteStorageKey.value,
+  (key) => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || '[]')
+      favoriteIds.value = Array.isArray(stored) ? stored : []
+    } catch {
+      favoriteIds.value = []
+    }
+  },
+)
 
 onUnmounted(() => {
   document.body.style.overflow = ''

@@ -2,13 +2,13 @@ export function isItemFavorite(favoriteIdsRef, itemId) {
   return favoriteIdsRef.value.includes(itemId)
 }
 
-export function toggleFavoriteItem(favoriteIdsRef, item) {
+export function toggleFavoriteItem(favoriteIdsRef, item, storageKey = 'browse_favorite_ids') {
   if (!item?.id) return
   const exists = favoriteIdsRef.value.includes(item.id)
   favoriteIdsRef.value = exists
     ? favoriteIdsRef.value.filter((id) => id !== item.id)
     : [...favoriteIdsRef.value, item.id]
-  localStorage.setItem('browse_favorite_ids', JSON.stringify(favoriteIdsRef.value))
+  localStorage.setItem(storageKey, JSON.stringify(favoriteIdsRef.value))
 }
 
 export function handleBrowseSidebarClick(activeMenuRef, menu, router) {
