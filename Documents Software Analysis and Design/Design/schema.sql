@@ -96,7 +96,7 @@ CREATE TABLE menu_items (
     description     TEXT,
     price           DECIMAL(12,2) NOT NULL,
     
-    image_url       TEXT,
+    image_url       LONGTEXT,
 
     is_available    BOOLEAN DEFAULT TRUE,
     is_deleted      BOOLEAN DEFAULT FALSE,

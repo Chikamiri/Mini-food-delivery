@@ -68,7 +68,7 @@ CREATE TABLE menu_items (
     name            VARCHAR(200) NOT NULL,
     description     TEXT,
     price           DECIMAL(12,2) NOT NULL,
-    image_url       VARCHAR(500),
+    image_url       LONGTEXT,
     is_available    BOOLEAN NOT NULL DEFAULT TRUE,
     is_deleted      BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

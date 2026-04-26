@@ -33,8 +33,8 @@ const menuForm = ref({
 const imagePreview = ref('')
 const fileInputRef = ref(null)
 
-/** Compress & resize image file → Base64 data URL (max 400×400, JPEG quality 0.7) */
-const compressImage = (file, maxSize = 400, quality = 0.7) => {
+/** Compress & resize image file → Base64 data URL */
+const compressImage = (file, maxSize = 1200, quality = 0.85) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => {
