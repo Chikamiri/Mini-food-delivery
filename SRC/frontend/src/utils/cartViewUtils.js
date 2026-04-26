@@ -1,13 +1,13 @@
 export function incrementCartItem(cartStore, item) {
-  cartStore.updateQuantity(item.id, item.quantity + 1)
+  cartStore.updateQuantity(item.lineId, item.quantity + 1)
 }
 
 export function decrementCartItem(cartStore, item) {
-  cartStore.updateQuantity(item.id, item.quantity - 1)
+  cartStore.updateQuantity(item.lineId, item.quantity - 1)
 }
 
-export function removeCartItem(cartStore, id) {
-  cartStore.removeItem(id)
+export function removeCartItem(cartStore, lineId) {
+  cartStore.removeItem(lineId)
 }
 
 export function formatCartPrice(value) {

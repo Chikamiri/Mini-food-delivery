@@ -13,14 +13,27 @@ export const useCartStore = defineStore('cart', () => {
     items.value.reduce((total, item) => total + item.price * item.quantity, 0),
   )
 
+  function normalizeText(value) {
+    return String(value || '').trim()
+  }
+
+  function buildLineId(menuItem) {
+    const itemId = menuItem.id ?? ''
+    const size = normalizeText(menuItem.size || 'Vừa')
+    const noteText = normalizeText(menuItem.note || '')
+    return `${itemId}::${size}::${noteText}`
+  }
+
   function addItem(menuItem, quantity = 1) {
-    const existing = items.value.find((item) => item.id === menuItem.id)
+    const lineId = buildLineId(menuItem)
+    const existing = items.value.find((item) => item.lineId === lineId)
     if (existing) {
       existing.quantity += quantity
       return
     }
 
     items.value.push({
+      lineId,
       id: menuItem.id,
       name: menuItem.name,
       price: menuItem.price,
@@ -33,15 +46,15 @@ export const useCartStore = defineStore('cart', () => {
     })
   }
 
-  function removeItem(itemId) {
-    items.value = items.value.filter((item) => item.id !== itemId)
+  function removeItem(lineId) {
+    items.value = items.value.filter((item) => item.lineId !== lineId)
   }
 
-  function updateQuantity(itemId, quantity) {
-    const target = items.value.find((item) => item.id === itemId)
+  function updateQuantity(lineId, quantity) {
+    const target = items.value.find((item) => item.lineId === lineId)
     if (!target) return
     if (quantity <= 0) {
-      removeItem(itemId)
+      removeItem(lineId)
       return
     }
     target.quantity = quantity

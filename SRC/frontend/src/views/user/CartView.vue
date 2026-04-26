@@ -20,7 +20,7 @@ const deliveryFee = 18000
 
 const increment = (item) => incrementCartItem(cartStore, item)
 const decrement = (item) => decrementCartItem(cartStore, item)
-const removeItem = (id) => removeCartItem(cartStore, id)
+const removeItem = (lineId) => removeCartItem(cartStore, lineId)
 
 const subtotal = computed(() => cartStore.subtotal)
 
@@ -68,10 +68,11 @@ const goBrowse = () => goBrowseFromCart(router)
             <h3>{{ restaurant }}</h3>
           </div>
 
-          <article v-for="item in items" :key="item.id" class="cart-item">
+          <article v-for="item in items" :key="item.lineId" class="cart-item">
             <div class="item-image">{{ item.imageUrl ? '🍽️' : '🍱' }}</div>
             <div class="item-info">
               <h4>{{ item.name }}</h4>
+              <p class="item-note">Kích cỡ: {{ item.size || 'Vừa' }}</p>
               <p v-if="item.note" class="item-note">Ghi chú: {{ item.note }}</p>
               <span class="item-price">{{ formatPrice(item.price) }}</span>
             </div>
@@ -82,7 +83,7 @@ const goBrowse = () => goBrowseFromCart(router)
                 <button class="qty-btn" @click="increment(item)">+</button>
               </div>
               <span class="item-subtotal">{{ formatPrice(item.price * item.quantity) }}</span>
-              <button class="remove-btn" @click="removeItem(item.id)" aria-label="Xoá">✕</button>
+              <button class="remove-btn" @click="removeItem(item.lineId)" aria-label="Xoá">✕</button>
             </div>
           </article>
         </div>
