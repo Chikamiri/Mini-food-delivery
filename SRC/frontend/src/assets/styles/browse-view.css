@@ -518,6 +518,20 @@
   box-shadow: 0 16px 30px rgba(26, 36, 56, 0.14);
 }
 
+.category-card.active {
+  outline: 2px solid #ff8b2c;
+  outline-offset: 2px;
+}
+
+.category-clear-btn {
+  border: 0;
+  background: transparent;
+  color: #f8143f;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
 .category-image {
   width: 100%;
   height: 100%;

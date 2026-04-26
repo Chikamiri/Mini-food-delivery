@@ -37,13 +37,56 @@ export function closeDishDetailModal(selectedDishRef) {
 }
 
 export function mapBrowseCategory(item) {
+  const name = String(item.name || 'Danh mục')
+  const normalized = name.toLowerCase().replace(/\s+/g, ' ').trim()
+  let image =
+    'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80'
+
+  if (
+    normalized.includes('hải sản') ||
+    normalized.includes('seafood') ||
+    normalized.includes('sea food')
+  ) {
+    image =
+      'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=900&q=80'
+  } else if (
+    normalized.includes('fastfood') ||
+    normalized.includes('fast food') ||
+    normalized.includes('fasstfood') ||
+    normalized.includes('đồ ăn nhanh')
+  ) {
+    image =
+      'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=900&q=80'
+  } else if (normalized.includes('đồ uống') || normalized.includes('drink') || normalized.includes('nước')) {
+    image =
+      'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80'
+  } else if (normalized.includes('tráng miệng') || normalized.includes('dessert') || normalized.includes('ngọt')) {
+    image =
+      'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&q=80'
+  } else if (
+    normalized.includes('món khô') ||
+    normalized.includes('khô') ||
+    normalized.includes('dry dish') ||
+    normalized.includes('drydish')
+  ) {
+    image =
+      'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=80'
+  } else if (normalized.includes('cơm') || normalized.includes('rice')) {
+    image =
+      'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80'
+  } else if (normalized.includes('bún') || normalized.includes('mì') || normalized.includes('phở')) {
+    image =
+      'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=80'
+  } else if (item.iconUrl) {
+    image = item.iconUrl
+  }
+
   return {
     icon: '🍽️',
-    label: item.name || 'Danh mục',
+    label: name,
+    keyword: name,
     subtitle: 'Mon an noi bat',
-    image:
-      item.iconUrl ||
-      'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=900&q=80',
+    image,
   }
 }
 
@@ -67,6 +110,7 @@ export function mapBrowseMenuItem(item, restaurantMap) {
       item.imageUrl ||
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
     restaurant: restaurant?.name || 'Nha hang',
+    categoryName: item.categoryName || '',
     restaurantId: item.restaurantId || restaurant?.id || null,
     restaurantLogo:
       restaurant?.imageUrl ||

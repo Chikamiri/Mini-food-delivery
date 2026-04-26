@@ -65,19 +65,39 @@ const unreadNoticeCount = computed(
   () => notifications.value.filter((item) => item?.isRead === false).length,
 )
 const favoriteIds = ref([])
+const activeCategoryKeyword = ref('')
 const isPromoView = computed(() => activeMenu.value === 'promo')
 const isFavoritesView = computed(() => activeMenu.value === 'favorites')
 const isFlashSaleView = computed(() => activeMenu.value === 'flashsale')
 const promoItems = computed(() => {
   const merged = [...popularDishes.value, ...recommendedItems.value]
   const seen = new Set()
-  return merged.filter((item) => {
+  const deduped = merged.filter((item) => {
     if (!item?.id || seen.has(item.id)) return false
     seen.add(item.id)
     return true
   })
+  if (!activeCategoryKeyword.value) return deduped
+  const keyword = activeCategoryKeyword.value.toLowerCase()
+  return deduped.filter((item) =>
+    `${item.name || ''} ${item.categoryName || ''}`.toLowerCase().includes(keyword),
+  )
 })
 const favoriteItems = computed(() => promoItems.value.filter((item) => favoriteIds.value.includes(item.id)))
+const filteredPopularDishes = computed(() => {
+  if (!activeCategoryKeyword.value) return popularDishes.value
+  const keyword = activeCategoryKeyword.value.toLowerCase()
+  return popularDishes.value.filter((item) =>
+    `${item.name || ''} ${item.categoryName || ''}`.toLowerCase().includes(keyword),
+  )
+})
+const filteredRecommendedItems = computed(() => {
+  if (!activeCategoryKeyword.value) return recommendedItems.value
+  const keyword = activeCategoryKeyword.value.toLowerCase()
+  return recommendedItems.value.filter((item) =>
+    `${item.name || ''} ${item.categoryName || ''}`.toLowerCase().includes(keyword),
+  )
+})
 
 const selectedDish = ref(null)
 const dishNote = ref('')
@@ -150,6 +170,15 @@ const openRestaurantDetail = (dish) => {
   selectedDish.value = null
   document.body.style.overflow = ''
   router.push(`/restaurants/${dish.restaurantId}`)
+}
+const applyCategoryFilter = (item) => {
+  activeMenu.value = 'overview'
+  activeCategoryKeyword.value = String(item?.keyword || item?.label || '').trim()
+  const section = document.getElementById('popular-section')
+  if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+const clearCategoryFilter = () => {
+  activeCategoryKeyword.value = ''
 }
 const formatNoticeTime = (value) => {
   if (!value) return 'Vừa xong'
@@ -434,10 +463,20 @@ onUnmounted(() => {
       <section class="section-block">
         <div class="section-head">
           <h3>Danh mục món</h3>
-          <a href="#">Xem tất cả</a>
+          <button type="button" class="category-clear-btn" @click="clearCategoryFilter">Xem tất cả</button>
         </div>
         <div class="category-grid">
-          <article v-for="item in categories" :key="item.label" class="category-card">
+          <article
+            v-for="item in categories"
+            :key="item.label"
+            class="category-card"
+            :class="{ active: activeCategoryKeyword === item.keyword }"
+            role="button"
+            tabindex="0"
+            @click="applyCategoryFilter(item)"
+            @keydown.enter="applyCategoryFilter(item)"
+            @keydown.space.prevent="applyCategoryFilter(item)"
+          >
             <img class="category-image" :src="item.image" :alt="item.label" />
             <div class="category-overlay">
               <span class="category-icon">{{ item.icon }}</span>
@@ -455,7 +494,7 @@ onUnmounted(() => {
         </div>
         <div class="popular-grid">
           <article
-            v-for="dish in popularDishes"
+            v-for="dish in filteredPopularDishes"
             :key="dish.id"
             class="popular-card"
             role="button"
@@ -515,7 +554,7 @@ onUnmounted(() => {
         </div>
         <div class="recommend-list">
           <article
-            v-for="item in recommendedItems"
+            v-for="item in filteredRecommendedItems"
             :key="item.id"
             class="recommend-card"
             role="button"
