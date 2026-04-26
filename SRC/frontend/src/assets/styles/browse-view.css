@@ -498,7 +498,7 @@
 .category-grid {
   margin-top: 0.7rem;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(495px, 1fr));
   gap: 0.75rem;
 }
 
@@ -506,7 +506,8 @@
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  min-height: 180px;
+  width: 100%;
+  height: 256px;
   border: 1px solid #eef1f6;
   box-shadow: 0 10px 24px rgba(26, 36, 56, 0.08);
   cursor: pointer;
@@ -535,7 +536,6 @@
 .category-image {
   width: 100%;
   height: 100%;
-  min-height: 180px;
   object-fit: cover;
   display: block;
 }
