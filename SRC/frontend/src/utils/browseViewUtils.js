@@ -49,13 +49,17 @@ export function mapBrowseCategory(item) {
 
 export function mapBrowseMenuItem(item, restaurantMap) {
   const restaurant = restaurantMap.get(item.restaurantId)
+  const basePrice = Number(item.price || 0)
+  const parsedSizePrices = parseSizePricesFromDescription(item.description, basePrice)
   return {
     id: item.id,
     name: item.name,
     distance: restaurant?.address ? 'Gan ban' : '---',
     rating: String(restaurant?.rating ?? 4.7),
     reviews: 'new',
-    price: `$${Number(item.price || 0).toFixed(2)}`,
+    price: `$${basePrice.toFixed(2)}`,
+    basePrice,
+    sizePrices: parsedSizePrices,
     oldPrice: `$${Math.max(Number(item.price || 0) - 1, 0).toFixed(2)}`,
     badge: 'NEW',
     isAvailable: Boolean(item.isAvailable),
@@ -69,6 +73,50 @@ export function mapBrowseMenuItem(item, restaurantMap) {
       'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
     menuItemId: item.id,
   }
+}
+
+function parseSizePricesFromDescription(description, fallbackPrice) {
+  const content = String(description || '')
+  const matched = content.match(/\[SIZE_PRICES\](\{.*\})$/s)
+  const fallback = {
+    small: Number((Number(fallbackPrice || 0) * 0.9).toFixed(2)),
+    medium: Number((Number(fallbackPrice || 0) * 1).toFixed(2)),
+    large: Number((Number(fallbackPrice || 0) * 1.2).toFixed(2)),
+  }
+  if (!matched) return fallback
+  try {
+    const parsed = JSON.parse(matched[1])
+    return {
+      small: Number(parsed.small || fallback.small),
+      medium: Number(parsed.medium || fallback.medium),
+      large: Number(parsed.large || fallback.large),
+    }
+  } catch {
+    return fallback
+  }
+}
+
+const SIZE_MULTIPLIERS = {
+  'Nhỏ': 0.9,
+  'Vừa': 1,
+  'Lớn': 1.2,
+}
+
+export function getSizeAdjustedPrice(item, size = 'Vừa') {
+  if (item?.sizePrices && typeof item.sizePrices === 'object') {
+    if (size === 'Nhỏ') return Number(item.sizePrices.small || 0)
+    if (size === 'Lớn') return Number(item.sizePrices.large || 0)
+    return Number(item.sizePrices.medium || 0)
+  }
+  const baseSource =
+    item?.basePrice ?? Number(String(item?.price || '').replace('$', '') || 0)
+  const base = Number(baseSource || 0)
+  const multiplier = SIZE_MULTIPLIERS[size] || 1
+  return Number((base * multiplier).toFixed(2))
+}
+
+export function formatDishPrice(amount) {
+  return `$${Number(amount || 0).toFixed(2)}`
 }
 
 export function formatRecentOrderTime(value) {
@@ -94,11 +142,12 @@ export function mapRecentBrowseOrder(order) {
 
 export function addItemToCartFromDish(cartStore, closeModal, dishNoteRef, selectedSizeRef, item) {
   if (!item?.isAvailable) return
+  const adjustedPrice = getSizeAdjustedPrice(item, selectedSizeRef.value)
   cartStore.addItem(
     {
       id: item.menuItemId || item.id,
       name: item.name,
-      price: Number(String(item.price).replace('$', '')) || 0,
+      price: adjustedPrice,
       imageUrl: item.image,
       restaurantId: item.restaurantId || null,
       restaurantName: item.restaurant || 'Nha hang',

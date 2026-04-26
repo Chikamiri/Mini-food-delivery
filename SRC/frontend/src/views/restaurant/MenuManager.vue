@@ -30,8 +30,62 @@ const menuForm = ref({
   isAvailable: true,
   categoryId: null,
 })
+const sizePrices = ref({
+  small: '',
+  medium: '',
+  large: '',
+})
 const imagePreview = ref('')
 const fileInputRef = ref(null)
+const formatVnd = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
+const getAutoSizePrices = (basePrice) => {
+  const base = Number(basePrice || 0)
+  return {
+    small: Math.round(base * 0.9),
+    medium: Math.round(base),
+    large: Math.round(base * 1.2),
+  }
+}
+const previewSizePrices = computed(() => getAutoSizePrices(menuForm.value.price))
+const SIZE_META_PREFIX = '[SIZE_PRICES]'
+
+const encodeDescriptionWithSizePrices = (description, prices) => {
+  const cleanDescription = String(description || '').replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '').trim()
+  const payload = {
+    small: Number(prices.small || 0),
+    medium: Number(prices.medium || 0),
+    large: Number(prices.large || 0),
+  }
+  return `${cleanDescription}\n${SIZE_META_PREFIX}${JSON.stringify(payload)}`
+}
+
+const parseDescriptionAndSizePrices = (description, fallbackPrice = 0) => {
+  const content = String(description || '')
+  const matched = content.match(/\[SIZE_PRICES\](\{.*\})$/s)
+  const base = getAutoSizePrices(fallbackPrice)
+  if (!matched) {
+    return {
+      cleanDescription: content,
+      prices: base,
+    }
+  }
+  try {
+    const parsed = JSON.parse(matched[1])
+    return {
+      cleanDescription: content.replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '').trim(),
+      prices: {
+        small: Number(parsed.small || base.small),
+        medium: Number(parsed.medium || base.medium),
+        large: Number(parsed.large || base.large),
+      },
+    }
+  } catch {
+    return {
+      cleanDescription: content,
+      prices: base,
+    }
+  }
+}
 
 /** Compress & resize image file → Base64 data URL */
 const compressImage = (file, maxSize = 1200, quality = 0.85) => {
@@ -144,6 +198,11 @@ const resetMenuForm = () => {
     isAvailable: true,
     categoryId: categoryOptions.value[0]?.id || null,
   }
+  sizePrices.value = {
+    small: String(previewSizePrices.value.small),
+    medium: String(previewSizePrices.value.medium),
+    large: String(previewSizePrices.value.large),
+  }
   imagePreview.value = ''
   if (fileInputRef.value) fileInputRef.value.value = ''
 }
@@ -154,15 +213,21 @@ const openAddMenu = () => {
   menuModalOpen.value = true
 }
 const openEditMenu = (item) => {
+  const parsed = parseDescriptionAndSizePrices(item.description || '', item.price)
   menuModalMode.value = 'edit'
   editingMenuId.value = item.id
   menuForm.value = {
     name: item.name || '',
-    description: item.description || '',
+    description: parsed.cleanDescription || '',
     price: String(item.price ?? ''),
     imageUrl: item.imageUrl || '',
     isAvailable: item.isAvailable !== false,
     categoryId: item.categoryId ?? categoryOptions.value[0]?.id ?? null,
+  }
+  sizePrices.value = {
+    small: String(parsed.prices.small),
+    medium: String(parsed.prices.medium),
+    large: String(parsed.prices.large),
   }
   imagePreview.value = item.imageUrl || ''
   menuModalOpen.value = true
@@ -181,10 +246,26 @@ const saveMenuItem = async () => {
     errorMessage.value = 'Vui lòng nhập tên món và giá.'
     return
   }
+  const numericSizePrices = {
+    small: Number(sizePrices.value.small || 0),
+    medium: Number(sizePrices.value.medium || menuForm.value.price || 0),
+    large: Number(sizePrices.value.large || 0),
+  }
+  if (
+    !Number.isFinite(numericSizePrices.small) ||
+    !Number.isFinite(numericSizePrices.medium) ||
+    !Number.isFinite(numericSizePrices.large) ||
+    numericSizePrices.small < 0 ||
+    numericSizePrices.medium < 0 ||
+    numericSizePrices.large < 0
+  ) {
+    errorMessage.value = 'Giá theo kích cỡ không hợp lệ.'
+    return
+  }
   const payload = {
     name: menuForm.value.name,
-    description: menuForm.value.description || '',
-    price: Number(menuForm.value.price),
+    description: encodeDescriptionWithSizePrices(menuForm.value.description, numericSizePrices),
+    price: numericSizePrices.medium,
     imageUrl: menuForm.value.imageUrl || '',
     isAvailable: Boolean(menuForm.value.isAvailable),
   }
@@ -341,6 +422,20 @@ onMounted(async () => {
               <span>Giá (VND)</span>
               <input v-model="menuForm.price" type="number" min="0" placeholder="50000" />
             </label>
+            <div class="size-price-fields">
+              <label>
+                <span>Cỡ Nhỏ (VND)</span>
+                <input v-model="sizePrices.small" type="number" min="0" />
+              </label>
+              <label>
+                <span>Cỡ Vừa (VND)</span>
+                <input v-model="sizePrices.medium" type="number" min="0" />
+              </label>
+              <label>
+                <span>Cỡ Lớn (VND)</span>
+                <input v-model="sizePrices.large" type="number" min="0" />
+              </label>
+            </div>
             <label v-if="menuModalMode === 'add'">
               <span>Danh mục</span>
               <select v-model="menuForm.categoryId">
@@ -397,6 +492,36 @@ onMounted(async () => {
   margin-top: 0.65rem;
   display: flex;
   gap: 0.45rem;
+}
+
+.size-price-preview {
+  margin-top: 0.45rem;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.size-price-preview small {
+  background: #f6f8fc;
+  color: #51607a;
+  border: 1px solid #e2e8f3;
+  border-radius: 7px;
+  padding: 0.15rem 0.42rem;
+  font-size: 0.75rem;
+}
+
+.form-preview {
+  margin-top: -0.2rem;
+}
+
+.size-price-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.size-price-fields label span {
+  font-size: 0.78rem;
 }
 
 .outline-btn.small,

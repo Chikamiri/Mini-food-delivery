@@ -28,6 +28,8 @@ import {
   closeDishDetailModal,
   addItemToCartFromDish,
   loadBrowseDataAction,
+  getSizeAdjustedPrice,
+  formatDishPrice,
 } from '@/utils/browseViewUtils'
 
 const sidebarMenus = [
@@ -80,6 +82,10 @@ const favoriteItems = computed(() => promoItems.value.filter((item) => favoriteI
 const selectedDish = ref(null)
 const dishNote = ref('')
 const selectedSize = ref('Vừa')
+const selectedDishDisplayPrice = computed(() => {
+  if (!selectedDish.value) return '$0.00'
+  return formatDishPrice(getSizeAdjustedPrice(selectedDish.value, selectedSize.value))
+})
 const isFavorite = (itemId) => isItemFavorite(favoriteIds, itemId)
 const toggleFavorite = (item) => toggleFavoriteItem(favoriteIds, item)
 const handleSidebarClick = (menu) => handleBrowseSidebarClick(activeMenu, menu, router)
@@ -653,7 +659,7 @@ onMounted(() => {
             </label>
 
             <div class="dish-detail-footer">
-              <strong>{{ selectedDish.price }}</strong>
+              <strong>{{ selectedDishDisplayPrice }}</strong>
               <button type="button" :disabled="!selectedDish.isAvailable" @click="addToCart(selectedDish)">
                 {{ selectedDish.isAvailable ? 'Thêm vào giỏ' : 'Tạm hết món' }}
               </button>
