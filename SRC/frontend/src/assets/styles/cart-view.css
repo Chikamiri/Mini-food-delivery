@@ -102,8 +102,6 @@
 }
 
 .item-image {
-  font-size: 1.8rem;
-  line-height: 1;
   width: 54px;
   height: 54px;
   display: flex;
@@ -113,6 +111,19 @@
   border-radius: 14px;
   border: 1px solid #edf1f8;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.item-image span {
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
 .item-info {
@@ -341,7 +352,11 @@
 }
 
 .checkout-btn {
-  width: 100%;
+  width: fit-content;
+  min-width: 220px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
   border: 0;
   background: linear-gradient(120deg, #f8143f 0%, #ff4f72 100%);
   color: #fff;

@@ -69,7 +69,10 @@ const goBrowse = () => goBrowseFromCart(router)
           </div>
 
           <article v-for="item in items" :key="item.lineId" class="cart-item">
-            <div class="item-image">{{ item.imageUrl ? '🍽️' : '🍱' }}</div>
+            <div class="item-image">
+              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" />
+              <span v-else>🍱</span>
+            </div>
             <div class="item-info">
               <h4>{{ item.name }}</h4>
               <p class="item-note">Kích cỡ: {{ item.size || 'Vừa' }}</p>
