@@ -66,6 +66,8 @@ const unreadNoticeCount = computed(
 )
 const favoriteIds = ref([])
 const activeCategoryKeyword = ref('')
+const searchKeyword = ref('')
+const isSearchOpen = ref(false)
 const isPromoView = computed(() => activeMenu.value === 'promo')
 const isFavoritesView = computed(() => activeMenu.value === 'favorites')
 const isFlashSaleView = computed(() => activeMenu.value === 'flashsale')
@@ -97,6 +99,20 @@ const filteredRecommendedItems = computed(() => {
   return recommendedItems.value.filter((item) =>
     `${item.name || ''} ${item.categoryName || ''}`.toLowerCase().includes(keyword),
   )
+})
+const quickSearchResults = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase()
+  if (!keyword) return []
+  const merged = [...popularDishes.value, ...recommendedItems.value]
+  const map = new Map()
+  merged.forEach((item) => {
+    if (!item?.id || map.has(item.id)) return
+    const haystack = `${item.name || ''} ${item.restaurant || ''} ${item.categoryName || ''}`.toLowerCase()
+    if (haystack.includes(keyword)) {
+      map.set(item.id, item)
+    }
+  })
+  return Array.from(map.values()).slice(0, 6)
 })
 
 const selectedDish = ref(null)
@@ -179,6 +195,24 @@ const applyCategoryFilter = (item) => {
 }
 const clearCategoryFilter = () => {
   activeCategoryKeyword.value = ''
+}
+const onSearchFocus = () => {
+  isSearchOpen.value = true
+}
+const onSearchBlur = () => {
+  setTimeout(() => {
+    isSearchOpen.value = false
+  }, 120)
+}
+const selectSearchResult = (item) => {
+  if (!item) return
+  searchKeyword.value = ''
+  isSearchOpen.value = false
+  openDishDetail(item)
+}
+const submitSearch = () => {
+  if (!quickSearchResults.value.length) return
+  selectSearchResult(quickSearchResults.value[0])
 }
 const formatNoticeTime = (value) => {
   if (!value) return 'Vừa xong'
@@ -291,11 +325,34 @@ onUnmounted(() => {
         </div>
         <div class="search-input">
           <img :src="iconSearch" alt="" class="search-icon" />
-          <input type="text" placeholder="Tìm món ăn, nhà hàng..." />
+          <input
+            v-model="searchKeyword"
+            type="text"
+            placeholder="Tìm món ăn, nhà hàng..."
+            @focus="onSearchFocus"
+            @blur="onSearchBlur"
+            @keydown.enter.prevent="submitSearch"
+          />
           <RouterLink to="/cart" class="cart-btn" aria-label="Giỏ hàng">
             <img :src="iconCart" alt="" />
             <span v-if="cartCount" class="cart-count">{{ cartCount }}</span>
           </RouterLink>
+          <div v-if="isSearchOpen && searchKeyword.trim()" class="search-popover">
+            <p v-if="!quickSearchResults.length" class="search-empty">Không tìm thấy món phù hợp.</p>
+            <button
+              v-for="item in quickSearchResults"
+              :key="item.id"
+              type="button"
+              class="search-result-item"
+              @mousedown.prevent="selectSearchResult(item)"
+            >
+              <img :src="item.image" :alt="item.name" />
+              <span>
+                <strong>{{ item.name }}</strong>
+                <small>{{ item.restaurant }}</small>
+              </span>
+            </button>
+          </div>
         </div>
       </header>
       <p v-if="isLoading">Dang tai du lieu...</p>
