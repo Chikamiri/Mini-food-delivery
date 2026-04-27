@@ -43,6 +43,8 @@ const editAddressSearchQuery = ref('')
 const editAddressSearchResults = ref([])
 const editAddressSearching = ref(false)
 let editSearchTimer = null
+const newMiniMapOpen = ref(true)
+const editMiniMapOpen = ref(true)
 
 const newMapMarkers = computed(() => {
   const { latitude: lat, longitude: lng, label } = newAddress.value
@@ -92,6 +94,16 @@ function selectEditAddressResult(result) {
   editAddress.value.longitude = Number(result.lng || result.lon)
   editAddressSearchResults.value = []
   editAddressSearchQuery.value = ''
+}
+
+function onNewMapClick({ lat, lng }) {
+  newAddress.value.latitude = Number(lat.toFixed(6))
+  newAddress.value.longitude = Number(lng.toFixed(6))
+}
+
+function onEditMapClick({ lat, lng }) {
+  editAddress.value.latitude = Number(lat.toFixed(6))
+  editAddress.value.longitude = Number(lng.toFixed(6))
 }
 
 const fetchAddresses = () => fetchAddressesAction(userService, addresses, isLoading, errorMessage)
@@ -275,12 +287,26 @@ onMounted(fetchAddresses)
           <span>Đặt làm địa chỉ mặc định</span>
         </label>
       </div>
-      <MapView
-        v-if="newMapMarkers.length"
-        :markers="newMapMarkers"
-        height="220px"
-        class="form-map"
-      />
+      <div class="mini-map-actions">
+        <button type="button" class="ghost-btn" @click="newMiniMapOpen = !newMiniMapOpen">
+          {{ newMiniMapOpen ? 'Ẩn bản đồ nhỏ' : 'Mở bản đồ nhỏ' }}
+        </button>
+        <small>Nhấn lên bản đồ để lấy vị trí nhanh.</small>
+      </div>
+      <div v-if="newMiniMapOpen" class="mini-map-window">
+        <div class="mini-map-head">
+          <strong>Vị trí địa chỉ mới</strong>
+          <span v-if="newAddress.latitude && newAddress.longitude">
+            {{ Number(newAddress.latitude).toFixed(6) }}, {{ Number(newAddress.longitude).toFixed(6) }}
+          </span>
+        </div>
+        <MapView
+          :markers="newMapMarkers"
+          height="220px"
+          class="form-map"
+          @map-click="onNewMapClick"
+        />
+      </div>
       <div class="form-actions">
         <button type="button" class="ghost-btn" @click="toggleAddForm">Hủy</button>
         <button type="button" class="set-default-btn" :disabled="isSubmitting" @click="addAddress">
@@ -366,12 +392,26 @@ onMounted(fetchAddresses)
           <span>Đặt làm địa chỉ mặc định</span>
         </label>
       </div>
-      <MapView
-        v-if="editMapMarkers.length"
-        :markers="editMapMarkers"
-        height="220px"
-        class="form-map"
-      />
+      <div class="mini-map-actions">
+        <button type="button" class="ghost-btn" @click="editMiniMapOpen = !editMiniMapOpen">
+          {{ editMiniMapOpen ? 'Ẩn bản đồ nhỏ' : 'Mở bản đồ nhỏ' }}
+        </button>
+        <small>Nhấn lên bản đồ để lấy vị trí nhanh.</small>
+      </div>
+      <div v-if="editMiniMapOpen" class="mini-map-window">
+        <div class="mini-map-head">
+          <strong>Vị trí địa chỉ đang sửa</strong>
+          <span v-if="editAddress.latitude && editAddress.longitude">
+            {{ Number(editAddress.latitude).toFixed(6) }}, {{ Number(editAddress.longitude).toFixed(6) }}
+          </span>
+        </div>
+        <MapView
+          :markers="editMapMarkers"
+          height="220px"
+          class="form-map"
+          @map-click="onEditMapClick"
+        />
+      </div>
       <div class="form-actions">
         <button type="button" class="ghost-btn" @click="cancelEdit">Hủy</button>
         <button type="button" class="set-default-btn" :disabled="isSubmitting" @click="updateAddress">
@@ -639,5 +679,43 @@ onMounted(fetchAddresses)
 
 .form-map {
   margin-top: 0.75rem;
+}
+
+.mini-map-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mini-map-actions small {
+  color: #6d778b;
+  font-size: 0.76rem;
+}
+
+.mini-map-window {
+  margin-top: 0.55rem;
+  border: 1px solid #e1e6f1;
+  border-radius: 12px;
+  padding: 0.6rem;
+  background: #fafbff;
+}
+
+.mini-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.mini-map-head strong {
+  color: #293247;
+  font-size: 0.84rem;
+}
+
+.mini-map-head span {
+  color: #6d778b;
+  font-size: 0.76rem;
 }
 </style>
