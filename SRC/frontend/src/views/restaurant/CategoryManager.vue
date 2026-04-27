@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 
@@ -20,6 +20,7 @@ const restaurants = ref([])
 const categories = ref([])
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 const categoryModalOpen = ref(false)
+watch(categoryModalOpen, (open) => { document.body.style.overflow = open ? 'hidden' : '' })
 const categoryModalMode = ref('add')
 const editingCategoryId = ref(null)
 const categoryForm = ref({

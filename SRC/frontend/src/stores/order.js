@@ -22,7 +22,7 @@ export const useOrderStore = defineStore('order', () => {
       orders.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai danh sach don hang'
+      error.value = err.message || 'Không thể tải danh sách đơn hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -37,7 +37,7 @@ export const useOrderStore = defineStore('order', () => {
       currentOrder.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai chi tiet don hang'
+      error.value = err.message || 'Không thể tải chi tiết đơn hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -53,7 +53,7 @@ export const useOrderStore = defineStore('order', () => {
       currentOrder.value = created
       return created
     } catch (err) {
-      error.value = err.message || 'Khong the tao don hang'
+      error.value = err.message || 'Không thể tạo đơn hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -73,7 +73,7 @@ export const useOrderStore = defineStore('order', () => {
       }
       return updated
     } catch (err) {
-      error.value = err.message || 'Khong the huy don hang'
+      error.value = err.message || 'Không thể hủy đơn hàng'
       throw err
     } finally {
       isLoading.value = false

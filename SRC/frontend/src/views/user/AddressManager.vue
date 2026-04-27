@@ -98,6 +98,23 @@ const addAddress = async () => {
     isSubmitting.value = false
   }
 }
+const deleteAddress = async (addressId) => {
+  const ok = window.confirm('Bạn có chắc muốn xoá địa chỉ này?')
+  if (!ok) return
+  errorMessage.value = ''
+  successMessage.value = ''
+  isSubmitting.value = true
+  try {
+    await userService.deleteAddress(addressId)
+    successMessage.value = 'Đã xoá địa chỉ.'
+    await fetchAddresses()
+  } catch (error) {
+    errorMessage.value = error.message || 'Không thể xoá địa chỉ.'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
 const updateAddress = async () => {
   errorMessage.value = ''
   successMessage.value = ''
@@ -205,10 +222,11 @@ onMounted(fetchAddresses)
             <strong>{{ address.label || 'Địa chỉ' }}</strong>
             <p>{{ address.addressLine || address.detail || 'Chưa có chi tiết địa chỉ' }}</p>
           </div>
-          <div class="address-actions">
-            <button type="button" class="edit-btn" @click="openEditForm(address)">Chỉnh sửa</button>
-            <button type="button" class="set-default-btn" @click="setDefault(address.id)">Đặt mặc định</button>
-          </div>
+            <div class="address-actions">
+              <button type="button" class="edit-btn" @click="openEditForm(address)">Chỉnh sửa</button>
+              <button type="button" class="set-default-btn" @click="setDefault(address.id)">Đặt mặc định</button>
+              <button type="button" class="delete-btn" @click="deleteAddress(address.id)">Xoá</button>
+            </div>
         </article>
       </div>
     </section>
@@ -433,4 +451,18 @@ onMounted(fetchAddresses)
 .state-msg--success {
   color: #168247;
 }
+
+.delete-btn {
+  border: 1px solid #fcc;
+  border-radius: 9px;
+  background: #fff0f2;
+  color: #c02144;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.42rem 0.62rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.delete-btn:hover { background: #ffe0e4; }
 </style>

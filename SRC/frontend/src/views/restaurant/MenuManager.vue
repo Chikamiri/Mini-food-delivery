@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 
@@ -20,6 +20,7 @@ const restaurants = ref([])
 const menuItems = ref([])
 const categoryOptions = ref([])
 const menuModalOpen = ref(false)
+watch(menuModalOpen, (open) => { document.body.style.overflow = open ? 'hidden' : '' })
 const menuModalMode = ref('add')
 const editingMenuId = ref(null)
 const menuForm = ref({

@@ -1,9 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useOrderStore } from '@/stores/order'
 import userService from '@/services/userService'
+import iconBackArrow from '@/assets/icon/back-arrow.svg'
 import {
   formatPriceVND,
   loadCheckoutAddressesAction,
@@ -61,12 +62,20 @@ onMounted(() => {
   <section class="checkout-page">
     <main class="checkout-main">
       <header class="checkout-header">
+        <RouterLink to="/cart" class="back-link">
+          <img :src="iconBackArrow" alt="" width="16" height="16" />
+          Quay lại giỏ hàng
+        </RouterLink>
         <h1>Thanh toán an toàn</h1>
       </header>
 
       <section class="checkout-section">
         <h2>Địa chỉ giao hàng</h2>
-        <div class="address-grid">
+        <p v-if="!deliveryAddresses.length" class="empty-address">
+          Bạn chưa có địa chỉ nào.
+          <RouterLink to="/addresses" class="add-address-link">Thêm địa chỉ →</RouterLink>
+        </p>
+        <div v-else class="address-grid">
           <article
             v-for="item in deliveryAddresses"
             :key="item.id"
@@ -76,7 +85,7 @@ onMounted(() => {
             tabindex="0"
             @click="selectedAddressId = item.id"
           >
-            <p class="address-label">{{ item.label || 'Dia chi' }}</p>
+            <p class="address-label">{{ item.label || 'Địa chỉ' }}</p>
             <p class="address-detail">{{ item.addressLine || item.detail }}</p>
           </article>
         </div>
@@ -175,7 +184,7 @@ onMounted(() => {
         </div>
 
         <button class="pay-btn" :disabled="isSubmitting || !cartItems.length" @click="submitOrder">
-          {{ isSubmitting ? 'Dang xu ly...' : 'Xác nhận đặt đơn' }}
+          {{ isSubmitting ? 'Đang xử lý...' : 'Xác nhận đặt đơn' }}
         </button>
       </div>
     </aside>
@@ -210,6 +219,33 @@ onMounted(() => {
   border-bottom: 1px solid #edf1f7;
   padding-bottom: 0.9rem;
   margin-bottom: 0.8rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #485166;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+
+.back-link:hover { color: #f8143f; }
+
+.empty-address {
+  color: #7c8595;
+  padding: 1rem;
+  text-align: center;
+}
+
+.add-address-link {
+  display: inline-block;
+  margin-top: 0.4rem;
+  color: #f8143f;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .checkout-header h1 {

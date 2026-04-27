@@ -17,39 +17,65 @@ import ShipperDashboard from '@/views/shipper/DashboardView.vue'
 import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
 import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
 import AdminDashboard from '@/views/admin/DashboardView.vue'
+import NotFoundView from '@/views/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(_to, _from, savedPosition) {
+    return savedPosition || { top: 0 }
+  },
   routes: [
     { path: '/', name: 'home', component: HomeView },
 
-    // User routes
-    { path: '/browse', name: 'browse', component: BrowseView },
-    { path: '/restaurants/:id', name: 'restaurant-detail', component: RestaurantDetail },
-    { path: '/cart', name: 'cart', component: CartView },
-    { path: '/checkout', name: 'checkout', component: CheckoutView },
-    { path: '/orders/:id/tracking', name: 'order-tracking', component: OrderTracking },
-    { path: '/orders/history', name: 'order-history', component: OrderHistory },
-    { path: '/profile', name: 'profile', component: ProfileView },
-    { path: '/addresses', name: 'addresses', component: AddressManager },
+    // User routes (require login)
+    { path: '/browse', name: 'browse', component: BrowseView, meta: { requiresAuth: true } },
+    { path: '/restaurants/:id', name: 'restaurant-detail', component: RestaurantDetail, meta: { requiresAuth: true } },
+    { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
+    { path: '/checkout', name: 'checkout', component: CheckoutView, meta: { requiresAuth: true } },
+    { path: '/orders/:id/tracking', name: 'order-tracking', component: OrderTracking, meta: { requiresAuth: true } },
+    { path: '/orders/history', name: 'order-history', component: OrderHistory, meta: { requiresAuth: true } },
+    { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/addresses', name: 'addresses', component: AddressManager, meta: { requiresAuth: true } },
 
     // Restaurant Owner routes
-    { path: '/restaurant/dashboard', name: 'restaurant-dashboard', component: RestaurantDashboard },
-    { path: '/restaurant/menu', name: 'restaurant-menu', component: MenuManager },
-    { path: '/restaurant/categories', name: 'restaurant-categories', component: CategoryManager },
-    { path: '/restaurant/orders', name: 'restaurant-orders', component: OrderManager },
-    { path: '/restaurant/revenue', name: 'restaurant-revenue', component: RevenueStats },
+    { path: '/restaurant/dashboard', name: 'restaurant-dashboard', component: RestaurantDashboard, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
+    { path: '/restaurant/menu', name: 'restaurant-menu', component: MenuManager, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
+    { path: '/restaurant/categories', name: 'restaurant-categories', component: CategoryManager, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
+    { path: '/restaurant/orders', name: 'restaurant-orders', component: OrderManager, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
+    { path: '/restaurant/revenue', name: 'restaurant-revenue', component: RevenueStats, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
 
     // Shipper routes
-    { path: '/shipper/dashboard', name: 'shipper-dashboard', component: ShipperDashboard },
-    { path: '/shipper/delivery/:id', name: 'delivery-detail', component: DeliveryDetail },
-    { path: '/shipper/history', name: 'shipper-history', component: DeliveryHistory },
+    { path: '/shipper/dashboard', name: 'shipper-dashboard', component: ShipperDashboard, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
+    { path: '/shipper/delivery/:id', name: 'delivery-detail', component: DeliveryDetail, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
+    { path: '/shipper/history', name: 'shipper-history', component: DeliveryHistory, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
 
-    // Admin routes
-    { path: '/admin/dashboard', name: 'admin-dashboard', component: AdminDashboard },
-    { path: '/admin/users', name: 'admin-users', component: AdminDashboard },
-    { path: '/admin/restaurants/approval', name: 'admin-restaurants-approval', component: AdminDashboard },
+    // Admin routes — meta.tab syncs with DashboardView's activeTab
+    { path: '/admin/dashboard', name: 'admin-dashboard', component: AdminDashboard, meta: { requiresAuth: true, roles: ['ADMIN'], tab: 'overview' } },
+    { path: '/admin/users', name: 'admin-users', component: AdminDashboard, meta: { requiresAuth: true, roles: ['ADMIN'], tab: 'users' } },
+    { path: '/admin/restaurants/approval', name: 'admin-restaurants-approval', component: AdminDashboard, meta: { requiresAuth: true, roles: ['ADMIN'], tab: 'approval' } },
+
+    // 404 catch-all
+    { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
   ],
+})
+
+// Navigation guard
+router.beforeEach((to, _from, next) => {
+  const token = localStorage.getItem('token')
+  const userRaw = token ? (() => { try { return JSON.parse(atob(token.split('.')[1])) } catch { return null } })() : null
+  const role = String(userRaw?.role || '').toUpperCase().replace(/^ROLE_/, '')
+
+  if (to.meta.requiresAuth && !token) {
+    return next({ name: 'home' })
+  }
+
+  if (to.meta.roles && to.meta.roles.length) {
+    if (!role || !to.meta.roles.includes(role)) {
+      return next({ name: 'home' })
+    }
+  }
+
+  next()
 })
 
 export default router

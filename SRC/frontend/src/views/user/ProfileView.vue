@@ -217,7 +217,7 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
             <span class="member-badge">Thành viên từ {{ profile.created_at }}</span>
           </div>
         </div>
-        <p v-if="isLoading" class="member-badge">Dang tai du lieu...</p>
+        <p v-if="isLoading" class="member-badge">Đang tải dữ liệu...</p>
         <p v-if="errorMessage" class="member-badge">{{ errorMessage }}</p>
 
         <div class="stats-row">
@@ -302,7 +302,7 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
         <div class="danger-card">
           <h2>Vùng nguy hiểm</h2>
           <p>Xoá tài khoản sẽ không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xoá vĩnh viễn.</p>
-          <button class="danger-btn">Xoá tài khoản</button>
+          <button class="danger-btn" @click="() => { if (window.confirm('Bạn có chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.')) { /* TODO: call API */ alert('Chức năng đang phát triển.') } }">Xoá tài khoản</button>
         </div>
       </div>
     </div>

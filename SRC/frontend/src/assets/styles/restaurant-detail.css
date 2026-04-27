@@ -197,3 +197,46 @@
   border-radius: 10px;
   border: 1px solid #e8ecf4;
 }
+
+.size-btn {
+  border: 1px solid #dce2ef;
+  background: #fff;
+  color: #2f3a54;
+  border-radius: 8px;
+  padding: 0.28rem 0.52rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.size-btn:hover {
+  background: #ff7f23;
+  border-color: #ff7f23;
+  color: #fff;
+}
+
+.added-msg {
+  color: #0f7b3f;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: #e6f9ee;
+  border-radius: 10px;
+}
+
+.empty-menu {
+  color: #7c8595;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .menu-row {
+    grid-template-columns: 1fr;
+  }
+  .menu-thumb {
+    height: 140px;
+  }
+}

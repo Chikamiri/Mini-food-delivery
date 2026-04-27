@@ -17,14 +17,14 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const cartStore = useCartStore()
-      cartStore.clearCart()
       const result = await authService.login(email, password)
       user.value = result.user
       token.value = result.token
       localStorage.setItem('token', result.token)
+      cartStore.setUser(result.user?.id || result.user?.email || 'guest')
       return result.user
     } catch (err) {
-      error.value = err.message || 'Dang nhap that bai'
+      error.value = err.message || 'Đăng nhập thất bại'
       throw err
     } finally {
       isLoading.value = false
@@ -36,14 +36,14 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const cartStore = useCartStore()
-      cartStore.clearCart()
       const result = await authService.register(payload)
       user.value = result.user
       token.value = result.token
       localStorage.setItem('token', result.token)
+      cartStore.setUser(result.user?.id || result.user?.email || 'guest')
       return result.user
     } catch (err) {
-      error.value = err.message || 'Dang ky that bai'
+      error.value = err.message || 'Đăng ký thất bại'
       throw err
     } finally {
       isLoading.value = false
@@ -57,9 +57,11 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const profile = await authService.getProfile()
       user.value = profile
+      const cartStore = useCartStore()
+      cartStore.setUser(profile?.id || profile?.email || 'guest')
       return profile
     } catch (err) {
-      error.value = err.message || 'Khong the tai profile'
+      error.value = err.message || 'Không thể tải hồ sơ'
       throw err
     } finally {
       isLoading.value = false
@@ -73,6 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       const cartStore = useCartStore()
       cartStore.clearCart()
+      cartStore.setUser('')
       user.value = null
       token.value = null
       error.value = null

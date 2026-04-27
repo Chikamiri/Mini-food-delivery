@@ -1,9 +1,38 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref([])
   const note = ref('')
+  const _currentUserKey = ref('')
+
+  function _storageKey() {
+    return _currentUserKey.value ? `cart_items_${_currentUserKey.value}` : ''
+  }
+
+  function _persist() {
+    const key = _storageKey()
+    if (!key) return
+    try { localStorage.setItem(key, JSON.stringify(items.value)) } catch { /* quota */ }
+  }
+
+  function _loadFromStorage() {
+    const key = _storageKey()
+    if (!key) { items.value = []; return }
+    try {
+      const raw = localStorage.getItem(key)
+      items.value = raw ? JSON.parse(raw) : []
+    } catch { items.value = [] }
+  }
+
+  function setUser(userIdOrEmail) {
+    const id = String(userIdOrEmail || 'guest')
+    if (_currentUserKey.value === id) return
+    _currentUserKey.value = id
+    _loadFromStorage()
+  }
+
+  watch(items, () => _persist(), { deep: true })
 
   const itemCount = computed(() =>
     items.value.reduce((total, item) => total + item.quantity, 0),
@@ -74,6 +103,7 @@ export const useCartStore = defineStore('cart', () => {
     note,
     itemCount,
     subtotal,
+    setUser,
     addItem,
     removeItem,
     updateQuantity,

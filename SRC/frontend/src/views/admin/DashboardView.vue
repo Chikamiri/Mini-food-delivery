@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminService from '@/services/adminService'
 import {
@@ -10,9 +10,14 @@ import {
 } from '@/utils/adminDashboardUtils'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
-const activeTab = ref('overview')
+const activeTab = ref(route.meta?.tab || 'overview')
+watch(
+  () => route.meta?.tab,
+  (tab) => { if (tab) activeTab.value = tab },
+)
 const tabs = [
   { key: 'overview', label: 'Tổng quan' },
   { key: 'approval', label: 'Duyệt nhà hàng' },
@@ -40,6 +45,7 @@ const successMessage = ref('')
 const keyword = ref('')
 const rejectedRestaurantIds = ref([])
 const editUserModalOpen = ref(false)
+watch(editUserModalOpen, (open) => { document.body.style.overflow = open ? 'hidden' : '' })
 const editingUser = ref(null)
 const editRole = ref('USER')
 const editActive = ref(true)
@@ -78,8 +84,11 @@ const filteredUsers = computed(() =>
 
 const logout = () => logoutAdminAction(authStore, router)
 const formatCurrency = (value) => formatAdminCurrency(value)
+const rejectedStorageKey = computed(() =>
+  `admin_rejected_restaurant_ids_${String(authStore.user?.id || authStore.user?.email || 'admin')}`,
+)
 const persistRejectedRestaurantIds = () => {
-  localStorage.setItem('admin_rejected_restaurant_ids', JSON.stringify(rejectedRestaurantIds.value))
+  localStorage.setItem(rejectedStorageKey.value, JSON.stringify(rejectedRestaurantIds.value))
 }
 const loadDashboardData = async () => {
   await loadAdminDashboardDataAction(
@@ -227,7 +236,7 @@ const deleteUser = async (user) => {
 
 onMounted(() => {
   try {
-    const stored = JSON.parse(localStorage.getItem('admin_rejected_restaurant_ids') || '[]')
+    const stored = JSON.parse(localStorage.getItem(rejectedStorageKey.value) || '[]')
     rejectedRestaurantIds.value = Array.isArray(stored) ? stored : []
   } catch {
     rejectedRestaurantIds.value = []

@@ -22,7 +22,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       restaurants.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai danh sach nha hang'
+      error.value = err.message || 'Không thể tải danh sách nhà hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -37,7 +37,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       selectedRestaurant.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai chi tiet nha hang'
+      error.value = err.message || 'Không thể tải chi tiết nhà hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -52,7 +52,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       categories.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai danh muc nha hang'
+      error.value = err.message || 'Không thể tải danh mục nhà hàng'
       throw err
     } finally {
       isLoading.value = false
@@ -67,7 +67,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       menuItems.value = data
       return data
     } catch (err) {
-      error.value = err.message || 'Khong the tai menu nha hang'
+      error.value = err.message || 'Không thể tải menu nhà hàng'
       throw err
     } finally {
       isLoading.value = false

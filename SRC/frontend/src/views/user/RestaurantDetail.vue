@@ -2,10 +2,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
+import { useCartStore } from '@/stores/cart'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
 
 const route = useRoute()
 const router = useRouter()
+const cartStore = useCartStore()
 const restaurant = ref(null)
 const menuItems = ref([])
 const isLoading = ref(false)
@@ -56,6 +58,22 @@ const categoryFilters = computed(() => {
 
 const formatPrice = (value) => `${Number(value || 0).toLocaleString('vi-VN')}đ`
 const goBack = () => router.push('/browse')
+const addedMessage = ref('')
+
+const addToCart = (item, sizeKey = 'medium') => {
+  const sizeLabels = { small: 'Nhỏ', medium: 'Vừa', large: 'Lớn' }
+  cartStore.addItem({
+    id: item.id,
+    name: item.name,
+    price: item.prices[sizeKey],
+    imageUrl: item.image,
+    restaurantId: restaurant.value?.id,
+    restaurantName: restaurant.value?.name,
+    size: sizeLabels[sizeKey],
+  })
+  addedMessage.value = `Đã thêm ${item.name} (${sizeLabels[sizeKey]}) vào giỏ hàng!`
+  setTimeout(() => { addedMessage.value = '' }, 2000)
+}
 
 function parseSizePrices(description, mediumPrice) {
   const content = String(description || '')
@@ -90,7 +108,7 @@ onMounted(async () => {
     restaurant.value = restaurantData
     menuItems.value = Array.isArray(menuData) ? menuData : []
   } catch (error) {
-    errorMessage.value = error.message || 'Khong the tai chi tiet nha hang'
+    errorMessage.value = error.message || 'Không thể tải chi tiết nhà hàng'
   } finally {
     isLoading.value = false
   }
@@ -144,7 +162,9 @@ onMounted(async () => {
             {{ filter === 'all' ? 'Tất cả' : filter }}
           </button>
         </div>
-        <div class="menu-list">
+        <p v-if="addedMessage" class="added-msg">{{ addedMessage }}</p>
+        <p v-if="!visibleMenuItems.length" class="empty-menu">Nhà hàng chưa có món ăn nào.</p>
+        <div v-else class="menu-list">
           <article v-for="item in visibleMenuItems" :key="item.id" class="menu-row">
             <div class="menu-row-content">
               <h4>{{ item.name }}</h4>
@@ -152,9 +172,9 @@ onMounted(async () => {
                 {{ item.description?.replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '') || 'Món ăn nổi bật của nhà hàng' }}
               </p>
               <div class="menu-row-prices">
-                <span>Nhỏ: {{ formatPrice(item.prices.small) }}</span>
-                <span>Vừa: {{ formatPrice(item.prices.medium) }}</span>
-                <span>Lớn: {{ formatPrice(item.prices.large) }}</span>
+                <button type="button" class="size-btn" @click="addToCart(item, 'small')">Nhỏ: {{ formatPrice(item.prices.small) }}</button>
+                <button type="button" class="size-btn" @click="addToCart(item, 'medium')">Vừa: {{ formatPrice(item.prices.medium) }}</button>
+                <button type="button" class="size-btn" @click="addToCart(item, 'large')">Lớn: {{ formatPrice(item.prices.large) }}</button>
               </div>
             </div>
             <img class="menu-thumb" :src="item.image" :alt="item.name" />

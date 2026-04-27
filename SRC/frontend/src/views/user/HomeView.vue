@@ -150,7 +150,7 @@ const steps = [
         </p>
 
         <div class="cta-row">
-          <button class="primary-btn">Bắt đầu ngay</button>
+          <button class="primary-btn" @click="openLoginModal">Bắt đầu ngay</button>
           <button class="watch-btn">
             <i>▶</i>
             Xem video
@@ -200,7 +200,7 @@ const steps = [
           <span class="section-tag">Món phổ biến</span>
           <h2>Chọn món bạn yêu thích</h2>
         </div>
-        <button class="outline-btn">Xem tất cả món</button>
+        <button class="outline-btn" @click="openLoginModal">Xem tất cả món</button>
       </div>
 
       <div class="menu-grid">
@@ -237,12 +237,12 @@ const steps = [
         <h2>Giảm 20% cho đơn hàng đầu tiên</h2>
         <p>Sử dụng mã <strong>CHAO20</strong> khi thanh toán.</p>
       </div>
-      <button class="primary-btn">Đặt món ngay</button>
+      <button class="primary-btn" @click="openLoginModal">Đặt món ngay</button>
     </section>
 
     <footer class="home-footer">
       <div class="footer-brand">
-        <div class="logo-box">FO</div>
+        <div class="logo-box">FD</div>
         <div>
           <strong>Giao Đồ Ăn</strong>
           <p>Ngon nhanh, giao tận nơi.</p>

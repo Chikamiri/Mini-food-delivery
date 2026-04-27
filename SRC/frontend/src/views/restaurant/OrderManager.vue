@@ -32,9 +32,58 @@ const filteredOrders = computed(() => {
   return orders.value.filter((o) => String(o.status || '').toUpperCase() === filterStatus.value)
 })
 
+const actionLoading = ref(false)
+const successMsg = ref('')
 const go = (path) => goRestaurantPath(router, path)
 const statusBadge = (status) => restaurantStatusBadge(status)
 const statusLabel = (key) => restaurantStatusLabel(key)
+
+const confirmOrder = async (orderId) => {
+  actionLoading.value = true
+  successMsg.value = ''
+  try {
+    await orderService.confirm(orderId)
+    const target = orders.value.find((o) => o.id === orderId)
+    if (target) target.status = 'CONFIRMED'
+    successMsg.value = 'Đã xác nhận đơn hàng #' + orderId
+  } catch (err) {
+    errorMessage.value = err.message || 'Không thể xác nhận đơn hàng'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const rejectOrder = async (orderId) => {
+  const reason = window.prompt('Nhập lý do từ chối đơn hàng:', 'Hết nguyên liệu')
+  if (reason === null) return
+  actionLoading.value = true
+  successMsg.value = ''
+  try {
+    await orderService.reject(orderId, reason)
+    const target = orders.value.find((o) => o.id === orderId)
+    if (target) target.status = 'CANCELLED'
+    successMsg.value = 'Đã từ chối đơn hàng #' + orderId
+  } catch (err) {
+    errorMessage.value = err.message || 'Không thể từ chối đơn hàng'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const markReady = async (orderId) => {
+  actionLoading.value = true
+  successMsg.value = ''
+  try {
+    await orderService.updateStatus(orderId, 'READY')
+    const target = orders.value.find((o) => o.id === orderId)
+    if (target) target.status = 'READY'
+    successMsg.value = 'Đơn #' + orderId + ' đã sẵn sàng giao'
+  } catch (err) {
+    errorMessage.value = err.message || 'Không thể cập nhật trạng thái'
+  } finally {
+    actionLoading.value = false
+  }
+}
 const loadData = () =>
   loadRestaurantOrdersDataAction({
     loading,
@@ -114,12 +163,45 @@ onMounted(loadData)
           <p>Không có đơn hàng nào{{ filterStatus !== 'ALL' ? ' ở trạng thái này' : '' }}.</p>
         </div>
 
+        <p v-if="successMsg" class="success-text">{{ successMsg }}</p>
+
         <ul v-else class="simple-list">
-          <li v-for="order in filteredOrders" :key="order.id">
-            <span>#{{ order.id }}</span>
-            <span>{{ order.customerName || 'Khách hàng' }}</span>
-            <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
-            <b :class="statusBadge(order.status)">{{ order.status }}</b>
+          <li v-for="order in filteredOrders" :key="order.id" class="order-row">
+            <div class="order-info">
+              <span class="order-id">#{{ order.id }}</span>
+              <span>{{ order.customerName || 'Khách hàng' }}</span>
+              <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
+              <b :class="statusBadge(order.status)">{{ order.status }}</b>
+            </div>
+            <div class="order-actions">
+              <button
+                v-if="order.status === 'PENDING'"
+                type="button"
+                class="action-btn confirm"
+                :disabled="actionLoading"
+                @click="confirmOrder(order.id)"
+              >
+                Xác nhận
+              </button>
+              <button
+                v-if="order.status === 'PENDING'"
+                type="button"
+                class="action-btn reject"
+                :disabled="actionLoading"
+                @click="rejectOrder(order.id)"
+              >
+                Từ chối
+              </button>
+              <button
+                v-if="order.status === 'CONFIRMED' || order.status === 'PREPARING'"
+                type="button"
+                class="action-btn ready"
+                :disabled="actionLoading"
+                @click="markReady(order.id)"
+              >
+                Sẵn sàng giao
+              </button>
+            </div>
           </li>
         </ul>
       </section>
@@ -128,3 +210,37 @@ onMounted(loadData)
 </template>
 
 <style scoped src="@/assets/styles/restaurant-views.css"></style>
+<style scoped>
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.order-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.order-id { font-weight: 700; color: #1f293b; }
+.order-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.action-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.38rem 0.72rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.action-btn.confirm { background: #e6f9ee; color: #0f7b3f; }
+.action-btn.reject { background: #ffedf0; color: #c02144; }
+.action-btn.ready { background: #e6f0ff; color: #1d5dba; }
+.success-text { color: #0f7b3f; font-weight: 600; margin-bottom: 0.5rem; }
+</style>
