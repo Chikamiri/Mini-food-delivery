@@ -18,12 +18,12 @@ const isLoading = computed(() => orderStore.isLoading)
 const error = computed(() => orderStore.error)
 
 const statusSteps = [
-  { key: 'PENDING', label: 'Đặt hàng', icon: '📝', desc: 'Đơn hàng đã được gửi đi' },
-  { key: 'CONFIRMED', label: 'Xác nhận', icon: '✅', desc: 'Nhà hàng đã nhận đơn' },
-  { key: 'PREPARING', label: 'Chuẩn bị', icon: '👨‍🍳', desc: 'Đang chế biến món ăn' },
-  { key: 'READY', label: 'Sẵn sàng', icon: '📦', desc: 'Món đã sẵn sàng giao' },
-  { key: 'DELIVERING', label: 'Đang giao', icon: '🚀', desc: 'Shipper đang trên đường' },
-  { key: 'DELIVERED', label: 'Hoàn thành', icon: '🎉', desc: 'Đã giao thành công' },
+  { key: 'PENDING', label: 'Đặt hàng', icon: '1', desc: 'Đơn hàng đã được gửi đi' },
+  { key: 'CONFIRMED', label: 'Xác nhận', icon: '2', desc: 'Nhà hàng đã nhận đơn' },
+  { key: 'PREPARING', label: 'Chuẩn bị', icon: '3', desc: 'Đang chế biến món ăn' },
+  { key: 'READY', label: 'Sẵn sàng', icon: '4', desc: 'Món đã sẵn sàng giao' },
+  { key: 'DELIVERING', label: 'Đang giao', icon: '5', desc: 'Shipper đang trên đường' },
+  { key: 'DELIVERED', label: 'Hoàn thành', icon: '6', desc: 'Đã giao thành công' },
 ]
 
 const currentStepIndex = computed(() => {
@@ -182,7 +182,7 @@ onUnmounted(() => {
       </section>
 
       <section v-else class="cancelled-section">
-        <span class="cancelled-icon">❌</span>
+        <span class="cancelled-icon">X</span>
         <h3>Đơn hàng đã bị hủy</h3>
         <p>{{ order.cancelReason || order.note || 'Không có lý do cụ thể.' }}</p>
       </section>
@@ -190,7 +190,7 @@ onUnmounted(() => {
       <!-- Live map for READY / SHIPPING / DELIVERING / DELIVERED -->
       <section v-if="mapMarkers.length" class="detail-card">
         <h2>Bản đồ giao hàng</h2>
-        <p v-if="shipperPos" class="shipper-online">🟢 Shipper đang trực tuyến</p>
+        <p v-if="shipperPos" class="shipper-online">Shipper đang trực tuyến</p>
         <MapView :markers="mapMarkers" :route="mapRoute" height="300px" />
       </section>
 

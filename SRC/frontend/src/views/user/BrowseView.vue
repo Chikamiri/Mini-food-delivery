@@ -621,7 +621,7 @@ onUnmounted(() => {
         <div class="dish-grid recent">
           <p v-if="!recentOrders.length" class="muted">Chưa có đơn đã giao thành công.</p>
           <article v-for="dish in recentOrders" :key="dish.id" class="dish-card">
-            <div class="dish-img">🍽️</div>
+            <div class="dish-img">--</div>
             <h4>{{ dish.name }}</h4>
             <p>{{ dish.price }}</p>
             <small>Đặt lúc: {{ dish.eta }}</small>

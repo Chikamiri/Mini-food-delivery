@@ -9,6 +9,7 @@ import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
 import iconSetting from '@/assets/icon/setting.svg'
+import iconTagOutline from '@/assets/icon/tag.svg'
 import { goRestaurantPath } from '@/utils/restaurantViewUtils'
 import { loadRestaurantCategoriesDataAction } from '@/utils/restaurantDataUtils'
 
@@ -170,7 +171,7 @@ onMounted(loadData)
           <div v-for="category in categories" :key="category.id" class="category-chip">
             <div class="category-chip-icon">
               <img v-if="category.iconUrl" :src="category.iconUrl" :alt="category.name" />
-              <span v-else style="font-size: 1.2rem;">📁</span>
+              <img v-else :src="iconTagOutline" alt="" />
             </div>
             <div class="category-chip-text">
               <strong>{{ category.name }}</strong>

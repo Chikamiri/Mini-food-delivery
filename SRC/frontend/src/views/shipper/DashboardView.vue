@@ -196,11 +196,11 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
         <span>Shipper</span>
       </div>
       <nav class="sidebar-nav">
-        <button class="nav-btn active" type="button">🏠 Tổng quan</button>
-        <button class="nav-btn" type="button" @click="router.push('/shipper/history')">📋 Lịch sử</button>
+        <button class="nav-btn active" type="button">Tổng quan</button>
+        <button class="nav-btn" type="button" @click="router.push('/shipper/history')">Lịch sử</button>
       </nav>
       <div class="sidebar-spacer"></div>
-      <button class="nav-btn logout" type="button" @click="logout">🚪 Đăng xuất</button>
+      <button class="nav-btn logout" type="button" @click="logout">Đăng xuất</button>
     </aside>
 
     <main class="shipper-main">
@@ -215,10 +215,10 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
             :class="['toggle-btn', { online: isOnline }]"
             @click="isOnline = !isOnline"
           >
-            {{ isOnline ? '🟢 Đang hoạt động' : '⚫ Đã tắt' }}
+            {{ isOnline ? 'Đang hoạt động' : 'Đã tắt' }}
           </button>
           <button type="button" class="refresh-btn" :disabled="isLoading" @click="loadData">
-            {{ isLoading ? 'Đang tải...' : '🔄 Làm mới' }}
+            {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
           </button>
         </div>
       </header>
@@ -228,16 +228,16 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
 
       <!-- My active deliveries -->
       <section v-if="myDeliveries.length" class="orders-section">
-        <h2 class="section-title">🚚 Đơn đang xử lý ({{ myDeliveries.length }})</h2>
+        <h2 class="section-title">Đơn đang xử lý ({{ myDeliveries.length }})</h2>
         <div class="orders-grid">
           <article v-for="delivery in myDeliveries" :key="delivery.id" class="delivery-card highlight">
             <div class="delivery-info">
               <span class="order-num">Đơn #{{ delivery.orderId }}</span>
               <span class="delivery-status">{{ statusLabel(delivery.status) }}</span>
               <template v-if="orderDetails[delivery.orderId]">
-                <p class="address">📍 {{ orderDetails[delivery.orderId].deliveryAddress || '—' }}</p>
-                <p class="price">💵 {{ formatPrice(orderDetails[delivery.orderId].totalAmount) }}</p>
-                <p class="restaurant-name">🏪 {{ orderDetails[delivery.orderId].restaurantName || '' }}</p>
+                <p class="address">Địa chỉ: {{ orderDetails[delivery.orderId].deliveryAddress || '—' }}</p>
+                <p class="price">Giá trị đơn: {{ formatPrice(orderDetails[delivery.orderId].totalAmount) }}</p>
+                <p class="restaurant-name">Nhà hàng: {{ orderDetails[delivery.orderId].restaurantName || '' }}</p>
               </template>
               <p v-if="delivery.createdAt" class="time-text">Nhận lúc: {{ formatTime(delivery.createdAt) }}</p>
             </div>
@@ -248,7 +248,7 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
                 class="action-btn pickup"
                 @click="pickupOrder(delivery)"
               >
-                ✅ Đã lấy hàng
+                Đã lấy hàng
               </button>
               <button
                 v-if="delivery.status === 'PICKED_UP'"
@@ -256,7 +256,7 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
                 class="action-btn complete"
                 @click="deliverOrder(delivery)"
               >
-                🏁 Đã giao xong
+                Đã giao xong
               </button>
             </div>
           </article>
@@ -265,13 +265,13 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
 
       <!-- Route map for active delivery -->
       <section v-if="activeDeliveryMapMarkers.length" class="orders-section">
-        <h2 class="section-title">🗺 Tuyến đường giao hàng</h2>
+        <h2 class="section-title">Tuyến đường giao hàng</h2>
         <MapView :markers="activeDeliveryMapMarkers" :route="activeDeliveryMapRoute" height="280px" />
       </section>
 
       <!-- Available orders to accept -->
       <section class="orders-section">
-        <h2 class="section-title">📦 Đơn chờ nhận ({{ availableDeliveries.length }})</h2>
+        <h2 class="section-title">Đơn chờ nhận ({{ availableDeliveries.length }})</h2>
         <p v-if="!availableDeliveries.length && !isLoading" class="empty-text">
           Hiện không có đơn hàng nào sẵn sàng giao. Đơn mới sẽ hiện khi nhà hàng chuẩn bị xong.
         </p>
@@ -280,9 +280,9 @@ onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() 
             <div class="delivery-info">
               <span class="order-num">Đơn #{{ delivery.orderId }}</span>
               <template v-if="orderDetails[delivery.orderId]">
-                <p class="address">📍 {{ orderDetails[delivery.orderId].deliveryAddress || '—' }}</p>
-                <p class="price">💵 {{ formatPrice(orderDetails[delivery.orderId].totalAmount) }}</p>
-                <p class="restaurant-name">🏪 {{ orderDetails[delivery.orderId].restaurantName || '' }}</p>
+                <p class="address">Địa chỉ: {{ orderDetails[delivery.orderId].deliveryAddress || '—' }}</p>
+                <p class="price">Giá trị đơn: {{ formatPrice(orderDetails[delivery.orderId].totalAmount) }}</p>
+                <p class="restaurant-name">Nhà hàng: {{ orderDetails[delivery.orderId].restaurantName || '' }}</p>
               </template>
             </div>
             <button

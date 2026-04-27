@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
+import iconHome from '@/assets/icon/home.svg'
 import { useCartStore } from '@/stores/cart'
 import {
   incrementCartItem,
@@ -52,7 +53,7 @@ const goBrowse = () => goBrowseFromCart(router)
     <div class="cart-body">
       <div class="cart-items">
         <div v-if="cartItems.length === 0" class="empty-state">
-          <span class="empty-icon">🛒</span>
+          <span class="empty-icon">--</span>
           <h2>Giỏ hàng trống</h2>
           <p>Hãy thêm món ăn từ nhà hàng yêu thích!</p>
           <button class="browse-btn" @click="goBrowse">Khám phá ngay</button>
@@ -64,14 +65,14 @@ const goBrowse = () => goBrowseFromCart(router)
           class="restaurant-group"
         >
           <div class="restaurant-label">
-            <span class="restaurant-dot">🏪</span>
+            <span class="restaurant-dot"><img :src="iconHome" alt="" width="14" height="14" /></span>
             <h3>{{ restaurant }}</h3>
           </div>
 
           <article v-for="item in items" :key="item.lineId" class="cart-item">
             <div class="item-image">
               <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" />
-              <span v-else>🍱</span>
+              <span v-else>--</span>
             </div>
             <div class="item-info">
               <h4>{{ item.name }}</h4>

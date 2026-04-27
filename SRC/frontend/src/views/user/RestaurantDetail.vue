@@ -161,9 +161,9 @@ onMounted(async () => {
           <p class="hero-kicker">Bạn đang ở đây</p>
           <h1>{{ restaurant.name }}</h1>
           <div class="hero-meta">
-            <span>⭐ {{ Number(restaurant.rating || 4.6).toFixed(1) }}</span>
-            <span>📍 {{ restaurant.address || 'Chưa có địa chỉ' }}</span>
-            <span>⏱ {{ restaurant.openingTime || '08:00' }} - {{ restaurant.closingTime || '22:00' }}</span>
+            <span>Đánh giá: {{ Number(restaurant.rating || 4.6).toFixed(1) }}</span>
+            <span>Địa chỉ: {{ restaurant.address || 'Chưa có địa chỉ' }}</span>
+            <span>Giờ mở cửa: {{ restaurant.openingTime || '08:00' }} - {{ restaurant.closingTime || '22:00' }}</span>
           </div>
         </div>
       </section>

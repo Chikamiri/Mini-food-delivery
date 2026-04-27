@@ -204,11 +204,11 @@ onMounted(loadData)
               <b :class="statusBadge(order.status)">{{ statusLabel(order.status) }}</b>
               <!-- Shipper tracking info -->
               <span v-if="deliveryInfo[order.id]?.shipperName" class="shipper-tag">
-                🛵 {{ deliveryInfo[order.id].shipperName }}
+                {{ deliveryInfo[order.id].shipperName }}
                 <span v-if="deliveryInfo[order.id].status === 'PICKED_UP'"> · Đang trên đường giao</span>
                 <span v-else-if="deliveryInfo[order.id].status === 'ASSIGNED'"> · Đang đến lấy hàng</span>
               </span>
-              <span v-else-if="order.status === 'READY'" class="shipper-tag waiting">⏳ Chờ shipper nhận</span>
+              <span v-else-if="order.status === 'READY'" class="shipper-tag waiting">Chờ shipper nhận</span>
             </div>
             <div class="order-actions">
               <button

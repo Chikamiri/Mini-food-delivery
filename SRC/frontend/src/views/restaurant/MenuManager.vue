@@ -9,6 +9,7 @@ import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
 import iconSetting from '@/assets/icon/setting.svg'
+import iconView from '@/assets/icon/view.svg'
 import { goRestaurantPath } from '@/utils/restaurantViewUtils'
 import { loadRestaurantMenuDataAction } from '@/utils/restaurantDataUtils'
 
@@ -389,7 +390,7 @@ onMounted(async () => {
               :alt="item.name"
               class="menu-card-img"
             />
-            <div v-else class="menu-card-img" style="background:#f0f2f8; display:grid; place-items:center; color:#bbb; font-size:2rem;">🍽</div>
+            <div v-else class="menu-card-img" style="background:#f0f2f8; display:grid; place-items:center; color:#bbb; font-size:2rem;">--</div>
             <div class="menu-card-body">
               <h4>{{ item.name }}</h4>
               <div class="menu-card-meta">
@@ -458,7 +459,7 @@ onMounted(async () => {
                   <button type="button" class="remove-img-btn" @click="removeImage">✕</button>
                 </div>
                 <div v-else class="image-placeholder" @click="fileInputRef?.click()">
-                  <span class="upload-icon">📷</span>
+                  <img :src="iconView" alt="" class="upload-icon-svg" />
                   <span>Nhấn để chọn ảnh</span>
                 </div>
                 <input
@@ -661,6 +662,12 @@ onMounted(async () => {
 
 .upload-icon {
   font-size: 1.8rem;
+}
+
+.upload-icon-svg {
+  width: 26px;
+  height: 26px;
+  opacity: 0.75;
 }
 
 .file-input-hidden {

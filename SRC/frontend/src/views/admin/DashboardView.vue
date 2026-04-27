@@ -3,6 +3,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminService from '@/services/adminService'
+import iconOrder from '@/assets/icon/reciept.svg'
+import iconRestaurant from '@/assets/icon/home.svg'
+import iconUser from '@/assets/icon/check.svg'
+import iconRevenue from '@/assets/icon/dollar-sign.svg'
+import iconComplaint from '@/assets/icon/info.svg'
+import iconPromo from '@/assets/icon/tag.svg'
+import iconSettings from '@/assets/icon/setting.svg'
 import {
   logoutAdminAction,
   formatAdminCurrency,
@@ -54,10 +61,10 @@ const roleOptions = ['USER', 'OWNER', 'ADMIN', 'SHIPPER', 'CUSTOMER']
 const normalizeRole = (value) => String(value || '').toUpperCase().replace(/^ROLE_/, '')
 
 const kpiCards = computed(() => [
-  { title: 'Tổng đơn', value: Number(stats.value.totalOrders || 0).toLocaleString('vi-VN'), icon: '🧾' },
-  { title: 'Nhà hàng', value: Number(stats.value.totalRestaurants || 0).toLocaleString('vi-VN'), icon: '🏬' },
-  { title: 'Người dùng', value: Number(stats.value.totalUsers || 0).toLocaleString('vi-VN'), icon: '👥' },
-  { title: 'Doanh thu', value: formatCurrency(stats.value.totalRevenue), icon: '💰' },
+  { title: 'Tổng đơn', value: Number(stats.value.totalOrders || 0).toLocaleString('vi-VN'), icon: iconOrder },
+  { title: 'Nhà hàng', value: Number(stats.value.totalRestaurants || 0).toLocaleString('vi-VN'), icon: iconRestaurant },
+  { title: 'Người dùng', value: Number(stats.value.totalUsers || 0).toLocaleString('vi-VN'), icon: iconUser },
+  { title: 'Doanh thu', value: formatCurrency(stats.value.totalRevenue), icon: iconRevenue },
 ])
 
 const filteredApprovals = computed(() =>
@@ -294,7 +301,7 @@ onMounted(() => {
       <template v-if="activeTab === 'overview'">
         <section class="kpi-grid">
           <article v-for="card in kpiCards" :key="card.title" class="kpi-card">
-            <span class="kpi-icon">{{ card.icon }}</span>
+            <span class="kpi-icon"><img :src="card.icon" alt="" width="18" height="18" /></span>
             <div>
               <p>{{ card.title }}</p>
               <h3>{{ card.value }}</h3>
@@ -443,7 +450,7 @@ onMounted(() => {
             <h3>Quản lý đơn hàng</h3>
           </div>
           <div class="coming-soon">
-            <span class="coming-icon">📦</span>
+            <span class="coming-icon"><img :src="iconOrder" alt="" width="18" height="18" /></span>
             <h3>Đang phát triển</h3>
             <p>Chức năng quản lý đơn hàng toàn hệ thống sẽ được cập nhật trong bản tiếp theo.</p>
           </div>
@@ -454,7 +461,7 @@ onMounted(() => {
       <template v-else-if="activeTab === 'revenue'">
         <section class="kpi-grid" style="margin-bottom:1rem;">
           <article class="kpi-card">
-            <span class="kpi-icon">💰</span>
+            <span class="kpi-icon"><img :src="iconRevenue" alt="" width="18" height="18" /></span>
             <div>
               <p>Tổng doanh thu</p>
               <h3>{{ formatCurrency(stats.totalRevenue) }}</h3>
@@ -462,7 +469,7 @@ onMounted(() => {
             </div>
           </article>
           <article class="kpi-card">
-            <span class="kpi-icon">🧾</span>
+            <span class="kpi-icon"><img :src="iconOrder" alt="" width="18" height="18" /></span>
             <div>
               <p>Tổng đơn hoàn thành</p>
               <h3>{{ Number(stats.totalOrders || 0).toLocaleString('vi-VN') }}</h3>
@@ -486,7 +493,7 @@ onMounted(() => {
             <h3>Quản lý khiếu nại</h3>
           </div>
           <div class="coming-soon">
-            <span class="coming-icon">📋</span>
+            <span class="coming-icon"><img :src="iconComplaint" alt="" width="18" height="18" /></span>
             <h3>Đang phát triển</h3>
             <p>Chức năng quản lý khiếu nại từ khách hàng sẽ được cập nhật trong bản tiếp theo.</p>
           </div>
@@ -500,7 +507,7 @@ onMounted(() => {
             <h3>Quản lý khuyến mãi</h3>
           </div>
           <div class="coming-soon">
-            <span class="coming-icon">🎁</span>
+            <span class="coming-icon"><img :src="iconPromo" alt="" width="18" height="18" /></span>
             <h3>Đang phát triển</h3>
             <p>Tạo và quản lý mã giảm giá, chương trình khuyến mãi sẽ được cập nhật trong bản tiếp theo.</p>
           </div>
@@ -514,7 +521,7 @@ onMounted(() => {
             <h3>Cài đặt hệ thống</h3>
           </div>
           <div class="coming-soon">
-            <span class="coming-icon">⚙️</span>
+            <span class="coming-icon"><img :src="iconSettings" alt="" width="18" height="18" /></span>
             <h3>Đang phát triển</h3>
             <p>Cấu hình phí giao hàng, thời gian xử lý, chính sách hoàn tiền sẽ được cập nhật trong bản tiếp theo.</p>
           </div>

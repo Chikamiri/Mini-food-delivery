@@ -392,14 +392,14 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
       <div v-if="settingsModalOpen" class="restaurant-overlay" @click.self="closeSettingsModal">
         <article class="restaurant-modal settings-modal">
           <div class="restaurant-modal-head">
-            <h3>⚙️ Cài đặt tài khoản</h3>
+            <h3>Cài đặt tài khoản</h3>
             <button type="button" class="modal-close-btn" @click="closeSettingsModal">✕</button>
           </div>
 
           <!-- Thông báo -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">🔔</span>
+              <span class="settings-group-icon">TB</span>
               <h4>Thông báo</h4>
             </div>
             <div class="settings-items">
@@ -436,7 +436,7 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
           <!-- Hiển thị -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">🎨</span>
+              <span class="settings-group-icon">HT</span>
               <h4>Hiển thị & ngôn ngữ</h4>
             </div>
             <div class="settings-items">
@@ -446,8 +446,8 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
                   <span class="toggle-desc">Chọn ngôn ngữ hiển thị ứng dụng</span>
                 </div>
                 <select v-model="settingsForm.language" class="settings-select">
-                  <option value="vi">🇻🇳 Tiếng Việt</option>
-                  <option value="en">🇬🇧 English</option>
+                  <option value="vi">Tiếng Việt</option>
+                  <option value="en">English</option>
                 </select>
               </div>
               <div class="settings-select-row">
@@ -456,9 +456,9 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
                   <span class="toggle-desc">Chọn chế độ sáng, tối hoặc theo hệ thống</span>
                 </div>
                 <select v-model="settingsForm.theme" class="settings-select">
-                  <option value="light">☀️ Sáng</option>
-                  <option value="dark">🌙 Tối</option>
-                  <option value="system">💻 Theo hệ thống</option>
+                  <option value="light">Sáng</option>
+                  <option value="dark">Tối</option>
+                  <option value="system">Theo hệ thống</option>
                 </select>
               </div>
             </div>
@@ -467,7 +467,7 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
           <!-- Riêng tư -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">🔒</span>
+              <span class="settings-group-icon">RT</span>
               <h4>Quyền riêng tư</h4>
             </div>
             <div class="settings-items">
@@ -477,9 +477,9 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
                   <span class="toggle-desc">Ai có thể xem lịch sử đặt hàng của bạn</span>
                 </div>
                 <select v-model="settingsForm.orderPrivacy" class="settings-select">
-                  <option value="private">🔒 Chỉ mình tôi</option>
-                  <option value="friends">👥 Bạn bè</option>
-                  <option value="public">🌐 Công khai</option>
+                  <option value="private">Chỉ mình tôi</option>
+                  <option value="friends">Bạn bè</option>
+                  <option value="public">Công khai</option>
                 </select>
               </div>
             </div>
@@ -487,7 +487,7 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
 
           <div class="settings-actions">
             <button type="button" class="settings-cancel-btn" @click="closeSettingsModal">Đóng</button>
-            <button type="button" class="settings-save-btn" @click="saveSettings">💾 Lưu cài đặt</button>
+            <button type="button" class="settings-save-btn" @click="saveSettings">Lưu cài đặt</button>
           </div>
 
           <p v-if="restaurantMessage" class="settings-saved-msg">{{ restaurantMessage }}</p>
