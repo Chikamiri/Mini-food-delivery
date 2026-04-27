@@ -69,9 +69,36 @@ export default {
 
   // --- Shipper ---
   async getAvailableForDelivery() {
-    return []
+    const response = await api.get('/api/deliveries/available')
+    return Array.isArray(response) ? response : []
   },
 
+  async getMyDeliveries() {
+    const response = await api.get('/api/deliveries/my')
+    return Array.isArray(response) ? response : []
+  },
+
+  // Self-assign: shipper accepts an available delivery
+  async selfAssign(orderId, shipperId) {
+    return api.post('/api/deliveries/assign', { orderId: Number(orderId), shipperId: Number(shipperId) })
+  },
+
+  // Mark picked up from restaurant
+  async markPickup(orderId) {
+    return api.patch(`/api/deliveries/${orderId}/pickup`, { note: '' })
+  },
+
+  // Mark delivered to customer (COD must be collected)
+  async markDelivered(orderId) {
+    return api.patch(`/api/deliveries/${orderId}/deliver`, { note: '', codCollected: true })
+  },
+
+  // Get delivery assignment for a specific order (used by restaurant to track shipper)
+  async getDeliveryByOrder(orderId) {
+    return api.get(`/api/deliveries/order/${orderId}`)
+  },
+
+  // Kept for backward compat
   async acceptDelivery(orderId) {
     return api.patch(`/api/deliveries/${orderId}/pickup`, { note: '' })
   },

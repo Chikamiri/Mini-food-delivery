@@ -19,7 +19,7 @@ public class DeliveryAssignment {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipper_id", nullable = false)
+    @JoinColumn(name = "shipper_id", nullable = true)
     private User shipper;
 
     @Column(name = "status", nullable = false)

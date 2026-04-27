@@ -22,6 +22,8 @@ const errorMessage = ref('')
 const restaurants = ref([])
 const orders = ref([])
 const filterStatus = ref('ALL')
+// delivery assignment info keyed by orderId
+const deliveryInfo = ref({})
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 
@@ -99,8 +101,8 @@ const markReady = async (orderId) => {
     actionLoading.value = false
   }
 }
-const loadData = () =>
-  loadRestaurantOrdersDataAction({
+const loadData = async () => {
+  await loadRestaurantOrdersDataAction({
     loading,
     errorMessage,
     restaurantService,
@@ -109,6 +111,15 @@ const loadData = () =>
     orderService,
     orders,
   })
+  // Fetch delivery assignment info for SHIPPING orders
+  const shippingOrders = orders.value.filter((o) => o.status === 'SHIPPING' || o.status === 'READY')
+  await Promise.all(shippingOrders.map(async (o) => {
+    try {
+      const assignment = await orderService.getDeliveryByOrder(o.id)
+      if (assignment) deliveryInfo.value[o.id] = assignment
+    } catch { /* no assignment yet */ }
+  }))
+}
 
 onMounted(loadData)
 </script>
@@ -186,7 +197,14 @@ onMounted(loadData)
               <span class="order-id">#{{ order.id }}</span>
               <span>{{ order.customerName || 'Khách hàng' }}</span>
               <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
-              <b :class="statusBadge(order.status)">{{ order.status }}</b>
+              <b :class="statusBadge(order.status)">{{ statusLabel(order.status) }}</b>
+              <!-- Shipper tracking info -->
+              <span v-if="deliveryInfo[order.id]?.shipperName" class="shipper-tag">
+                🛵 {{ deliveryInfo[order.id].shipperName }}
+                <span v-if="deliveryInfo[order.id].status === 'PICKED_UP'"> · Đang trên đường giao</span>
+                <span v-else-if="deliveryInfo[order.id].status === 'ASSIGNED'"> · Đang đến lấy hàng</span>
+              </span>
+              <span v-else-if="order.status === 'READY'" class="shipper-tag waiting">⏳ Chờ shipper nhận</span>
             </div>
             <div class="order-actions">
               <button
@@ -267,4 +285,16 @@ onMounted(loadData)
 .action-btn.reject { background: #ffedf0; color: #c02144; }
 .action-btn.ready { background: #e6f0ff; color: #1d5dba; }
 .success-text { color: #0f7b3f; font-weight: 600; margin-bottom: 0.5rem; }
+.shipper-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #e0f0ff;
+  color: #1560bd;
+}
+.shipper-tag.waiting { background: #fff3cd; color: #856404; }
 </style>

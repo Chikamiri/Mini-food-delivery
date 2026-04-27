@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -166,5 +168,28 @@ public class DeliveryServiceImpl implements DeliveryService {
         ShipperLocation location = shipperLocationRepository.findByShipperId(shipperId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_LOCATION, "shipperId", shipperId));
         return deliveryMapper.toLocationResponse(location);
+    }
+
+    @Override
+    public List<DeliveryAssignmentResponse> getAvailableDeliveries() {
+        return deliveryAssignmentRepository.findAllByShipperIsNullAndStatus("UNASSIGNED")
+                .stream()
+                .map(deliveryMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DeliveryAssignmentResponse> getMyDeliveries(Long shipperId) {
+        return deliveryAssignmentRepository.findAllByShipperId(shipperId)
+                .stream()
+                .map(deliveryMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public DeliveryAssignmentResponse getByOrderId(Long orderId) {
+        DeliveryAssignment assignment = deliveryAssignmentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ASSIGNMENT, "orderId", orderId));
+        return deliveryMapper.toResponse(assignment);
     }
 }

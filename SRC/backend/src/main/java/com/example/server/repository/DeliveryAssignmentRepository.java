@@ -11,4 +11,7 @@ import java.util.Optional;
 public interface DeliveryAssignmentRepository extends JpaRepository<DeliveryAssignment, Long> {
     Optional<DeliveryAssignment> findByOrderId(Long orderId);
     Optional<DeliveryAssignment> findByShipperIdAndStatusIn(Long shipperId, List<String> statuses);
+    List<DeliveryAssignment> findAllByShipperIsNullAndStatus(String status);
+    List<DeliveryAssignment> findAllByShipperId(Long shipperId);
+    List<DeliveryAssignment> findAllByOrderIdIn(List<Long> orderIds);
 }

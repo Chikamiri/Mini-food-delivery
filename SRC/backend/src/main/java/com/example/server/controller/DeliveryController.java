@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/deliveries")
 @RequiredArgsConstructor
@@ -52,5 +54,23 @@ public class DeliveryController {
     @GetMapping("/{shipperId}/location")
     public ResponseEntity<ShipperLocationResponse> getShipperLocation(@PathVariable Long shipperId) {
         return ResponseEntity.ok(deliveryService.getShipperLocation(shipperId));
+    }
+
+    @GetMapping("/available")
+    @PreAuthorize("hasAnyRole('SHIPPER', 'ADMIN')")
+    public ResponseEntity<List<DeliveryAssignmentResponse>> getAvailableDeliveries() {
+        return ResponseEntity.ok(deliveryService.getAvailableDeliveries());
+    }
+
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('SHIPPER')")
+    public ResponseEntity<List<DeliveryAssignmentResponse>> getMyDeliveries(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(deliveryService.getMyDeliveries(userDetails.getId()));
+    }
+
+    @GetMapping("/order/{orderId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<DeliveryAssignmentResponse> getByOrderId(@PathVariable Long orderId) {
+        return ResponseEntity.ok(deliveryService.getByOrderId(orderId));
     }
 }
