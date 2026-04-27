@@ -13,6 +13,7 @@ import MenuManager from '@/views/restaurant/MenuManager.vue'
 import CategoryManager from '@/views/restaurant/CategoryManager.vue'
 import OrderManager from '@/views/restaurant/OrderManager.vue'
 import RevenueStats from '@/views/restaurant/RevenueStats.vue'
+import RestaurantSettings from '@/views/restaurant/SettingsView.vue'
 import ShipperDashboard from '@/views/shipper/DashboardView.vue'
 import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
 import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
@@ -44,6 +45,7 @@ const router = createRouter({
     { path: '/restaurant/categories', name: 'restaurant-categories', component: CategoryManager, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
     { path: '/restaurant/orders', name: 'restaurant-orders', component: OrderManager, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
     { path: '/restaurant/revenue', name: 'restaurant-revenue', component: RevenueStats, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
+    { path: '/restaurant/settings', name: 'restaurant-settings', component: RestaurantSettings, meta: { requiresAuth: true, roles: ['OWNER', 'ADMIN'] } },
 
     // Shipper routes
     { path: '/shipper/dashboard', name: 'shipper-dashboard', component: ShipperDashboard, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },

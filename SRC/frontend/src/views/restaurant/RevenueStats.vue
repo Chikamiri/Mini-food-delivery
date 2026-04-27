@@ -9,6 +9,7 @@ import iconMenu from '@/assets/icon/menu.svg'
 import iconTag from '@/assets/icon/tag.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import iconDollar from '@/assets/icon/dollar-sign.svg'
+import iconSetting from '@/assets/icon/setting.svg'
 import { goRestaurantPath } from '@/utils/restaurantViewUtils'
 import { loadRestaurantRevenueDataAction } from '@/utils/restaurantDataUtils'
 
@@ -64,6 +65,9 @@ onMounted(loadData)
       </button>
       <button class="nav-btn active" type="button" @click="go('/restaurant/revenue')">
         <img :src="iconDollar" alt="" />Doanh thu
+      </button>
+      <button class="nav-btn" type="button" @click="go('/restaurant/settings')">
+        <img :src="iconSetting" alt="" />Cài đặt
       </button>
       <div class="sidebar-spacer"></div>
     </aside>

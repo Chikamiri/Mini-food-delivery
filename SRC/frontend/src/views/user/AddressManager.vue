@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import userService from '@/services/userService'
 import { fetchAddressesAction, setDefaultAddressAction } from '@/utils/addressManagerUtils'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
+import MapView from '@/components/MapView.vue'
+import mapService from '@/services/mapService'
 
 const addresses = ref([])
 const isLoading = ref(false)
@@ -30,6 +32,67 @@ const editAddress = ref({
   longitude: 0,
 })
 const router = useRouter()
+
+// --- Map search ---
+const newAddressSearchQuery = ref('')
+const newAddressSearchResults = ref([])
+const newAddressSearching = ref(false)
+let newSearchTimer = null
+
+const editAddressSearchQuery = ref('')
+const editAddressSearchResults = ref([])
+const editAddressSearching = ref(false)
+let editSearchTimer = null
+
+const newMapMarkers = computed(() => {
+  const { latitude: lat, longitude: lng, label } = newAddress.value
+  return lat && lng ? [{ lat: Number(lat), lng: Number(lng), label: label || 'Vị trí', color: 'red' }] : []
+})
+
+const editMapMarkers = computed(() => {
+  const { latitude: lat, longitude: lng, label } = editAddress.value
+  return lat && lng ? [{ lat: Number(lat), lng: Number(lng), label: label || 'Vị trí', color: 'blue' }] : []
+})
+
+function onNewAddressSearchInput() {
+  clearTimeout(newSearchTimer)
+  if (!newAddressSearchQuery.value.trim()) { newAddressSearchResults.value = []; return }
+  newSearchTimer = setTimeout(async () => {
+    newAddressSearching.value = true
+    try {
+      newAddressSearchResults.value = await mapService.searchAddress(newAddressSearchQuery.value)
+    } catch (_) { newAddressSearchResults.value = [] }
+    newAddressSearching.value = false
+  }, 400)
+}
+
+function selectNewAddressResult(result) {
+  newAddress.value.addressLine = result.displayName || result.display_name || ''
+  newAddress.value.latitude = Number(result.lat)
+  newAddress.value.longitude = Number(result.lng || result.lon)
+  newAddressSearchResults.value = []
+  newAddressSearchQuery.value = ''
+}
+
+function onEditAddressSearchInput() {
+  clearTimeout(editSearchTimer)
+  if (!editAddressSearchQuery.value.trim()) { editAddressSearchResults.value = []; return }
+  editSearchTimer = setTimeout(async () => {
+    editAddressSearching.value = true
+    try {
+      editAddressSearchResults.value = await mapService.searchAddress(editAddressSearchQuery.value)
+    } catch (_) { editAddressSearchResults.value = [] }
+    editAddressSearching.value = false
+  }, 400)
+}
+
+function selectEditAddressResult(result) {
+  editAddress.value.addressLine = result.displayName || result.display_name || ''
+  editAddress.value.latitude = Number(result.lat)
+  editAddress.value.longitude = Number(result.lng || result.lon)
+  editAddressSearchResults.value = []
+  editAddressSearchQuery.value = ''
+}
 
 const fetchAddresses = () => fetchAddressesAction(userService, addresses, isLoading, errorMessage)
 const setDefault = (id) => setDefaultAddressAction(userService, id, fetchAddresses, errorMessage)
@@ -174,6 +237,27 @@ onMounted(fetchAddresses)
           <span>Nhãn địa chỉ</span>
           <input v-model="newAddress.label" type="text" placeholder="Ví dụ: Nhà riêng, Công ty..." />
         </label>
+        <div class="field">
+          <span class="field-label">Tìm địa chỉ trên bản đồ</span>
+          <div class="search-wrap">
+            <input
+              v-model="newAddressSearchQuery"
+              type="text"
+              placeholder="Nhập địa chỉ để tìm kiếm..."
+              @input="onNewAddressSearchInput"
+            />
+            <span v-if="newAddressSearching" class="searching-hint">Đang tìm...</span>
+          </div>
+          <ul v-if="newAddressSearchResults.length" class="geo-results">
+            <li
+              v-for="(r, i) in newAddressSearchResults"
+              :key="i"
+              @click="selectNewAddressResult(r)"
+            >
+              {{ r.displayName || r.display_name }}
+            </li>
+          </ul>
+        </div>
         <label class="field">
           <span>Địa chỉ</span>
           <input
@@ -191,6 +275,12 @@ onMounted(fetchAddresses)
           <span>Đặt làm địa chỉ mặc định</span>
         </label>
       </div>
+      <MapView
+        v-if="newMapMarkers.length"
+        :markers="newMapMarkers"
+        height="220px"
+        class="form-map"
+      />
       <div class="form-actions">
         <button type="button" class="ghost-btn" @click="toggleAddForm">Hủy</button>
         <button type="button" class="set-default-btn" :disabled="isSubmitting" @click="addAddress">
@@ -238,6 +328,27 @@ onMounted(fetchAddresses)
           <span>Nhãn địa chỉ</span>
           <input v-model="editAddress.label" type="text" placeholder="Ví dụ: Nhà riêng, Công ty..." />
         </label>
+        <div class="field">
+          <span class="field-label">Tìm địa chỉ trên bản đồ</span>
+          <div class="search-wrap">
+            <input
+              v-model="editAddressSearchQuery"
+              type="text"
+              placeholder="Nhập địa chỉ để tìm kiếm..."
+              @input="onEditAddressSearchInput"
+            />
+            <span v-if="editAddressSearching" class="searching-hint">Đang tìm...</span>
+          </div>
+          <ul v-if="editAddressSearchResults.length" class="geo-results">
+            <li
+              v-for="(r, i) in editAddressSearchResults"
+              :key="i"
+              @click="selectEditAddressResult(r)"
+            >
+              {{ r.displayName || r.display_name }}
+            </li>
+          </ul>
+        </div>
         <label class="field">
           <span>Địa chỉ</span>
           <input
@@ -255,6 +366,12 @@ onMounted(fetchAddresses)
           <span>Đặt làm địa chỉ mặc định</span>
         </label>
       </div>
+      <MapView
+        v-if="editMapMarkers.length"
+        :markers="editMapMarkers"
+        height="220px"
+        class="form-map"
+      />
       <div class="form-actions">
         <button type="button" class="ghost-btn" @click="cancelEdit">Hủy</button>
         <button type="button" class="set-default-btn" :disabled="isSubmitting" @click="updateAddress">
@@ -465,4 +582,62 @@ onMounted(fetchAddresses)
 }
 
 .delete-btn:hover { background: #ffe0e4; }
+
+.field-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #2a3345;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.search-wrap input {
+  width: 100%;
+  border: 1px solid #d7dbe3;
+  border-radius: 10px;
+  padding: 0.6rem 0.72rem;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.searching-hint {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.78rem;
+  color: #999;
+}
+
+.geo-results {
+  list-style: none;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #d7dbe3;
+  border-radius: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 99;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.geo-results li {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f2f6;
+  line-height: 1.4;
+}
+
+.geo-results li:last-child { border-bottom: none; }
+.geo-results li:hover { background: #fff6f0; color: #ff7f23; }
+
+.form-map {
+  margin-top: 0.75rem;
+}
 </style>

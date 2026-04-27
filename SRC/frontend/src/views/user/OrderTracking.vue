@@ -1,8 +1,12 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
+import MapView from '@/components/MapView.vue'
+import mapService from '@/services/mapService'
+import restaurantService from '@/services/restaurantService'
+import { useShipperTracking } from '@/composables/useShipperTracking'
 
 const route = useRoute()
 const router = useRouter()
@@ -57,6 +61,68 @@ const loadOrder = () => {
   }
 }
 
+// --- Map tracking ---
+const mapMarkers = ref([])
+const mapRoute = ref([])
+const { shipperPos, connect: wsConnect, disconnect: wsDisconnect } = useShipperTracking()
+const TRACKING_STATUSES = ['READY', 'DELIVERING', 'SHIPPING', 'DELIVERED']
+let wsConnected = false
+
+async function buildMap(ord) {
+  if (!ord) return
+  const status = String(ord.status || '').toUpperCase()
+  if (!TRACKING_STATUSES.includes(status)) { mapMarkers.value = []; mapRoute.value = []; return }
+
+  const markers = []
+  let restaurantLat = null, restaurantLng = null
+  let deliveryLat = null, deliveryLng = null
+
+  // Restaurant location
+  if (ord.restaurantId) {
+    try {
+      const r = await restaurantService.getById(ord.restaurantId)
+      if (r?.latitude && r?.longitude) {
+        restaurantLat = Number(r.latitude); restaurantLng = Number(r.longitude)
+      } else if (r?.address) {
+        const res = await mapService.searchAddress(r.address)
+        if (res.length) { restaurantLat = Number(res[0].lat); restaurantLng = Number(res[0].lng || res[0].lon) }
+      }
+      if (restaurantLat) markers.push({ lat: restaurantLat, lng: restaurantLng, label: r.name || 'Nhà hàng', color: 'orange' })
+    } catch (_) {}
+  }
+
+  // Delivery address
+  const deliveryAddr = ord.deliveryAddress || ord.address
+  if (deliveryAddr) {
+    try {
+      const res = await mapService.searchAddress(deliveryAddr)
+      if (res.length) { deliveryLat = Number(res[0].lat); deliveryLng = Number(res[0].lng || res[0].lon) }
+      if (deliveryLat) markers.push({ lat: deliveryLat, lng: deliveryLng, label: 'Giao đến đây', color: 'red' })
+    } catch (_) {}
+  }
+
+  mapMarkers.value = markers
+
+  // Draw route if both points are available
+  if (restaurantLat && deliveryLat) {
+    try {
+      const routeResp = await mapService.getRoute(restaurantLat, restaurantLng, deliveryLat, deliveryLng)
+      mapRoute.value = mapService.extractRouteCoords(routeResp)
+    } catch (_) { mapRoute.value = [] }
+  }
+
+  // WebSocket for shipper position
+  if (!wsConnected && (status === 'DELIVERING' || status === 'SHIPPING')) {
+    wsConnected = true
+    wsConnect(ord.id, (pos) => {
+      const existing = mapMarkers.value.filter((m) => m.label !== 'Shipper')
+      mapMarkers.value = [...existing, { lat: pos.lat, lng: pos.lng, label: 'Shipper', color: 'green' }]
+    })
+  }
+}
+
+watch(order, (ord) => buildMap(ord), { immediate: false })
+
 onMounted(() => {
   loadOrder()
   // Poll every 15 seconds for real-time updates
@@ -65,6 +131,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (pollingId.value) clearInterval(pollingId.value)
+  wsDisconnect()
 })
 </script>
 
@@ -118,6 +185,13 @@ onUnmounted(() => {
         <span class="cancelled-icon">❌</span>
         <h3>Đơn hàng đã bị hủy</h3>
         <p>{{ order.cancelReason || order.note || 'Không có lý do cụ thể.' }}</p>
+      </section>
+
+      <!-- Live map for READY / SHIPPING / DELIVERING / DELIVERED -->
+      <section v-if="mapMarkers.length" class="detail-card">
+        <h2>Bản đồ giao hàng</h2>
+        <p v-if="shipperPos" class="shipper-online">🟢 Shipper đang trực tuyến</p>
+        <MapView :markers="mapMarkers" :route="mapRoute" height="300px" />
       </section>
 
       <!-- Order details -->
@@ -320,5 +394,12 @@ onUnmounted(() => {
 
 @media (max-width: 600px) {
   .tracking-header { flex-direction: column; }
+}
+
+.shipper-online {
+  font-size: 0.85rem;
+  color: #168247;
+  margin: 0 0 0.6rem;
+  font-weight: 600;
 }
 </style>

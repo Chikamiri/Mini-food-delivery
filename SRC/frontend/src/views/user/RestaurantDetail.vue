@@ -4,6 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 import { useCartStore } from '@/stores/cart'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
+import MapView from '@/components/MapView.vue'
+import mapService from '@/services/mapService'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,6 +98,32 @@ function parseSizePrices(description, mediumPrice) {
   }
 }
 
+const restaurantMapMarkers = ref([])
+
+async function resolveRestaurantMarker(r) {
+  if (!r) return
+  if (r.latitude && r.longitude) {
+    restaurantMapMarkers.value = [{
+      lat: Number(r.latitude),
+      lng: Number(r.longitude),
+      label: r.name,
+      color: 'orange',
+    }]
+  } else if (r.address) {
+    try {
+      const results = await mapService.searchAddress(r.address)
+      if (results.length) {
+        restaurantMapMarkers.value = [{
+          lat: Number(results[0].lat),
+          lng: Number(results[0].lng || results[0].lon),
+          label: r.name,
+          color: 'orange',
+        }]
+      }
+    } catch (_) {}
+  }
+}
+
 onMounted(async () => {
   if (!route.params.id) return
   isLoading.value = true
@@ -107,6 +135,7 @@ onMounted(async () => {
     ])
     restaurant.value = restaurantData
     menuItems.value = Array.isArray(menuData) ? menuData : []
+    resolveRestaurantMarker(restaurantData)
   } catch (error) {
     errorMessage.value = error.message || 'Không thể tải chi tiết nhà hàng'
   } finally {
@@ -137,6 +166,11 @@ onMounted(async () => {
             <span>⏱ {{ restaurant.openingTime || '08:00' }} - {{ restaurant.closingTime || '22:00' }}</span>
           </div>
         </div>
+      </section>
+
+      <section v-if="restaurantMapMarkers.length" class="section-block">
+        <h2>Vị trí nhà hàng</h2>
+        <MapView :markers="restaurantMapMarkers" height="260px" />
       </section>
 
       <section class="section-block">

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useOrderStore } from '@/stores/order'
@@ -10,6 +10,8 @@ import {
   loadCheckoutAddressesAction,
   submitCheckoutOrderAction,
 } from '@/utils/checkoutViewUtils'
+import MapView from '@/components/MapView.vue'
+import mapService from '@/services/mapService'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -53,6 +55,35 @@ const submitOrder = () =>
     router,
   })
 
+// --- Map for selected address ---
+const addressMapMarkers = ref([])
+
+async function resolveAddressMarker(address) {
+  if (!address) { addressMapMarkers.value = []; return }
+  if (address.latitude && address.longitude) {
+    addressMapMarkers.value = [{
+      lat: Number(address.latitude),
+      lng: Number(address.longitude),
+      label: address.label || 'Giao đến đây',
+      color: 'red',
+    }]
+  } else if (address.addressLine || address.detail) {
+    try {
+      const results = await mapService.searchAddress(address.addressLine || address.detail)
+      if (results.length) {
+        addressMapMarkers.value = [{
+          lat: Number(results[0].lat),
+          lng: Number(results[0].lng || results[0].lon),
+          label: address.label || 'Giao đến đây',
+          color: 'red',
+        }]
+      }
+    } catch (_) { addressMapMarkers.value = [] }
+  }
+}
+
+watch(selectedAddress, (addr) => resolveAddressMarker(addr))
+
 onMounted(() => {
   loadAddresses()
 })
@@ -89,6 +120,12 @@ onMounted(() => {
             <p class="address-detail">{{ item.addressLine || item.detail }}</p>
           </article>
         </div>
+        <MapView
+          v-if="addressMapMarkers.length"
+          :markers="addressMapMarkers"
+          height="220px"
+          style="margin-top:0.75rem"
+        />
       </section>
 
       <section class="checkout-section">

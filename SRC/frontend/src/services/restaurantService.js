@@ -36,6 +36,10 @@ export default {
     return api.post('/api/restaurants', payload)
   },
 
+  async updateRestaurant(id, payload) {
+    return api.put(`/api/restaurants/${id}`, payload)
+  },
+
   async getByCategory(categoryId) {
     const response = await api.post('/api/restaurants/search', { categoryId })
     return Array.isArray(response) ? response : response?.items || []
