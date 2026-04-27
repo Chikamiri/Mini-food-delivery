@@ -324,6 +324,7 @@ onMounted(fetchAddresses)
         </div>
         <div class="address-actions">
           <button type="button" class="edit-btn" @click="openEditForm(primaryAddress)">Chỉnh sửa</button>
+          <button type="button" class="delete-btn" @click="deleteAddress(primaryAddress.id)">Xoá</button>
           <span class="badge">Mặc định</span>
         </div>
       </article>
