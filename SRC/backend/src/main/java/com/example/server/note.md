@@ -54,7 +54,11 @@ src/main/java/com/example/server/
     - [DONE] User request to become Owner.
     - [DONE] Admin review and approval system.
     - [DONE] Automatic role update and restaurant creation.
-2. Reporting Enhancement [DONE]:
+2. **Shipper Promotion [DONE]**:
+    - [DONE] User request to become Shipper (Phone & License Plate).
+    - [DONE] Admin review and approval system.
+    - [DONE] Automatic role update and default location creation.
+3. Reporting Enhancement [DONE]:
     - [DONE] Basic Admin Report Summary.
     - [DONE] Export reports to CSV.
     - [DONE] Restaurant-specific revenue reports.
