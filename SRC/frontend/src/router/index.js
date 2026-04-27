@@ -18,6 +18,7 @@ import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
 import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
 import AdminDashboard from '@/views/admin/DashboardView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,14 +63,30 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to, _from, next) => {
   const token = localStorage.getItem('token')
-  const userRaw = token ? (() => { try { return JSON.parse(atob(token.split('.')[1])) } catch { return null } })() : null
-  const role = String(userRaw?.role || '').toUpperCase().replace(/^ROLE_/, '')
 
+  // Check auth requirement
   if (to.meta.requiresAuth && !token) {
     return next({ name: 'home' })
   }
 
-  if (to.meta.roles && to.meta.roles.length) {
+  // Check role requirement — use authStore user data (set after login/fetchProfile)
+  if (to.meta.roles && to.meta.roles.length && token) {
+    const authStore = useAuthStore()
+    const rawRole = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
+
+    // If authStore.user not yet loaded (page refresh), try parsing JWT as fallback
+    let role = rawRole
+    if (!role) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        // Spring Boot JWT may store role in: role, authorities, scope, or sub
+        const jwtRole = payload.role || payload.authorities?.[0] || ''
+        role = String(jwtRole).toUpperCase().replace(/^ROLE_/, '')
+      } catch {
+        role = ''
+      }
+    }
+
     if (!role || !to.meta.roles.includes(role)) {
       return next({ name: 'home' })
     }

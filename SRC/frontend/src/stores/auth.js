@@ -3,6 +3,15 @@ import { defineStore } from 'pinia'
 import authService from '@/services/authService'
 import { useCartStore } from '@/stores/cart'
 
+function normalizeRole(role) {
+  return String(role || '').toUpperCase().replace(/^ROLE_/, '')
+}
+
+function normalizeUser(u) {
+  if (!u) return u
+  return { ...u, role: normalizeRole(u.role) }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
@@ -18,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const cartStore = useCartStore()
       const result = await authService.login(email, password)
-      user.value = result.user
+      user.value = normalizeUser(result.user)
       token.value = result.token
       localStorage.setItem('token', result.token)
       cartStore.setUser(result.user?.id || result.user?.email || 'guest')
@@ -37,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const cartStore = useCartStore()
       const result = await authService.register(payload)
-      user.value = result.user
+      user.value = normalizeUser(result.user)
       token.value = result.token
       localStorage.setItem('token', result.token)
       cartStore.setUser(result.user?.id || result.user?.email || 'guest')
@@ -56,10 +65,11 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
     try {
       const profile = await authService.getProfile()
-      user.value = profile
+      const normalizedProfile = normalizeUser(profile)
+      user.value = normalizedProfile
       const cartStore = useCartStore()
-      cartStore.setUser(profile?.id || profile?.email || 'guest')
-      return profile
+      cartStore.setUser(normalizedProfile?.id || normalizedProfile?.email || 'guest')
+      return normalizedProfile
     } catch (err) {
       error.value = err.message || 'Không thể tải hồ sơ'
       throw err

@@ -13,10 +13,16 @@ app.use(pinia)
 app.use(router)
 
 const authStore = useAuthStore(pinia)
-if (authStore.token) {
-  authStore.fetchProfile().catch(() => {
-    authStore.logout()
-  })
+
+async function bootstrap() {
+  if (authStore.token) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      authStore.logout()
+    }
+  }
+  app.mount('#app')
 }
 
-app.mount('#app')
+bootstrap()

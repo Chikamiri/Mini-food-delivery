@@ -29,17 +29,22 @@ export async function onLoginSubmitAction({
   try {
     const loggedInUser = await authStore.login(loginEmail.value, loginPassword.value)
     closeLoginModal()
-    if (loggedInUser?.role === 'ADMIN') {
+    const normalizedRole = String(loggedInUser?.role || '').toUpperCase().replace(/^ROLE_/, '')
+    if (normalizedRole === 'ADMIN') {
       router.push('/admin/dashboard')
       return
     }
-    if (['OWNER', 'RESTAURANT_OWNER'].includes(String(loggedInUser?.role || '').toUpperCase())) {
+    if (['OWNER', 'RESTAURANT_OWNER'].includes(normalizedRole)) {
       router.push('/restaurant/dashboard')
+      return
+    }
+    if (normalizedRole === 'SHIPPER') {
+      router.push('/shipper/dashboard')
       return
     }
     router.push('/browse')
   } catch (error) {
-    authError.value = error.message || 'Dang nhap that bai'
+    authError.value = error.message || 'Đăng nhập thất bại'
   }
 }
 
