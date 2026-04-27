@@ -96,6 +96,25 @@ const settingsForm = ref({
 })
 const getSettingsStorageKey = () =>
   `profile_settings_${String(authStore.user?.id || authStore.user?.email || profile.value.email || 'guest')}`
+const loadSettingsFromStorage = () => {
+  try {
+    const scopedKey = getSettingsStorageKey()
+    const scoped = JSON.parse(localStorage.getItem(scopedKey) || '{}')
+    if (scoped && typeof scoped === 'object' && Object.keys(scoped).length) {
+      settingsForm.value = { ...settingsForm.value, ...scoped }
+      return
+    }
+    // One-time migration from legacy shared key
+    const legacy = JSON.parse(localStorage.getItem('profile_settings') || '{}')
+    if (legacy && typeof legacy === 'object' && Object.keys(legacy).length) {
+      settingsForm.value = { ...settingsForm.value, ...legacy }
+      localStorage.setItem(scopedKey, JSON.stringify(legacy))
+      localStorage.removeItem('profile_settings')
+    }
+  } catch {
+    // keep defaults
+  }
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -169,12 +188,7 @@ onMounted(() => {
   }
   loadProfile()
   loadStats()
-  try {
-    const storedSettings = JSON.parse(localStorage.getItem(getSettingsStorageKey()) || '{}')
-    settingsForm.value = { ...settingsForm.value, ...storedSettings }
-  } catch {
-    // keep defaults
-  }
+  loadSettingsFromStorage()
   if (String(route.query.openSettings || '') === '1') {
     settingsModalOpen.value = true
   }

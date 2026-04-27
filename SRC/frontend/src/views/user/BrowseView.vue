@@ -199,6 +199,26 @@ const applyCategoryFilter = (item) => {
 const clearCategoryFilter = () => {
   activeCategoryKeyword.value = ''
 }
+const loadFavoritesByStorageKey = (key) => {
+  try {
+    const current = JSON.parse(localStorage.getItem(key) || '[]')
+    if (Array.isArray(current) && current.length) {
+      favoriteIds.value = current
+      return
+    }
+    // One-time migration from legacy shared key
+    const legacy = JSON.parse(localStorage.getItem('browse_favorite_ids') || '[]')
+    if (Array.isArray(legacy) && legacy.length) {
+      favoriteIds.value = legacy
+      localStorage.setItem(key, JSON.stringify(legacy))
+      localStorage.removeItem('browse_favorite_ids')
+      return
+    }
+    favoriteIds.value = []
+  } catch {
+    favoriteIds.value = []
+  }
+}
 const onSearchFocus = () => {
   isSearchOpen.value = true
 }
@@ -234,12 +254,7 @@ watch(selectedDish, (value) => {
 })
 
 onMounted(() => {
-  try {
-    const stored = JSON.parse(localStorage.getItem(favoriteStorageKey.value) || '[]')
-    favoriteIds.value = Array.isArray(stored) ? stored : []
-  } catch {
-    favoriteIds.value = []
-  }
+  loadFavoritesByStorageKey(favoriteStorageKey.value)
   loadBrowseData()
   loadNotifications()
 })
@@ -247,12 +262,7 @@ onMounted(() => {
 watch(
   () => favoriteStorageKey.value,
   (key) => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(key) || '[]')
-      favoriteIds.value = Array.isArray(stored) ? stored : []
-    } catch {
-      favoriteIds.value = []
-    }
+    loadFavoritesByStorageKey(key)
   },
 )
 
