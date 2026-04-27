@@ -91,7 +91,8 @@ export function mapBrowseCategory(item) {
 }
 
 export function mapBrowseMenuItem(item, restaurantMap) {
-  const restaurant = restaurantMap.get(item.restaurantId)
+  const fallbackRestaurantId = item.restaurant?.id || item.restaurantId || null
+  const restaurant = restaurantMap.get(fallbackRestaurantId)
   const basePrice = Number(item.price || 0)
   const parsedSizePrices = parseSizePricesFromDescription(item.description, basePrice)
   return {
@@ -111,7 +112,7 @@ export function mapBrowseMenuItem(item, restaurantMap) {
       'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
     restaurant: restaurant?.name || 'Nha hang',
     categoryName: item.categoryName || '',
-    restaurantId: item.restaurantId || restaurant?.id || null,
+    restaurantId: fallbackRestaurantId || restaurant?.id || null,
     restaurantLogo:
       restaurant?.imageUrl ||
       'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=120&q=80',
@@ -233,9 +234,22 @@ export async function loadBrowseDataAction({
     categories.value = (categoryData || []).slice(0, 6).map(mapBrowseCategory)
     const restaurantMap = new Map((restaurants || []).map((restaurant) => [restaurant.id, restaurant]))
     const menus = await Promise.all(
-      (restaurants || []).slice(0, 4).map((restaurant) => restaurantService.getMenuByRestaurant(restaurant.id)),
+      (restaurants || [])
+        .slice(0, 4)
+        .map(async (restaurant) => {
+          const list = await restaurantService.getMenuByRestaurant(restaurant.id)
+          return (Array.isArray(list) ? list : []).map((item) => ({
+            ...item,
+            // Preserve source restaurant id so checkout can send correct restaurantId
+            restaurantId: item.restaurantId || restaurant.id,
+            restaurant: item.restaurant || { id: restaurant.id },
+          }))
+        }),
     )
-    const flatMenus = menus.flat().slice(0, 12).map((item) => mapBrowseMenuItem(item, restaurantMap))
+    const flatMenus = menus
+      .flat()
+      .slice(0, 12)
+      .map((item) => mapBrowseMenuItem(item, restaurantMap))
     popularDishes.value = flatMenus.slice(0, 6)
     recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
     const orderHistory = await orderService.getByUser()

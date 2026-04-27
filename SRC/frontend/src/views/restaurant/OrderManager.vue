@@ -25,7 +25,7 @@ const filterStatus = ref('ALL')
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 
-const statusOptions = ['ALL', 'PENDING', 'CONFIRMED', 'DELIVERED', 'CANCELLED']
+const statusOptions = ['ALL', 'PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'SHIPPING', 'DELIVERED', 'CANCELLED', 'REJECTED']
 
 const filteredOrders = computed(() => {
   if (filterStatus.value === 'ALL') return orders.value
@@ -65,6 +65,21 @@ const rejectOrder = async (orderId) => {
     successMsg.value = 'Đã từ chối đơn hàng #' + orderId
   } catch (err) {
     errorMessage.value = err.message || 'Không thể từ chối đơn hàng'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const markPreparing = async (orderId) => {
+  actionLoading.value = true
+  successMsg.value = ''
+  try {
+    await orderService.updateStatus(orderId, 'PREPARING')
+    const target = orders.value.find((o) => o.id === orderId)
+    if (target) target.status = 'PREPARING'
+    successMsg.value = 'Đơn #' + orderId + ' đang được chuẩn bị'
+  } catch (err) {
+    errorMessage.value = err.message || 'Không thể cập nhật trạng thái'
   } finally {
     actionLoading.value = false
   }
@@ -193,7 +208,16 @@ onMounted(loadData)
                 Từ chối
               </button>
               <button
-                v-if="order.status === 'CONFIRMED' || order.status === 'PREPARING'"
+                v-if="order.status === 'CONFIRMED'"
+                type="button"
+                class="action-btn ready"
+                :disabled="actionLoading"
+                @click="markPreparing(order.id)"
+              >
+                Bắt đầu chuẩn bị
+              </button>
+              <button
+                v-if="order.status === 'PREPARING'"
                 type="button"
                 class="action-btn ready"
                 :disabled="actionLoading"

@@ -4,6 +4,15 @@
  */
 import api from '@/services/api'
 
+function normalizeOrderList(response) {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.content)) return response.content
+  if (Array.isArray(response?.items)) return response.items
+  if (Array.isArray(response?.orders)) return response.orders
+  if (Array.isArray(response?.data)) return response.data
+  return []
+}
+
 export default {
   // --- User ---
   async create(orderData) {
@@ -12,7 +21,7 @@ export default {
 
   async getByUser() {
     const response = await api.get('/api/orders/history')
-    return Array.isArray(response) ? response : response?.items || []
+    return normalizeOrderList(response)
   },
 
   async getById(orderId) {
@@ -25,8 +34,19 @@ export default {
   },
 
   // --- Restaurant Owner ---
+  // Backend's findByRestaurantIdAndStatus returns empty when status=null (IS NULL check).
+  // Workaround: fetch each status separately and merge.
   async getByRestaurant(restaurantId) {
-    return api.get(`/api/orders/restaurant/${restaurantId}`)
+    const statuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'SHIPPING', 'DELIVERED', 'REJECTED', 'CANCELLED']
+    const results = await Promise.all(
+      statuses.map((s) =>
+        api
+          .get(`/api/orders/restaurant/${restaurantId}?status=${s}`)
+          .then(normalizeOrderList)
+          .catch(() => []),
+      ),
+    )
+    return results.flat()
   },
 
   async confirm(orderId) {

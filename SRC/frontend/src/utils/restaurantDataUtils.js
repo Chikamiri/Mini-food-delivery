@@ -12,12 +12,21 @@ export async function loadRestaurantOrdersDataAction({
   try {
     const mine = await restaurantService.getMyRestaurants()
     restaurants.value = Array.isArray(mine) ? mine : []
-    if (!activeRestaurantIdRef.value) {
+    if (!restaurants.value.length) {
       orders.value = []
       return
     }
-    const data = await orderService.getByRestaurant(activeRestaurantIdRef.value)
-    orders.value = Array.isArray(data) ? data : []
+
+    // Load orders from all owned restaurants, then merge/dedupe by id
+    const orderLists = await Promise.all(
+      restaurants.value.map((restaurant) => orderService.getByRestaurant(restaurant.id)),
+    )
+    const merged = orderLists.flat().filter(Boolean)
+    const uniqueById = new Map()
+    merged.forEach((order) => {
+      if (order?.id != null) uniqueById.set(order.id, order)
+    })
+    orders.value = Array.from(uniqueById.values())
   } catch (error) {
     errorMessage.value = error.message || 'Không thể tải đơn hàng'
   } finally {
