@@ -671,7 +671,12 @@
 
 .dish-img {
   margin-top: 1rem;
-  font-size: 2.1rem;
+}
+
+.dish-img-icon {
+  width: 24px;
+  height: 24px;
+  opacity: 0.55;
 }
 
 .dish-card h4 {

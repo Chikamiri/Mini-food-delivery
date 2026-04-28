@@ -4,6 +4,7 @@ import restaurantService from '@/services/restaurantService'
 import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
 import iconView from '@/assets/icon/view.svg'
+import iconImage from '@/assets/icon/image.svg'
 import { loadRestaurantMenuDataAction } from '@/utils/restaurantDataUtils'
 import {
   encodeDescriptionWithSizePrices,
@@ -278,7 +279,9 @@ onMounted(async () => {
               :alt="item.name"
               class="menu-card-img"
             />
-            <div v-else class="menu-card-img menu-card-img--placeholder">--</div>
+            <div v-else class="menu-card-img menu-card-img--placeholder">
+              <img :src="iconImage" alt="" class="menu-card-img-placeholder-icon" />
+            </div>
             <div class="menu-card-body">
               <h4>{{ item.name }}</h4>
               <div class="menu-card-meta">

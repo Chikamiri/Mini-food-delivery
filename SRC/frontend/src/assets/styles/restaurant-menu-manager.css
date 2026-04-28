@@ -17,8 +17,12 @@
   background: #f0f2f8;
   display: grid;
   place-items: center;
-  color: #bbb;
-  font-size: 2rem;
+}
+
+.menu-card-img-placeholder-icon {
+  width: 26px;
+  height: 26px;
+  opacity: 0.55;
 }
 
 .size-price-preview {

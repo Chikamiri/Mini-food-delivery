@@ -18,6 +18,7 @@ import iconCart from '@/assets/icon/shopping-cart.svg'
 import iconHome from '@/assets/icon/home.svg'
 import iconTag from '@/assets/icon/tag.svg'
 import iconLove from '@/assets/icon/love.svg'
+import iconImage from '@/assets/icon/image.svg'
 import iconFlash from '@/assets/icon/monet-bill.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
 import {
@@ -621,7 +622,7 @@ onUnmounted(() => {
         <div class="dish-grid recent">
           <p v-if="!recentOrders.length" class="muted">Chưa có đơn đã giao thành công.</p>
           <article v-for="dish in recentOrders" :key="dish.id" class="dish-card">
-            <div class="dish-img">--</div>
+            <div class="dish-img"><img :src="iconImage" alt="" class="dish-img-icon" /></div>
             <h4>{{ dish.name }}</h4>
             <p>{{ dish.price }}</p>
             <small>Đặt lúc: {{ dish.eta }}</small>

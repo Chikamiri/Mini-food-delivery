@@ -121,9 +121,12 @@
   display: block;
 }
 
-.item-image span {
-  font-size: 1.5rem;
-  line-height: 1;
+.item-image-placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
 }
 
 .item-info {
@@ -231,9 +234,14 @@
 }
 
 .empty-icon {
-  font-size: 3rem;
   display: block;
   margin-bottom: 0.5rem;
+}
+
+.empty-icon-img {
+  width: 42px;
+  height: 42px;
+  opacity: 0.6;
 }
 
 .empty-state h2 {
