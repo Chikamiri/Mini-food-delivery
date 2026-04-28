@@ -1,19 +1,16 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
+import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
-import iconDashboard from '@/assets/icon/dashbroad.svg'
-import iconMenu from '@/assets/icon/menu.svg'
-import iconTag from '@/assets/icon/tag.svg'
-import iconReceipt from '@/assets/icon/reciept.svg'
-import iconDollar from '@/assets/icon/dollar-sign.svg'
-import iconSetting from '@/assets/icon/setting.svg'
 import iconView from '@/assets/icon/view.svg'
-import { goRestaurantPath } from '@/utils/restaurantViewUtils'
 import { loadRestaurantMenuDataAction } from '@/utils/restaurantDataUtils'
+import {
+  encodeDescriptionWithSizePrices,
+  getAutoSizePrices,
+  parseDescriptionAndSizePrices,
+} from '@/utils/menuSizePrices'
 
-const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -41,54 +38,7 @@ const sizePrices = ref({
 const imagePreview = ref('')
 const fileInputRef = ref(null)
 const formatVnd = (value) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
-const getAutoSizePrices = (basePrice) => {
-  const base = Number(basePrice || 0)
-  return {
-    small: Math.round(base * 0.9),
-    medium: Math.round(base),
-    large: Math.round(base * 1.2),
-  }
-}
 const previewSizePrices = computed(() => getAutoSizePrices(menuForm.value.price))
-const SIZE_META_PREFIX = '[SIZE_PRICES]'
-
-const encodeDescriptionWithSizePrices = (description, prices) => {
-  const cleanDescription = String(description || '').replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '').trim()
-  const payload = {
-    small: Number(prices.small || 0),
-    medium: Number(prices.medium || 0),
-    large: Number(prices.large || 0),
-  }
-  return `${cleanDescription}\n${SIZE_META_PREFIX}${JSON.stringify(payload)}`
-}
-
-const parseDescriptionAndSizePrices = (description, fallbackPrice = 0) => {
-  const content = String(description || '')
-  const matched = content.match(/\[SIZE_PRICES\](\{.*\})$/s)
-  const base = getAutoSizePrices(fallbackPrice)
-  if (!matched) {
-    return {
-      cleanDescription: content,
-      prices: base,
-    }
-  }
-  try {
-    const parsed = JSON.parse(matched[1])
-    return {
-      cleanDescription: content.replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '').trim(),
-      prices: {
-        small: Number(parsed.small || base.small),
-        medium: Number(parsed.medium || base.medium),
-        large: Number(parsed.large || base.large),
-      },
-    }
-  } catch {
-    return {
-      cleanDescription: content,
-      prices: base,
-    }
-  }
-}
 
 /** Compress & resize image file → Base64 data URL */
 const compressImage = (file, maxSize = 1200, quality = 0.85) => {
@@ -135,40 +85,6 @@ const removeImage = () => {
 }
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
-const deletedMenuStorageKey = 'restaurant_deleted_menu_items'
-
-const getDeletedMap = () => {
-  try {
-    return JSON.parse(localStorage.getItem(deletedMenuStorageKey) || '{}')
-  } catch {
-    return {}
-  }
-}
-
-const getDeletedIdsForRestaurant = (restaurantId) => {
-  if (!restaurantId) return []
-  const map = getDeletedMap()
-  return Array.isArray(map[String(restaurantId)]) ? map[String(restaurantId)] : []
-}
-
-const rememberDeletedMenuId = (restaurantId, itemId) => {
-  if (!restaurantId || !itemId) return
-  const map = getDeletedMap()
-  const key = String(restaurantId)
-  const current = Array.isArray(map[key]) ? map[key] : []
-  if (!current.includes(itemId)) {
-    map[key] = [...current, itemId]
-    localStorage.setItem(deletedMenuStorageKey, JSON.stringify(map))
-  }
-}
-
-const filterDeletedItemsForActiveRestaurant = () => {
-  if (!activeRestaurantId.value) return
-  const deletedIds = new Set(getDeletedIdsForRestaurant(activeRestaurantId.value))
-  menuItems.value = menuItems.value.filter((item) => !deletedIds.has(item.id))
-}
-
-const go = (path) => goRestaurantPath(router, path)
 const loadData = async () => {
   await loadRestaurantMenuDataAction({
     loading,
@@ -178,7 +94,6 @@ const loadData = async () => {
     activeRestaurantIdRef: activeRestaurantId,
     menuItems,
   })
-  filterDeletedItemsForActiveRestaurant()
 }
 const loadCategoryOptions = async () => {
   try {
@@ -306,8 +221,7 @@ const deleteMenuItem = async (item) => {
   actionLoading.value = true
   try {
     await restaurantService.deleteMenuItem(activeRestaurantId.value, item.id)
-    rememberDeletedMenuId(activeRestaurantId.value, item.id)
-    menuItems.value = menuItems.value.filter((menuItem) => menuItem.id !== item.id)
+    await loadData()
     successMessage.value = 'Đã xóa món khỏi menu.'
   } catch (error) {
     errorMessage.value = error.message || 'Không thể xóa món.'
@@ -324,33 +238,7 @@ onMounted(async () => {
 
 <template>
   <section class="restaurant-shell">
-    <aside class="restaurant-sidebar">
-      <div class="sidebar-brand">
-        <div class="logo-box">FD</div>
-        <span>Nhà hàng</span>
-      </div>
-
-      <span class="sidebar-section-label">Điều hướng</span>
-      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">
-        <img :src="iconDashboard" alt="" />Tổng quan
-      </button>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/menu')">
-        <img :src="iconMenu" alt="" />Quản lý menu
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
-        <img :src="iconTag" alt="" />Danh mục
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">
-        <img :src="iconReceipt" alt="" />Đơn hàng
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">
-        <img :src="iconDollar" alt="" />Doanh thu
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/settings')">
-        <img :src="iconSetting" alt="" />Cài đặt
-      </button>
-      <div class="sidebar-spacer"></div>
-    </aside>
+    <RestaurantSidebar active-key="menu" />
 
     <main class="restaurant-main">
       <header class="page-head">

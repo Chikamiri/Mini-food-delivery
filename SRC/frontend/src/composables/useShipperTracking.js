@@ -2,7 +2,8 @@ import { ref, onUnmounted } from 'vue'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
-const WS_URL = `${window.location.protocol === 'https:' ? 'https' : 'http'}://localhost:8080/ws`
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const WS_URL = `${API_BASE_URL.replace(/\/$/, '')}/ws`
 
 export function useShipperTracking() {
   const shipperPos = ref(null) // { lat, lng }

@@ -1,19 +1,10 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import restaurantService from '@/services/restaurantService'
 import mapService from '@/services/mapService'
 import MapView from '@/components/MapView.vue'
-import { goRestaurantPath } from '@/utils/restaurantViewUtils'
+import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
-import iconDashboard from '@/assets/icon/dashbroad.svg'
-import iconMenu from '@/assets/icon/menu.svg'
-import iconTag from '@/assets/icon/tag.svg'
-import iconReceipt from '@/assets/icon/reciept.svg'
-import iconDollar from '@/assets/icon/dollar-sign.svg'
-import iconSetting from '@/assets/icon/setting.svg'
-
-const router = useRouter()
 const loading = ref(false)
 const isSaving = ref(false)
 const errorMessage = ref('')
@@ -35,7 +26,6 @@ const settingsForm = ref({
 })
 
 const activeRestaurant = computed(() => restaurants.value[0] || null)
-const go = (path) => goRestaurantPath(router, path)
 const addressQuery = ref('')
 const addressResults = ref([])
 const searchingAddress = ref(false)
@@ -194,33 +184,7 @@ onMounted(loadData)
 
 <template>
   <section class="restaurant-shell">
-    <aside class="restaurant-sidebar">
-      <div class="sidebar-brand">
-        <div class="logo-box">FD</div>
-        <span>Nhà hàng</span>
-      </div>
-
-      <span class="sidebar-section-label">Điều hướng</span>
-      <button class="nav-btn" type="button" @click="go('/restaurant/dashboard')">
-        <img :src="iconDashboard" alt="" />Tổng quan
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">
-        <img :src="iconMenu" alt="" />Quản lý menu
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
-        <img :src="iconTag" alt="" />Danh mục
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">
-        <img :src="iconReceipt" alt="" />Đơn hàng
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">
-        <img :src="iconDollar" alt="" />Doanh thu
-      </button>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/settings')">
-        <img :src="iconSetting" alt="" />Cài đặt
-      </button>
-      <div class="sidebar-spacer"></div>
-    </aside>
+    <RestaurantSidebar active-key="settings" />
 
     <main class="restaurant-main">
       <header class="page-head">

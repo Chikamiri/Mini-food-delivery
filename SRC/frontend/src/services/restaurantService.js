@@ -6,14 +6,39 @@ import api from '@/services/api'
 
 const DELETED_MENU_STORAGE_KEY = 'restaurant_deleted_menu_items'
 
-function getDeletedMenuIdsByRestaurant(restaurantId) {
-  if (!restaurantId) return []
+function normalizeId(value) {
+  const id = Number(value)
+  return Number.isFinite(id) ? id : null
+}
+
+function getDeletedMenuMap() {
   try {
     const parsed = JSON.parse(localStorage.getItem(DELETED_MENU_STORAGE_KEY) || '{}')
-    const ids = parsed?.[String(restaurantId)]
-    return Array.isArray(ids) ? ids : []
+    return parsed && typeof parsed === 'object' ? parsed : {}
   } catch {
-    return []
+    return {}
+  }
+}
+
+function getDeletedMenuIdsByRestaurant(restaurantId) {
+  if (!restaurantId) return []
+  const map = getDeletedMenuMap()
+  const key = String(restaurantId)
+  const raw = Array.isArray(map[key]) ? map[key] : []
+  return raw.map(normalizeId).filter((id) => id != null)
+}
+
+function rememberDeletedMenuId(restaurantId, itemId) {
+  const normalizedRestaurantId = normalizeId(restaurantId)
+  const normalizedItemId = normalizeId(itemId)
+  if (normalizedRestaurantId == null || normalizedItemId == null) return
+
+  const map = getDeletedMenuMap()
+  const key = String(normalizedRestaurantId)
+  const current = Array.isArray(map[key]) ? map[key].map(normalizeId).filter((id) => id != null) : []
+  if (!current.includes(normalizedItemId)) {
+    map[key] = [...current, normalizedItemId]
+    localStorage.setItem(DELETED_MENU_STORAGE_KEY, JSON.stringify(map))
   }
 }
 
@@ -73,7 +98,7 @@ export default {
     const detail = await api.get(`/api/restaurants/${restaurantId}`)
     const menuItems = Array.isArray(detail?.menuItems) ? detail.menuItems : []
     const deletedIds = new Set(getDeletedMenuIdsByRestaurant(restaurantId))
-    return menuItems.filter((item) => !deletedIds.has(item?.id))
+    return menuItems.filter((item) => !deletedIds.has(normalizeId(item?.id)))
   },
 
   async getMenuItem(restaurantId, itemId) {
@@ -90,6 +115,8 @@ export default {
   },
 
   async deleteMenuItem(restaurantId, itemId) {
-    return api.delete(`/api/restaurants/${restaurantId}/menu/items/${itemId}`)
+    const result = await api.delete(`/api/restaurants/${restaurantId}/menu/items/${itemId}`)
+    rememberDeletedMenuId(restaurantId, itemId)
+    return result
   },
 }

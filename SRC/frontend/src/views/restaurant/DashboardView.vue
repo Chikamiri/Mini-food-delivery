@@ -4,14 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import orderService from '@/services/orderService'
+import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
-import iconDashboard from '@/assets/icon/dashbroad.svg'
-import iconMenu from '@/assets/icon/menu.svg'
-import iconTag from '@/assets/icon/tag.svg'
-import iconReceipt from '@/assets/icon/reciept.svg'
-import iconDollar from '@/assets/icon/dollar-sign.svg'
-import iconSetting from '@/assets/icon/setting.svg'
-import iconSignOut from '@/assets/icon/sign-out.svg'
 import { goRestaurantPath, restaurantStatusBadge } from '@/utils/restaurantViewUtils'
 import {
   logoutRestaurantAction,
@@ -75,44 +69,13 @@ onMounted(loadDashboard)
 
 <template>
   <section class="restaurant-shell">
-    <!-- Sidebar -->
-    <aside class="restaurant-sidebar">
-      <div class="sidebar-brand">
-        <div class="logo-box">FD</div>
-        <span>Nhà hàng</span>
-      </div>
-
-      <span class="sidebar-section-label">Điều hướng</span>
-      <button class="nav-btn active" type="button" @click="go('/restaurant/dashboard')">
-        <img :src="iconDashboard" alt="" />Tổng quan
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/menu')">
-        <img :src="iconMenu" alt="" />Quản lý menu
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/categories')">
-        <img :src="iconTag" alt="" />Danh mục
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/orders')">
-        <img :src="iconReceipt" alt="" />Đơn hàng
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/revenue')">
-        <img :src="iconDollar" alt="" />Doanh thu
-      </button>
-      <button class="nav-btn" type="button" @click="go('/restaurant/settings')">
-        <img :src="iconSetting" alt="" />Cài đặt
-      </button>
-
-      <div class="sidebar-spacer"></div>
-
-      <div v-if="activeRestaurant" class="sidebar-restaurant-name">
-        <strong>{{ activeRestaurant.name }}</strong>
-        {{ activeRestaurant.address || 'Chưa có địa chỉ' }}
-      </div>
-
-      <button class="logout-btn" type="button" @click="logout">
-        <img :src="iconSignOut" alt="" />Đăng xuất
-      </button>
-    </aside>
+    <RestaurantSidebar
+      active-key="dashboard"
+      :show-logout="true"
+      :restaurant-name="activeRestaurant?.name || ''"
+      :restaurant-address="activeRestaurant?.address || ''"
+      @logout="logout"
+    />
 
     <!-- Main -->
     <main class="restaurant-main">

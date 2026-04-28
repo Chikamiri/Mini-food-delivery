@@ -11,6 +11,7 @@ import {
   loadCheckoutAddressesAction,
   submitCheckoutOrderAction,
 } from '@/utils/checkoutViewUtils'
+import { getDeliveryFeeBySubtotal, getDiscountBySubtotal } from '@/utils/pricingUtils'
 import MapView from '@/components/MapView.vue'
 import mapService from '@/services/mapService'
 
@@ -34,8 +35,8 @@ const restaurantPoint = ref(null)
 
 const cartItems = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.subtotal)
-const deliveryFee = computed(() => (subtotal.value > 0 ? 18000 : 0))
-const discount = computed(() => (subtotal.value >= 100000 ? 20000 : 0))
+const deliveryFee = computed(() => getDeliveryFeeBySubtotal(subtotal.value))
+const discount = computed(() => getDiscountBySubtotal(subtotal.value))
 const total = computed(() => subtotal.value + deliveryFee.value - discount.value)
 const selectedAddress = computed(() =>
   deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),

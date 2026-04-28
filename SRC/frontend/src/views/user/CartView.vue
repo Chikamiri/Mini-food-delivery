@@ -12,12 +12,11 @@ import {
   groupCartByRestaurant,
   goBrowseFromCart,
 } from '@/utils/cartViewUtils'
+import { getDeliveryFeeBySubtotal, getDiscountBySubtotal } from '@/utils/pricingUtils'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const cartItems = computed(() => cartStore.items)
-
-const deliveryFee = 18000
 
 const increment = (item) => incrementCartItem(cartStore, item)
 const decrement = (item) => decrementCartItem(cartStore, item)
@@ -25,9 +24,11 @@ const removeItem = (lineId) => removeCartItem(cartStore, lineId)
 
 const subtotal = computed(() => cartStore.subtotal)
 
-const discount = computed(() => (subtotal.value >= 100000 ? 20000 : 0))
+const deliveryFee = computed(() => getDeliveryFeeBySubtotal(subtotal.value))
 
-const total = computed(() => subtotal.value + deliveryFee - discount.value)
+const discount = computed(() => getDiscountBySubtotal(subtotal.value))
+
+const total = computed(() => subtotal.value + deliveryFee.value - discount.value)
 
 const formatPrice = (value) => formatCartPrice(value)
 

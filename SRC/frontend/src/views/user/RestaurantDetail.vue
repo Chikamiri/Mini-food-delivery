@@ -6,6 +6,7 @@ import { useCartStore } from '@/stores/cart'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
 import MapView from '@/components/MapView.vue'
 import mapService from '@/services/mapService'
+import { parseDescriptionAndSizePrices, stripSizePriceMeta } from '@/utils/menuSizePrices'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,7 +32,7 @@ const offerCards = computed(() => {
 
 const menuWithUi = computed(() => {
   return menuItems.value.map((item) => {
-    const prices = parseSizePrices(item.description, item.price)
+    const prices = parseDescriptionAndSizePrices(item.description, item.price).prices
     return {
       ...item,
       image: item.imageUrl || fallbackThumb,
@@ -75,27 +76,6 @@ const addToCart = (item, sizeKey = 'medium') => {
   })
   addedMessage.value = `Đã thêm ${item.name} (${sizeLabels[sizeKey]}) vào giỏ hàng!`
   setTimeout(() => { addedMessage.value = '' }, 2000)
-}
-
-function parseSizePrices(description, mediumPrice) {
-  const content = String(description || '')
-  const matched = content.match(/\[SIZE_PRICES\](\{.*\})$/s)
-  const fallback = {
-    small: Math.round(Number(mediumPrice || 0) * 0.9),
-    medium: Math.round(Number(mediumPrice || 0)),
-    large: Math.round(Number(mediumPrice || 0) * 1.2),
-  }
-  if (!matched) return fallback
-  try {
-    const parsed = JSON.parse(matched[1])
-    return {
-      small: Number(parsed.small || fallback.small),
-      medium: Number(parsed.medium || fallback.medium),
-      large: Number(parsed.large || fallback.large),
-    }
-  } catch {
-    return fallback
-  }
 }
 
 const restaurantMapMarkers = ref([])
@@ -203,7 +183,7 @@ onMounted(async () => {
             <div class="menu-row-content">
               <h4>{{ item.name }}</h4>
               <p class="menu-row-desc">
-                {{ item.description?.replace(/\n?\[SIZE_PRICES\]\{.*\}$/s, '') || 'Món ăn nổi bật của nhà hàng' }}
+                {{ stripSizePriceMeta(item.description) || 'Món ăn nổi bật của nhà hàng' }}
               </p>
               <div class="menu-row-prices">
                 <button type="button" class="size-btn" @click="addToCart(item, 'small')">Nhỏ: {{ formatPrice(item.prices.small) }}</button>

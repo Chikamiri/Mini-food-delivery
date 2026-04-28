@@ -7,6 +7,7 @@ import MapView from '@/components/MapView.vue'
 import mapService from '@/services/mapService'
 import restaurantService from '@/services/restaurantService'
 import { useShipperTracking } from '@/composables/useShipperTracking'
+import { useOrderRouteMap } from '@/composables/useOrderRouteMap'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -109,8 +110,12 @@ const logout = async () => {
 }
 
 // --- Map for active delivery ---
-const activeDeliveryMapMarkers = ref([])
-const activeDeliveryMapRoute = ref([])
+const {
+  markers: activeDeliveryMapMarkers,
+  route: activeDeliveryMapRoute,
+  loadForOrder,
+  reset: resetRouteMap,
+} = useOrderRouteMap({ restaurantService, mapService })
 const activeDelivery = computed(() => myDeliveries.value.find((d) => ['ASSIGNED', 'PICKED_UP'].includes(d.status)))
 
 const { sendLocation } = useShipperTracking()
@@ -118,42 +123,10 @@ const { sendLocation } = useShipperTracking()
 let gpsWatchId = null
 
 async function buildDeliveryMap(delivery) {
-  if (!delivery) { activeDeliveryMapMarkers.value = []; activeDeliveryMapRoute.value = []; return }
+  if (!delivery) { resetRouteMap(); return }
   const ord = orderDetails.value[delivery.orderId]
   if (!ord) return
-  const markers = []
-  let restaurantLat = null, restaurantLng = null
-  let deliveryLat = null, deliveryLng = null
-
-  if (ord.restaurantId) {
-    try {
-      const r = await restaurantService.getById(ord.restaurantId)
-      if (r?.latitude && r?.longitude) {
-        restaurantLat = Number(r.latitude); restaurantLng = Number(r.longitude)
-      } else if (r?.address) {
-        const res = await mapService.searchAddress(r.address)
-        if (res.length) { restaurantLat = Number(res[0].lat); restaurantLng = Number(res[0].lng || res[0].lon) }
-      }
-      if (restaurantLat) markers.push({ lat: restaurantLat, lng: restaurantLng, label: r.name || 'Nhà hàng', color: 'orange' })
-    } catch (_) {}
-  }
-
-  if (ord.deliveryAddress) {
-    try {
-      const res = await mapService.searchAddress(ord.deliveryAddress)
-      if (res.length) { deliveryLat = Number(res[0].lat); deliveryLng = Number(res[0].lng || res[0].lon) }
-      if (deliveryLat) markers.push({ lat: deliveryLat, lng: deliveryLng, label: 'Giao đến đây', color: 'red' })
-    } catch (_) {}
-  }
-
-  activeDeliveryMapMarkers.value = markers
-
-  if (restaurantLat && deliveryLat) {
-    try {
-      const routeResp = await mapService.getRoute(restaurantLat, restaurantLng, deliveryLat, deliveryLng)
-      activeDeliveryMapRoute.value = mapService.extractRouteCoords(routeResp)
-    } catch (_) { activeDeliveryMapRoute.value = [] }
-  }
+  await loadForOrder(ord)
 }
 
 function startGpsBroadcast() {
@@ -185,7 +158,11 @@ watch(orderDetails, () => {
 // Poll every 30s for new available orders
 let pollTimer = null
 onMounted(() => { loadData(); pollTimer = setInterval(loadData, 30000) })
-onUnmounted(() => { if (pollTimer) clearInterval(pollTimer); stopGpsBroadcast() })
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+  stopGpsBroadcast()
+  resetRouteMap()
+})
 </script>
 
 <template>

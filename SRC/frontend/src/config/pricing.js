@@ -1,0 +1,3 @@
+export const DELIVERY_FEE_VND = 18000
+export const DISCOUNT_THRESHOLD_VND = 100000
+export const DISCOUNT_AMOUNT_VND = 20000
