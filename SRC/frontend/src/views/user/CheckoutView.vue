@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useOrderStore } from '@/stores/order'
@@ -20,15 +20,13 @@ const orderStore = useOrderStore()
 const deliveryAddresses = ref([])
 const selectedAddressId = ref(null)
 const orderTypes = ['Giao tiêu chuẩn', 'Giao hẹn giờ', 'Nhận tại quán']
-const subscriptionTypes = ['Tháng', 'Tuần', 'Tùy chọn']
-const deliveryPlans = ['3 ngày/tuần', '5 ngày/tuần']
 const selectedOrderType = ref(orderTypes[0])
-const selectedSubscriptionType = ref(subscriptionTypes[0])
-const selectedDeliveryPlan = ref(deliveryPlans[0])
 const orderNote = ref(cartStore.note || '')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const currentTime = ref(new Date())
+let timeTicker = null
 
 const cartItems = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.subtotal)
@@ -38,6 +36,10 @@ const total = computed(() => subtotal.value + deliveryFee.value - discount.value
 const selectedAddress = computed(() =>
   deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
 )
+const estimatedDeliveryTime = computed(() => {
+  const eta = new Date(currentTime.value.getTime() + 30 * 60 * 1000)
+  return eta.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+})
 
 const formatPrice = (value) => formatPriceVND(value)
 const loadAddresses = () =>
@@ -86,6 +88,13 @@ watch(selectedAddress, (addr) => resolveAddressMarker(addr))
 
 onMounted(() => {
   loadAddresses()
+  timeTicker = setInterval(() => {
+    currentTime.value = new Date()
+  }, 30000)
+})
+
+onUnmounted(() => {
+  if (timeTicker) clearInterval(timeTicker)
 })
 </script>
 
@@ -145,38 +154,10 @@ onMounted(() => {
 
       <section class="checkout-section form-grid">
         <div>
-          <label>Gói đăng ký?</label>
-          <div class="tabs-row">
-            <button
-            v-for="item in subscriptionTypes"
-              :key="item"
-              class="tab-btn"
-              :class="{ active: selectedSubscriptionType === item }"
-              @click="selectedSubscriptionType = item"
-            >
-              {{ item }}
-            </button>
-          </div>
-        </div>
-        <div>
-          <label>Gói giao?</label>
-          <div class="chips-row">
-            <button
-            v-for="item in deliveryPlans"
-              :key="item"
-              class="chip-btn secondary"
-              :class="{ active: selectedDeliveryPlan === item }"
-              @click="selectedDeliveryPlan = item"
-            >
-              {{ item }}
-            </button>
-          </div>
-        </div>
-        <div>
-          <label>Thời gian giao</label>
+          <label>Thời gian giao dự kiến</label>
           <div class="time-row">
-            <span>16:30</span>
-            <button>24 giờ</button>
+            <span>{{ estimatedDeliveryTime }}</span>
+            <small>Ước tính sau 30 phút từ thời điểm hiện tại</small>
           </div>
         </div>
         <div>
@@ -377,28 +358,11 @@ label {
   font-size: 0.92rem;
 }
 
-.tabs-row {
-  display: flex;
-  border-bottom: 1px solid #edf0f6;
-}
-
-.tab-btn {
-  border: 0;
-  background: transparent;
-  padding: 0.5rem 0.85rem;
-  color: #727b8d;
-  cursor: pointer;
-}
-
-.tab-btn.active {
-  color: #f8143f;
-  border-bottom: 2px solid #f8143f;
-}
-
 .time-row {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.55rem;
+  flex-wrap: wrap;
   padding-top: 0.3rem;
 }
 
@@ -407,14 +371,9 @@ label {
   font-weight: 600;
 }
 
-.time-row button {
-  border: 0;
-  background: #fff0f4;
-  color: #d81642;
-  border-radius: 999px;
-  padding: 0.34rem 0.64rem;
-  font-weight: 600;
-  cursor: pointer;
+.time-row small {
+  color: #8a92a0;
+  font-weight: 500;
 }
 
 textarea {
