@@ -21,6 +21,7 @@ const deliveryAddresses = ref([])
 const selectedAddressId = ref(null)
 const orderTypes = ['Giao tiêu chuẩn', 'Giao hẹn giờ', 'Nhận tại quán']
 const selectedOrderType = ref(orderTypes[0])
+const desiredDeliveryTime = ref('')
 const orderNote = ref(cartStore.note || '')
 const isSubmitting = ref(false)
 const errorMessage = ref('')
@@ -55,6 +56,8 @@ const submitOrder = () =>
     orderStore,
     cartStore,
     router,
+    selectedOrderType,
+    desiredDeliveryTime,
   })
 
 // --- Map for selected address ---
@@ -159,6 +162,18 @@ onUnmounted(() => {
             <span>{{ estimatedDeliveryTime }}</span>
             <small>Ước tính sau 30 phút từ thời điểm hiện tại</small>
           </div>
+        </div>
+        <div v-if="selectedOrderType === 'Giao hẹn giờ'">
+          <label>Giờ mong muốn giao</label>
+          <input
+            v-model="desiredDeliveryTime"
+            type="time"
+            class="desired-time-input"
+          />
+        </div>
+        <div v-else-if="selectedOrderType === 'Nhận tại quán'" class="pickup-note-box">
+          <label>Hình thức nhận</label>
+          <p>Bạn sẽ đến nhà hàng để nhận món sau khi quán báo sẵn sàng.</p>
         </div>
         <div>
           <label>Ghi chú cho quán</label>
@@ -391,6 +406,29 @@ textarea:focus {
   outline: none;
   border-color: #f8a1b1;
   box-shadow: 0 0 0 3px rgba(248, 20, 63, 0.1);
+}
+
+.desired-time-input {
+  width: 100%;
+  border: 1px solid #d9deea;
+  border-radius: 12px;
+  padding: 0.58rem 0.68rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.pickup-note-box {
+  border: 1px dashed #f6b6c5;
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  background: #fff3f6;
+}
+
+.pickup-note-box p {
+  margin: 0;
+  color: #7a4250;
+  font-size: 0.88rem;
+  line-height: 1.4;
 }
 
 .summary-card {

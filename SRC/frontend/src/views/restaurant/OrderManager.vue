@@ -40,6 +40,11 @@ const successMsg = ref('')
 const go = (path) => goRestaurantPath(router, path)
 const statusBadge = (status) => restaurantStatusBadge(status)
 const statusLabel = (key) => restaurantStatusLabel(key)
+const isPickupOrder = (order) => String(order?.note || '').includes('[FLOW:PICKUP_AT_STORE]')
+const pickupSchedule = (order) => {
+  const match = String(order?.note || '').match(/\[SCHEDULED_AT:([0-9]{2}:[0-9]{2})\]/)
+  return match?.[1] || ''
+}
 
 const confirmOrder = async (orderId) => {
   actionLoading.value = true
@@ -202,13 +207,15 @@ onMounted(loadData)
               <span>{{ order.customerName || 'Khách hàng' }}</span>
               <span>{{ Number(order.totalAmount || 0).toLocaleString('vi-VN') }} đ</span>
               <b :class="statusBadge(order.status)">{{ statusLabel(order.status) }}</b>
+              <span v-if="isPickupOrder(order)" class="shipper-tag waiting">Nhận tại quán</span>
+              <span v-else-if="pickupSchedule(order)" class="shipper-tag">Giao hẹn giờ: {{ pickupSchedule(order) }}</span>
               <!-- Shipper tracking info -->
-              <span v-if="deliveryInfo[order.id]?.shipperName" class="shipper-tag">
+              <span v-if="!isPickupOrder(order) && deliveryInfo[order.id]?.shipperName" class="shipper-tag">
                 {{ deliveryInfo[order.id].shipperName }}
                 <span v-if="deliveryInfo[order.id].status === 'PICKED_UP'"> · Đang trên đường giao</span>
                 <span v-else-if="deliveryInfo[order.id].status === 'ASSIGNED'"> · Đang đến lấy hàng</span>
               </span>
-              <span v-else-if="order.status === 'READY'" class="shipper-tag waiting">Chờ shipper nhận</span>
+              <span v-else-if="!isPickupOrder(order) && order.status === 'READY'" class="shipper-tag waiting">Chờ shipper nhận</span>
             </div>
             <div class="order-actions">
               <button
@@ -245,7 +252,7 @@ onMounted(loadData)
                 :disabled="actionLoading"
                 @click="markReady(order.id)"
               >
-                Sẵn sàng giao
+                {{ isPickupOrder(order) ? 'Sẵn sàng để khách đến nhận' : 'Sẵn sàng giao' }}
               </button>
             </div>
           </li>

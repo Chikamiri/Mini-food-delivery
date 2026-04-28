@@ -25,6 +25,8 @@ export async function submitCheckoutOrderAction({
   orderStore,
   cartStore,
   router,
+  selectedOrderType,
+  desiredDeliveryTime,
 }) {
   errorMessage.value = ''
   successMessage.value = ''
@@ -34,6 +36,10 @@ export async function submitCheckoutOrderAction({
   }
   if (!selectedAddress.value) {
     errorMessage.value = 'Vui long chon dia chi giao hang'
+    return
+  }
+  if (selectedOrderType?.value === 'Giao hẹn giờ' && !desiredDeliveryTime?.value) {
+    errorMessage.value = 'Vui lòng chọn giờ mong muốn để giao hàng'
     return
   }
 
@@ -57,6 +63,12 @@ export async function submitCheckoutOrderAction({
     // Create one order per restaurant to match backend model
     for (const rid of restaurantIds) {
       const items = groupsByRestaurant[rid]
+      const flowTags = []
+      if (selectedOrderType?.value === 'Nhận tại quán') flowTags.push('[FLOW:PICKUP_AT_STORE]')
+      if (selectedOrderType?.value === 'Giao hẹn giờ' && desiredDeliveryTime?.value) {
+        flowTags.push(`[SCHEDULED_AT:${desiredDeliveryTime.value}]`)
+      }
+      const mergedNote = [flowTags.join(' '), orderNote.value || ''].filter(Boolean).join(' ').trim()
       const payload = {
         restaurantId: Number(rid),
         addressId: selectedAddress.value.id,
@@ -64,7 +76,7 @@ export async function submitCheckoutOrderAction({
         deliveryLat: Number(selectedAddress.value.latitude ?? 0),
         deliveryLng: Number(selectedAddress.value.longitude ?? 0),
         paymentMethod: 'COD',
-        note: orderNote.value,
+        note: mergedNote,
         items: items.map((item) => ({
           menuItemId: item.id,
           quantity: item.quantity,
