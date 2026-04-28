@@ -108,8 +108,6 @@ function onEditMapClick({ lat, lng }) {
 
 const fetchAddresses = () => fetchAddressesAction(userService, addresses, isLoading, errorMessage)
 const setDefault = (id) => setDefaultAddressAction(userService, id, fetchAddresses, errorMessage)
-const primaryAddress = computed(() => addresses.value.find((item) => item.isDefault) || null)
-const otherAddresses = computed(() => addresses.value.filter((item) => !item.isDefault))
 const resetNewAddress = () => {
   newAddress.value = {
     label: '',
@@ -315,35 +313,37 @@ onMounted(fetchAddresses)
       </div>
     </section>
 
-    <section v-if="primaryAddress" class="address-block">
-      <h2>Địa chỉ mặc định</h2>
-      <article class="address-card active">
-        <div>
-          <strong>{{ primaryAddress.label || 'Địa chỉ chính' }}</strong>
-          <p>{{ primaryAddress.addressLine || primaryAddress.detail || 'Chưa có chi tiết địa chỉ' }}</p>
-        </div>
-        <div class="address-actions">
-          <button type="button" class="edit-btn" @click="openEditForm(primaryAddress)">Chỉnh sửa</button>
-          <button type="button" class="delete-btn" @click="deleteAddress(primaryAddress.id)">Xoá</button>
-          <span class="badge">Mặc định</span>
-        </div>
-      </article>
-    </section>
-
     <section class="address-block">
-      <h2>Địa chỉ khác</h2>
+      <h2>Địa chỉ</h2>
       <p v-if="!addresses.length" class="state-msg">Bạn chưa có địa chỉ nào.</p>
       <div v-else class="address-grid">
-        <article v-for="address in otherAddresses" :key="address.id" class="address-card">
-          <div>
-            <strong>{{ address.label || 'Địa chỉ' }}</strong>
+        <article
+          v-for="address in addresses"
+          :key="address.id"
+          class="address-card"
+          :class="{ active: address.isDefault }"
+        >
+          <div class="address-main">
+            <div class="address-top-row">
+              <strong>{{ address.label || 'Địa chỉ' }}</strong>
+            </div>
             <p>{{ address.addressLine || address.detail || 'Chưa có chi tiết địa chỉ' }}</p>
           </div>
-            <div class="address-actions">
-              <button type="button" class="edit-btn" @click="openEditForm(address)">Chỉnh sửa</button>
-              <button type="button" class="set-default-btn" @click="setDefault(address.id)">Đặt mặc định</button>
-              <button type="button" class="delete-btn" @click="deleteAddress(address.id)">Xoá</button>
+          <div class="address-actions">
+            <div class="address-actions-top">
+              <span v-if="address.isDefault" class="badge">Mặc định</span>
             </div>
+            <button type="button" class="edit-btn" @click="openEditForm(address)">Chỉnh sửa</button>
+            <button
+              v-if="!address.isDefault"
+              type="button"
+              class="set-default-btn"
+              @click="setDefault(address.id)"
+            >
+              Đặt mặc định
+            </button>
+            <button type="button" class="delete-btn" @click="deleteAddress(address.id)">Xoá</button>
+          </div>
         </article>
       </div>
     </section>
@@ -546,8 +546,22 @@ onMounted(fetchAddresses)
 }
 
 .address-actions {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 0.45rem;
+}
+
+.address-actions-top {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+}
+
+.address-actions .edit-btn,
+.address-actions .set-default-btn,
+.address-actions .delete-btn {
+  width: 100%;
 }
 
 .edit-btn {
@@ -575,6 +589,17 @@ onMounted(fetchAddresses)
   margin: 0.28rem 0 0;
   color: #6f788a;
   font-size: 0.9rem;
+}
+
+.address-main {
+  flex: 1;
+}
+
+.address-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
 }
 
 .set-default-btn {
