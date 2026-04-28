@@ -28,6 +28,7 @@ watch(
 const tabs = [
   { key: 'overview', label: 'Tổng quan' },
   { key: 'approval', label: 'Duyệt nhà hàng' },
+  { key: 'shipper-approval', label: 'Duyệt shipper' },
   { key: 'users', label: 'Người dùng' },
   { key: 'orders', label: 'Đơn hàng' },
   { key: 'revenue', label: 'Doanh thu' },
@@ -449,25 +450,6 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="table table--spaced">
-            <div class="panel-head panel-head--compact">
-              <h3>Đơn xin quyền SHIPPER ({{ filteredShipperRequests.length }})</h3>
-            </div>
-            <div v-if="!filteredShipperRequests.length" class="empty-row">Không có đơn xin SHIPPER nào chờ duyệt.</div>
-            <div v-for="request in filteredShipperRequests" :key="'shipper-' + request.id" class="row">
-              <div>
-                <strong>{{ request.userEmail || 'Đơn xin SHIPPER' }}</strong>
-                <p>SĐT: {{ request.phoneNumber || 'N/A' }} • Biển số: {{ request.licensePlate || 'N/A' }}</p>
-                <small>Gửi lúc: {{ request.createdAt ? String(request.createdAt).slice(0, 16).replace('T', ' ') : 'N/A' }}</small>
-              </div>
-              <div class="row-actions">
-                <button type="button" :disabled="actionLoading" @click="approveShipperRequest(request.id)">Duyệt SHIPPER</button>
-                <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectShipperRequest(request.id)">
-                  Từ chối
-                </button>
-              </div>
-            </div>
-          </div>
           <div class="table">
             <div v-if="!filteredApprovals.length" class="empty-row">Không có nhà hàng nào chờ duyệt.</div>
             <div v-for="item in filteredApprovals" :key="item.id" class="row">
@@ -479,6 +461,31 @@ onMounted(() => {
               <div class="row-actions">
                 <button type="button" :disabled="actionLoading" @click="approveRestaurant(item.id)">Duyệt</button>
                 <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectRestaurant(item.id)">
+                  Từ chối
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </template>
+
+      <!-- ========= TAB: Duyệt shipper ========= -->
+      <template v-else-if="activeTab === 'shipper-approval'">
+        <section class="panel full-panel">
+          <div class="panel-head">
+            <h3>Đơn xin quyền SHIPPER ({{ filteredShipperRequests.length }})</h3>
+          </div>
+          <div class="table">
+            <div v-if="!filteredShipperRequests.length" class="empty-row">Không có đơn xin SHIPPER nào chờ duyệt.</div>
+            <div v-for="request in filteredShipperRequests" :key="request.id" class="row">
+              <div>
+                <strong>{{ request.userEmail || 'Đơn xin SHIPPER' }}</strong>
+                <p>SĐT: {{ request.phoneNumber || 'N/A' }} • Biển số: {{ request.licensePlate || 'N/A' }}</p>
+                <small>Gửi lúc: {{ request.createdAt ? String(request.createdAt).slice(0, 16).replace('T', ' ') : 'N/A' }}</small>
+              </div>
+              <div class="row-actions">
+                <button type="button" :disabled="actionLoading" @click="approveShipperRequest(request.id)">Duyệt SHIPPER</button>
+                <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectShipperRequest(request.id)">
                   Từ chối
                 </button>
               </div>
