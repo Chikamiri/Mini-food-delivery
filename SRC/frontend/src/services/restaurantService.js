@@ -42,6 +42,10 @@ function rememberDeletedMenuId(restaurantId, itemId) {
   }
 }
 
+function isSoftDeletedMenuItem(item) {
+  return item?.isDeleted === true || item?.is_deleted === true || item?.deleted === true
+}
+
 export default {
   // --- Restaurant ---
   async getAll() {
@@ -98,7 +102,9 @@ export default {
     const detail = await api.get(`/api/restaurants/${restaurantId}`)
     const menuItems = Array.isArray(detail?.menuItems) ? detail.menuItems : []
     const deletedIds = new Set(getDeletedMenuIdsByRestaurant(restaurantId))
-    return menuItems.filter((item) => !deletedIds.has(normalizeId(item?.id)))
+    return menuItems.filter(
+      (item) => !isSoftDeletedMenuItem(item) && !deletedIds.has(normalizeId(item?.id)),
+    )
   },
 
   async getMenuItem(restaurantId, itemId) {
