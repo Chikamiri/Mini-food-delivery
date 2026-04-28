@@ -14,6 +14,10 @@ export default {
     return api.put('/api/users/me', data)
   },
 
+  async deleteMyProfile() {
+    return api.delete('/api/users/me')
+  },
+
   // --- Addresses ---
   async getAddresses() {
     return api.get('/api/users/me/addresses')

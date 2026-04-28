@@ -86,6 +86,7 @@ const openingForm = ref({
   noteToAdmin: '',
 })
 const settingsModalOpen = ref(false)
+const deletingAccount = ref(false)
 const settingsForm = ref({
   pushNotifications: true,
   emailNotifications: true,
@@ -147,6 +148,21 @@ const closeSettingsModal = () => {
 const saveSettings = () => {
   localStorage.setItem(getSettingsStorageKey(), JSON.stringify(settingsForm.value))
   restaurantMessage.value = 'Đã lưu cài đặt cá nhân.'
+}
+const deleteMyAccount = async () => {
+  const confirmed = window.confirm('Bạn có chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.')
+  if (!confirmed) return
+  deletingAccount.value = true
+  restaurantMessage.value = ''
+  try {
+    await userService.deleteMyProfile()
+    await authStore.logout()
+    router.push('/')
+  } catch (error) {
+    restaurantMessage.value = error.message || 'Không thể xoá tài khoản lúc này.'
+  } finally {
+    deletingAccount.value = false
+  }
 }
 const handleMenuClick = (item) => {
   if (item.action === 'settings') {
@@ -298,12 +314,6 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
           <button type="button" class="logout-btn" @click="logout">Đăng xuất</button>
         </div>
 
-        <!-- Danger zone -->
-        <div class="danger-card">
-          <h2>Vùng nguy hiểm</h2>
-          <p>Xoá tài khoản sẽ không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xoá vĩnh viễn.</p>
-          <button class="danger-btn" @click="() => { if (window.confirm('Bạn có chắc chắn muốn xoá tài khoản? Hành động này không thể hoàn tác.')) { /* TODO: call API */ alert('Chức năng đang phát triển.') } }">Xoá tài khoản</button>
-        </div>
       </div>
     </div>
 
@@ -482,6 +492,26 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
                   <option value="public">Công khai</option>
                 </select>
               </div>
+            </div>
+          </section>
+
+          <section class="settings-group danger-zone">
+            <div class="settings-group-title">
+              <span class="settings-group-icon">X</span>
+              <h4>Xóa tài khoản</h4>
+            </div>
+            <div class="settings-items">
+              <p class="danger-desc">
+                Xoá tài khoản sẽ không thể hoàn tác. Tất cả dữ liệu của bạn sẽ bị xoá vĩnh viễn.
+              </p>
+              <button
+                type="button"
+                class="danger-btn"
+                :disabled="deletingAccount"
+                @click="deleteMyAccount"
+              >
+                {{ deletingAccount ? 'Đang xoá...' : 'Xoá tài khoản' }}
+              </button>
             </div>
           </section>
 
