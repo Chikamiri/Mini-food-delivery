@@ -110,7 +110,7 @@ onMounted(loadData)
           <h1>Quản lý danh mục</h1>
           <p class="subtitle">Nhóm món ăn theo danh mục để menu hiển thị rõ ràng hơn.</p>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div class="page-head-actions">
           <button class="outline-btn" type="button" :disabled="actionLoading" @click="openAddCategory">
             Thêm danh mục
           </button>
@@ -121,7 +121,7 @@ onMounted(loadData)
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="error-text" style="color:#18814b;">{{ successMessage }}</p>
+      <p v-if="successMessage" class="error-text success-text">{{ successMessage }}</p>
 
       <section class="panel">
         <div class="panel-head">
@@ -180,72 +180,4 @@ onMounted(loadData)
 </template>
 
 <style scoped src="@/assets/styles/restaurant-views.css"></style>
-<style scoped>
-.category-actions {
-  margin-left: auto;
-  display: flex;
-  gap: 0.4rem;
-}
-
-.outline-btn.small,
-.danger-btn.small {
-  padding: 0.34rem 0.62rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
-
-.danger-btn.small {
-  border: 1px solid #f3b3c0;
-  background: #fff0f4;
-  color: #cf1f46;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 16, 28, 0.45);
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  z-index: 3000;
-}
-
-.menu-modal {
-  width: min(460px, 96vw);
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid #e7ebf2;
-  padding: 0.9rem;
-}
-
-.menu-form {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.menu-form label span {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: #2f3748;
-  font-size: 0.84rem;
-  font-weight: 600;
-}
-
-.menu-form input {
-  width: 100%;
-  border: 1px solid #d9deea;
-  border-radius: 10px;
-  padding: 0.56rem 0.65rem;
-  font-size: 0.88rem;
-  font-family: inherit;
-}
-
-.menu-modal-actions {
-  margin-top: 0.8rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-</style>
+<style scoped src="@/assets/styles/restaurant-category-manager.css"></style>

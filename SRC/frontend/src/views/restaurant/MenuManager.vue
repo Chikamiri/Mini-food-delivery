@@ -247,7 +247,7 @@ onMounted(async () => {
           <h1>Quản lý menu</h1>
           <p class="subtitle">Cập nhật danh sách món ăn và giá bán của nhà hàng.</p>
         </div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div class="menu-header-actions">
           <button class="outline-btn" type="button" :disabled="actionLoading" @click="openAddMenu">
             Thêm món
           </button>
@@ -258,7 +258,7 @@ onMounted(async () => {
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="error-text" style="color:#18814b;">{{ successMessage }}</p>
+      <p v-if="successMessage" class="error-text success-text">{{ successMessage }}</p>
 
       <!-- Menu cards -->
       <section class="panel">
@@ -278,7 +278,7 @@ onMounted(async () => {
               :alt="item.name"
               class="menu-card-img"
             />
-            <div v-else class="menu-card-img" style="background:#f0f2f8; display:grid; place-items:center; color:#bbb; font-size:2rem;">--</div>
+            <div v-else class="menu-card-img menu-card-img--placeholder">--</div>
             <div class="menu-card-body">
               <h4>{{ item.name }}</h4>
               <div class="menu-card-meta">
@@ -381,184 +381,4 @@ onMounted(async () => {
 </template>
 
 <style scoped src="@/assets/styles/restaurant-views.css"></style>
-<style scoped>
-.menu-actions {
-  margin-top: 0.65rem;
-  display: flex;
-  gap: 0.45rem;
-}
-
-.size-price-preview {
-  margin-top: 0.45rem;
-  display: flex;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.size-price-preview small {
-  background: #f6f8fc;
-  color: #51607a;
-  border: 1px solid #e2e8f3;
-  border-radius: 7px;
-  padding: 0.15rem 0.42rem;
-  font-size: 0.75rem;
-}
-
-.form-preview {
-  margin-top: -0.2rem;
-}
-
-.size-price-fields {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-.size-price-fields label span {
-  font-size: 0.78rem;
-}
-
-.outline-btn.small,
-.danger-btn.small {
-  padding: 0.34rem 0.62rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-}
-
-.danger-btn.small {
-  border: 1px solid #f3b3c0;
-  background: #fff0f4;
-  color: #cf1f46;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.menu-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 16, 28, 0.45);
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  z-index: 3000;
-}
-
-.menu-modal {
-  width: min(520px, 96vw);
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid #e7ebf2;
-  padding: 0.9rem;
-}
-
-.menu-form {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.menu-form label span {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: #2f3748;
-  font-size: 0.84rem;
-  font-weight: 600;
-}
-
-.menu-form input,
-.menu-form textarea,
-.menu-form select {
-  width: 100%;
-  border: 1px solid #d9deea;
-  border-radius: 10px;
-  padding: 0.56rem 0.65rem;
-  font-size: 0.88rem;
-  font-family: inherit;
-}
-
-.checkbox-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.checkbox-row span {
-  margin: 0;
-}
-
-.menu-modal-actions {
-  margin-top: 0.8rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-/* Image upload */
-.image-upload-area {
-  margin-top: 0.15rem;
-}
-
-.image-preview-box {
-  position: relative;
-  display: inline-block;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid #d9deea;
-}
-
-.image-preview {
-  display: block;
-  max-width: 100%;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-.remove-img-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0,0,0,0.55);
-  color: #fff;
-  font-size: 0.85rem;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-
-.image-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  padding: 1.5rem;
-  border: 2px dashed #ccd2e0;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #8c94a6;
-  transition: border-color 0.2s;
-}
-
-.image-placeholder:hover {
-  border-color: #6c63ff;
-  color: #6c63ff;
-}
-
-.upload-icon {
-  font-size: 1.8rem;
-}
-
-.upload-icon-svg {
-  width: 26px;
-  height: 26px;
-  opacity: 0.75;
-}
-
-.file-input-hidden {
-  display: none;
-}
-</style>
+<style scoped src="@/assets/styles/restaurant-menu-manager.css"></style>

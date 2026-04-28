@@ -382,8 +382,8 @@ onMounted(() => {
           <div class="panel-head">
             <h3>Danh sách nhà hàng chờ duyệt ({{ filteredApprovals.length }})</h3>
           </div>
-          <div class="table" style="margin-bottom: 1rem;">
-            <div class="panel-head" style="padding: 0 0 0.5rem;">
+          <div class="table table--spaced">
+            <div class="panel-head panel-head--compact">
               <h3>Đơn xin quyền OWNER ({{ filteredOwnerRequests.length }})</h3>
             </div>
             <div v-if="!filteredOwnerRequests.length" class="empty-row">Không có đơn xin OWNER nào chờ duyệt.</div>
@@ -459,7 +459,7 @@ onMounted(() => {
 
       <!-- ========= TAB: Doanh thu ========= -->
       <template v-else-if="activeTab === 'revenue'">
-        <section class="kpi-grid" style="margin-bottom:1rem;">
+        <section class="kpi-grid kpi-grid--spaced">
           <article class="kpi-card">
             <span class="kpi-icon"><img :src="iconRevenue" alt="" width="18" height="18" /></span>
             <div>
@@ -543,14 +543,14 @@ onMounted(() => {
                 <option v-for="role in roleOptions" :key="role" :value="role">{{ role }}</option>
               </select>
             </label>
-            <label class="field" style="margin-top: 0.6rem;">
+            <label class="field field--spaced">
               <span>Trạng thái</span>
               <select v-model="editActive">
                 <option :value="true">Đang hoạt động</option>
                 <option :value="false">Đã khóa</option>
               </select>
             </label>
-            <div style="display: flex; gap: 0.6rem; margin-top: 1rem;">
+            <div class="modal-actions">
               <button type="button" class="save-btn" :disabled="actionLoading" @click="saveUserEdit">Lưu thay đổi</button>
               <button type="button" class="danger-action" :disabled="actionLoading" @click="closeEditUser">Hủy</button>
             </div>

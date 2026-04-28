@@ -140,14 +140,12 @@ onMounted(loadData)
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
       <!-- Status filter tabs -->
-      <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.25rem;">
+      <div class="order-filter-row">
         <button
           v-for="s in statusOptions"
           :key="s"
           type="button"
-          :class="['outline-btn', { 'active-filter': filterStatus === s }]"
-          style="border-radius:999px; padding:0.45rem 1rem; font-size:0.85rem; cursor:pointer;"
-          :style="filterStatus === s ? 'background:#f8143f; color:#fff; border-color:#f8143f;' : 'background:#fff; color:#3f4552; border:1px solid #e2e5eb;'"
+          :class="['outline-btn', 'filter-chip', { 'active-filter': filterStatus === s }]"
           @click="filterStatus = s"
         >
           {{ statusLabel(s) }}
@@ -228,49 +226,4 @@ onMounted(loadData)
 </template>
 
 <style scoped src="@/assets/styles/restaurant-views.css"></style>
-<style scoped>
-.order-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.order-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-.order-id { font-weight: 700; color: #1f293b; }
-.order-actions {
-  display: flex;
-  gap: 0.4rem;
-}
-.action-btn {
-  border: 0;
-  border-radius: 8px;
-  padding: 0.38rem 0.72rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.action-btn.confirm { background: #e6f9ee; color: #0f7b3f; }
-.action-btn.reject { background: #ffedf0; color: #c02144; }
-.action-btn.ready { background: #e6f0ff; color: #1d5dba; }
-.success-text { color: #0f7b3f; font-weight: 600; margin-bottom: 0.5rem; }
-.shipper-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: #e0f0ff;
-  color: #1560bd;
-}
-.shipper-tag.waiting { background: #fff3cd; color: #856404; }
-</style>
+<style scoped src="@/assets/styles/restaurant-order-manager.css"></style>

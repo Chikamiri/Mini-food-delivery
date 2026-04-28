@@ -1,0 +1,128 @@
+.settings-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.settings-form label.full {
+  grid-column: 1 / -1;
+}
+
+.settings-form span {
+  color: #2f3748;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.settings-form input,
+.settings-form textarea {
+  width: 100%;
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  padding: 0.58rem 0.68rem;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+.searching-text {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8c94a6;
+  font-size: 0.75rem;
+}
+
+.address-results {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  background: #fff;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.address-results li {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid #eef1f7;
+  font-size: 0.83rem;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.address-results li:last-child {
+  border-bottom: none;
+}
+
+.address-results li:hover {
+  background: #fff3eb;
+}
+
+.switch-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.switch-row span {
+  font-weight: 500;
+}
+
+.actions {
+  margin-top: 0.35rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mini-map-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.mini-map-actions small {
+  color: #6d778b;
+  font-size: 0.76rem;
+}
+
+.mini-map-window {
+  border: 1px solid #e1e6f1;
+  border-radius: 12px;
+  padding: 0.6rem;
+  background: #fafbff;
+}
+
+.mini-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  gap: 0.5rem;
+}
+
+.mini-map-head strong {
+  color: #293247;
+  font-size: 0.84rem;
+}
+
+.mini-map-head span {
+  color: #6d778b;
+  font-size: 0.76rem;
+}
+
+.success-text {
+  margin: 0.7rem 0 0;
+  color: #0f7b3f;
+  font-weight: 600;
+}

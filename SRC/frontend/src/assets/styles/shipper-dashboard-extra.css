@@ -1,0 +1,86 @@
+.subtitle {
+  color: #8e95a5;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f293b;
+  margin: 0 0 1rem;
+}
+
+.delivery-status {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #fff3cd;
+  color: #856404;
+  margin-bottom: 0.4rem;
+}
+
+.highlight .delivery-status {
+  background: #d1e7dd;
+  color: #0a5c36;
+}
+
+.order-num {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f293b;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.address {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0.2rem 0;
+}
+
+.price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #f8143f;
+  margin: 0.2rem 0;
+}
+
+.restaurant-name {
+  font-size: 0.82rem;
+  color: #777;
+  margin: 0.15rem 0;
+}
+
+.time-text {
+  font-size: 0.78rem;
+  color: #aaa;
+  margin-top: 0.3rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn.pickup {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.action-btn.pickup:hover {
+  background: #b6d4fe;
+}
+
+.success-text {
+  color: #0f7b3f;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  background: #d1e7dd;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+}
