@@ -38,6 +38,15 @@ const selectedAddress = computed(() =>
   deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
 )
 const estimatedDeliveryTime = computed(() => {
+  if (selectedOrderType.value === 'Giao hẹn giờ' && desiredDeliveryTime.value) {
+    const [hours, minutes] = desiredDeliveryTime.value.split(':').map(Number)
+    const base = new Date()
+    base.setHours(Number.isFinite(hours) ? hours : base.getHours())
+    base.setMinutes(Number.isFinite(minutes) ? minutes : base.getMinutes())
+    base.setSeconds(0, 0)
+    const eta = new Date(base.getTime() + 30 * 60 * 1000)
+    return eta.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+  }
   const eta = new Date(currentTime.value.getTime() + 30 * 60 * 1000)
   return eta.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
 })
