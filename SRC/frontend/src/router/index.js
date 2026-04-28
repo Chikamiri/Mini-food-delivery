@@ -17,6 +17,7 @@ import RestaurantSettings from '@/views/restaurant/SettingsView.vue'
 import ShipperDashboard from '@/views/shipper/DashboardView.vue'
 import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
 import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
+import ShipperSettings from '@/views/shipper/SettingsView.vue'
 import AdminDashboard from '@/views/admin/DashboardView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -51,6 +52,7 @@ const router = createRouter({
     { path: '/shipper/dashboard', name: 'shipper-dashboard', component: ShipperDashboard, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
     { path: '/shipper/delivery/:id', name: 'delivery-detail', component: DeliveryDetail, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
     { path: '/shipper/history', name: 'shipper-history', component: DeliveryHistory, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
+    { path: '/shipper/settings', name: 'shipper-settings', component: ShipperSettings, meta: { requiresAuth: true, roles: ['SHIPPER', 'ADMIN'] } },
 
     // Admin routes — meta.tab syncs with DashboardView's activeTab
     { path: '/admin/dashboard', name: 'admin-dashboard', component: AdminDashboard, meta: { requiresAuth: true, roles: ['ADMIN'], tab: 'overview' } },
