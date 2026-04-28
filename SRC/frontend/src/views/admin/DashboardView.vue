@@ -44,6 +44,7 @@ const stats = ref({
 })
 const approvalQueue = ref([])
 const ownerRequestQueue = ref([])
+const shipperRequestQueue = ref([])
 const users = ref([])
 const isLoading = ref(false)
 const actionLoading = ref(false)
@@ -83,6 +84,14 @@ const filteredOwnerRequests = computed(() =>
   ),
 )
 
+const filteredShipperRequests = computed(() =>
+  shipperRequestQueue.value.filter((item) =>
+    `${item.userEmail || ''} ${item.phoneNumber || ''} ${item.licensePlate || ''}`
+      .toLowerCase()
+      .includes(keyword.value.trim().toLowerCase()),
+  ),
+)
+
 const filteredUsers = computed(() =>
   users.value.filter((item) =>
     `${item.fullName || ''} ${item.email || ''}`.toLowerCase().includes(keyword.value.trim().toLowerCase()),
@@ -107,6 +116,13 @@ const loadDashboardData = async () => {
     users,
     ownerRequestQueue,
   )
+  // Load shipper requests
+  try {
+    const shipperData = await adminService.getPendingShipperRequests()
+    shipperRequestQueue.value = Array.isArray(shipperData) ? shipperData : []
+  } catch {
+    shipperRequestQueue.value = []
+  }
   if (rejectedRestaurantIds.value.length) {
     approvalQueue.value = approvalQueue.value.filter(
       (item) => !rejectedRestaurantIds.value.includes(item.id),
@@ -174,6 +190,38 @@ const rejectOwnerRequest = async (requestId) => {
     successMessage.value = 'Đã từ chối đơn xin quyền OWNER'
   } catch (error) {
     errorMessage.value = error.message || 'Từ chối đơn OWNER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const approveShipperRequest = async (requestId) => {
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.approveShipperRequest(requestId)
+    shipperRequestQueue.value = shipperRequestQueue.value.filter((item) => item.id !== requestId)
+    successMessage.value = 'Đã duyệt đơn xin quyền SHIPPER'
+  } catch (error) {
+    errorMessage.value = error.message || 'Duyệt đơn SHIPPER thất bại'
+  } finally {
+    actionLoading.value = false
+  }
+}
+
+const rejectShipperRequest = async (requestId) => {
+  const reason = window.prompt('Nhập lý do từ chối đơn SHIPPER:', 'Thiếu thông tin hồ sơ')
+  if (reason === null) return
+  actionLoading.value = true
+  successMessage.value = ''
+  errorMessage.value = ''
+  try {
+    await adminService.rejectShipperRequest(requestId, reason)
+    shipperRequestQueue.value = shipperRequestQueue.value.filter((item) => item.id !== requestId)
+    successMessage.value = 'Đã từ chối đơn xin quyền SHIPPER'
+  } catch (error) {
+    errorMessage.value = error.message || 'Từ chối đơn SHIPPER thất bại'
   } finally {
     actionLoading.value = false
   }
@@ -275,7 +323,7 @@ onMounted(() => {
 
       <div class="sidebar-note">
         <p>Khuyến nghị</p>
-        <strong>{{ approvalQueue.length + filteredOwnerRequests.length }} yêu cầu đang chờ duyệt.</strong>
+        <strong>{{ approvalQueue.length + filteredOwnerRequests.length + filteredShipperRequests.length }} yêu cầu đang chờ duyệt.</strong>
       </div>
     </aside>
 
@@ -396,6 +444,25 @@ onMounted(() => {
               <div class="row-actions">
                 <button type="button" :disabled="actionLoading" @click="approveOwnerRequest(request.id)">Duyệt OWNER</button>
                 <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectOwnerRequest(request.id)">
+                  Từ chối
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="table table--spaced">
+            <div class="panel-head panel-head--compact">
+              <h3>Đơn xin quyền SHIPPER ({{ filteredShipperRequests.length }})</h3>
+            </div>
+            <div v-if="!filteredShipperRequests.length" class="empty-row">Không có đơn xin SHIPPER nào chờ duyệt.</div>
+            <div v-for="request in filteredShipperRequests" :key="'shipper-' + request.id" class="row">
+              <div>
+                <strong>{{ request.userEmail || 'Đơn xin SHIPPER' }}</strong>
+                <p>SĐT: {{ request.phoneNumber || 'N/A' }} • Biển số: {{ request.licensePlate || 'N/A' }}</p>
+                <small>Gửi lúc: {{ request.createdAt ? String(request.createdAt).slice(0, 16).replace('T', ' ') : 'N/A' }}</small>
+              </div>
+              <div class="row-actions">
+                <button type="button" :disabled="actionLoading" @click="approveShipperRequest(request.id)">Duyệt SHIPPER</button>
+                <button type="button" class="danger-action" :disabled="actionLoading" @click="rejectShipperRequest(request.id)">
                   Từ chối
                 </button>
               </div>

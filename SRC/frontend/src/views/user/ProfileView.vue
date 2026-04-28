@@ -10,6 +10,7 @@ import iconLocation from '@/assets/icon/home.svg'
 import iconHistory from '@/assets/icon/time.svg'
 import iconPayment from '@/assets/icon/credit-card.svg'
 import iconOpenRestaurant from '@/assets/icon/home.svg'
+import iconShipper from '@/assets/icon/send.svg'
 import iconSetting from '@/assets/icon/setting.svg'
 import iconHelp from '@/assets/icon/info.svg'
 import userService from '@/services/userService'
@@ -17,6 +18,7 @@ import orderService from '@/services/orderService'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import ownerRequestService from '@/services/ownerRequestService'
+import shipperRequestService from '@/services/shipperRequestService'
 import {
   startEditingProfileAction,
   cancelEditingProfileAction,
@@ -31,6 +33,9 @@ import {
   loadProfileAction,
   loadProfileStatsAction,
   updateProfileAction,
+  openShipperModalAction,
+  closeShipperModalAction,
+  submitShipperRequestAction,
 } from '@/utils/profileViewUtils'
 
 const isEditing = ref(false)
@@ -69,6 +74,7 @@ const menuItems = [
   { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
   { icon: iconPayment, label: 'Phương thức thanh toán', action: 'coming-soon' },
   { icon: iconOpenRestaurant, label: 'Mở nhà hàng', action: 'open-restaurant' },
+  { icon: iconShipper, label: 'Làm shipper', action: 'become-shipper' },
   { icon: iconSetting, label: 'Cài đặt', action: 'settings' },
   { icon: iconHelp, label: 'Trợ giúp', action: 'coming-soon' },
 ]
@@ -87,6 +93,18 @@ const openingForm = ref({
 })
 const settingsModalOpen = ref(false)
 const deletingAccount = ref(false)
+
+// Shipper request state
+const shipperModalOpen = ref(false)
+const shipperLoading = ref(false)
+const shipperMessage = ref('')
+const shipperRequests = ref([])
+const showShipperForm = ref(false)
+const shipperForm = ref({
+  phoneNumber: '',
+  licensePlate: '',
+})
+
 const settingsForm = ref({
   pushNotifications: true,
   emailNotifications: true,
@@ -145,6 +163,30 @@ const openSettingsModal = () => {
 const closeSettingsModal = () => {
   settingsModalOpen.value = false
 }
+
+// Shipper modal handlers
+const openShipperModal = () =>
+  openShipperModalAction({
+    shipperModalOpen,
+    shipperLoading,
+    shipperMessage,
+    shipperRequests,
+    showShipperForm,
+    shipperForm,
+    authStore,
+    profile,
+    shipperRequestService,
+  })
+const closeShipperModal = () => closeShipperModalAction(shipperModalOpen, showShipperForm)
+const submitShipperRequest = () =>
+  submitShipperRequestAction({
+    shipperMessage,
+    shipperLoading,
+    shipperForm,
+    showShipperForm,
+    shipperRequests,
+    shipperRequestService,
+  })
 const saveSettings = () => {
   localStorage.setItem(getSettingsStorageKey(), JSON.stringify(settingsForm.value))
   restaurantMessage.value = 'Đã lưu cài đặt cá nhân.'
@@ -176,6 +218,7 @@ const handleMenuClick = (item) => {
     restaurantMessage,
     restaurantModalOpen,
     showOpenRestaurantForm,
+    openShipperModal,
   )
 }
 const submitOpenRestaurant = () =>
@@ -210,8 +253,8 @@ onMounted(() => {
   }
 })
 
-watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen]) => {
-  document.body.style.overflow = restaurantOpen || settingsOpen ? 'hidden' : ''
+watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOpen, settingsOpen, shipperOpen]) => {
+  document.body.style.overflow = restaurantOpen || settingsOpen || shipperOpen ? 'hidden' : ''
 })
 </script>
 
@@ -521,6 +564,87 @@ watch([restaurantModalOpen, settingsModalOpen], ([restaurantOpen, settingsOpen])
           </div>
 
           <p v-if="restaurantMessage" class="settings-saved-msg">{{ restaurantMessage }}</p>
+        </article>
+      </div>
+    </Teleport>
+
+    <!-- Shipper Request Modal -->
+    <Teleport to="body">
+      <div v-if="shipperModalOpen" class="restaurant-overlay" @click.self="closeShipperModal">
+        <article class="restaurant-modal">
+          <div class="restaurant-modal-head">
+            <h3>Đăng ký làm Shipper</h3>
+            <button type="button" class="modal-close-btn" @click="closeShipperModal">✕</button>
+          </div>
+
+          <section class="restaurant-section">
+            <h4>Trạng thái yêu cầu</h4>
+            <p v-if="shipperLoading">Đang tải...</p>
+
+            <template v-else>
+              <!-- Show existing requests -->
+              <ul v-if="shipperRequests.length" class="restaurant-list">
+                <li v-for="req in shipperRequests" :key="req.id">
+                  <strong>Yêu cầu #{{ req.id }}</strong>
+                  <small>SĐT: {{ req.phoneNumber }} | Biển số: {{ req.licensePlate }}</small>
+                  <div class="restaurant-actions">
+                    <small
+                      :class="
+                        String(req.status).toUpperCase() === 'APPROVED'
+                          ? 'approved-badge'
+                          : String(req.status).toUpperCase() === 'REJECTED'
+                            ? 'rejected-badge'
+                            : 'pending-badge'
+                      "
+                    >
+                      {{
+                        String(req.status).toUpperCase() === 'APPROVED'
+                          ? 'Đã duyệt'
+                          : String(req.status).toUpperCase() === 'REJECTED'
+                            ? 'Bị từ chối'
+                            : 'Chờ admin duyệt'
+                      }}
+                    </small>
+                  </div>
+                  <small v-if="req.adminNote" class="admin-note">Ghi chú admin: {{ req.adminNote }}</small>
+                </li>
+              </ul>
+              <p v-else>Bạn chưa gửi yêu cầu nào.</p>
+            </template>
+          </section>
+
+          <section v-if="showShipperForm" class="restaurant-section">
+            <h4>Gửi yêu cầu mới</h4>
+            <form class="restaurant-form" @submit.prevent="submitShipperRequest">
+              <label class="field">
+                <span>Số điện thoại liên hệ</span>
+                <input
+                  v-model="shipperForm.phoneNumber"
+                  required
+                  type="tel"
+                  placeholder="09xxxxxxxx"
+                  minlength="10"
+                  maxlength="15"
+                />
+              </label>
+              <label class="field">
+                <span>Biển số xe</span>
+                <input
+                  v-model="shipperForm.licensePlate"
+                  required
+                  type="text"
+                  placeholder="VD: 59A-12345"
+                  minlength="4"
+                  maxlength="20"
+                />
+              </label>
+              <button type="submit" class="save-btn" :disabled="shipperLoading">
+                {{ shipperLoading ? 'Đang gửi...' : 'Gửi yêu cầu làm Shipper' }}
+              </button>
+            </form>
+          </section>
+
+          <p v-if="shipperMessage" class="restaurant-message">{{ shipperMessage }}</p>
         </article>
       </div>
     </Teleport>

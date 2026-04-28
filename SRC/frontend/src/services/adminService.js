@@ -4,6 +4,7 @@
  */
 import api from '@/services/api'
 import ownerRequestService from '@/services/ownerRequestService'
+import shipperRequestService from '@/services/shipperRequestService'
 
 export default {
   // --- User Management ---
@@ -58,5 +59,18 @@ export default {
 
   async rejectOwnerRequest(requestId, reason) {
     return ownerRequestService.processRequest(requestId, false, reason || null)
+  },
+
+  // --- Shipper Request Approval ---
+  async getPendingShipperRequests() {
+    return shipperRequestService.getPendingRequests()
+  },
+
+  async approveShipperRequest(requestId) {
+    return shipperRequestService.processRequest(requestId, true, null)
+  },
+
+  async rejectShipperRequest(requestId, reason) {
+    return shipperRequestService.processRequest(requestId, false, reason || null)
   },
 }

@@ -126,9 +126,13 @@ export async function openRestaurantModalAction({
   }
 }
 
-export function handleProfileMenuClickAction(item, openRestaurantModal, router, restaurantMessage, restaurantModalOpen, showOpenRestaurantForm) {
+export function handleProfileMenuClickAction(item, openRestaurantModal, router, restaurantMessage, restaurantModalOpen, showOpenRestaurantForm, openShipperModal) {
   if (item.action === 'open-restaurant') {
     openRestaurantModal()
+    return
+  }
+  if (item.action === 'become-shipper') {
+    if (openShipperModal) openShipperModal()
     return
   }
   if (item.route) {
@@ -260,5 +264,115 @@ export async function updateProfileAction(isLoading, errorMessage, userService, 
     errorMessage.value = error.message || 'Khong the cap nhat thong tin'
   } finally {
     isLoading.value = false
+  }
+}
+
+// --- Shipper Request Flow ---
+
+export async function openShipperModalAction({
+  shipperModalOpen,
+  shipperLoading,
+  shipperMessage,
+  shipperRequests,
+  showShipperForm,
+  shipperForm,
+  authStore,
+  profile,
+  shipperRequestService,
+}) {
+  shipperModalOpen.value = true
+  shipperMessage.value = ''
+  shipperLoading.value = true
+  showShipperForm.value = false
+
+  // Refresh profile to get latest role
+  if (authStore.token) {
+    try {
+      await authStore.fetchProfile()
+    } catch {
+      // ignore
+    }
+  }
+
+  const role = String(authStore.user?.role || profile.value.role || '').toUpperCase()
+
+  // If already SHIPPER, inform user
+  if (role === 'SHIPPER') {
+    shipperMessage.value = 'Bạn đã là Shipper! Hãy đăng nhập lại để truy cập dashboard giao hàng.'
+    shipperLoading.value = false
+    return
+  }
+
+  // Fetch existing shipper requests
+  try {
+    const myRequests = await shipperRequestService.getMyRequests()
+    const requests = Array.isArray(myRequests) ? myRequests : []
+    shipperRequests.value = requests
+
+    const pendingRequest = requests.find(
+      (item) => String(item?.status || '').toUpperCase() === 'PENDING',
+    )
+    const rejectedRequests = requests.filter(
+      (item) => String(item?.status || '').toUpperCase() === 'REJECTED',
+    )
+
+    if (pendingRequest) {
+      shipperMessage.value =
+        'Bạn đã gửi yêu cầu làm Shipper và đang chờ admin duyệt. Sau khi được duyệt, hãy đăng nhập lại để truy cập dashboard giao hàng.'
+    } else if (rejectedRequests.length > 0 && !requests.some((r) => String(r?.status || '').toUpperCase() === 'APPROVED')) {
+      const lastRejected = rejectedRequests[rejectedRequests.length - 1]
+      shipperMessage.value =
+        `Yêu cầu trước đó đã bị từ chối${lastRejected?.adminNote ? ': ' + lastRejected.adminNote : ''}. Bạn có thể gửi lại yêu cầu mới.`
+      showShipperForm.value = true
+    } else {
+      showShipperForm.value = true
+    }
+  } catch {
+    showShipperForm.value = true
+  }
+  shipperLoading.value = false
+}
+
+export function closeShipperModalAction(shipperModalOpen, showShipperForm) {
+  shipperModalOpen.value = false
+  showShipperForm.value = false
+}
+
+export async function submitShipperRequestAction({
+  shipperMessage,
+  shipperLoading,
+  shipperForm,
+  showShipperForm,
+  shipperRequests,
+  shipperRequestService,
+}) {
+  shipperMessage.value = ''
+  shipperLoading.value = true
+  try {
+    await shipperRequestService.submitRequest({
+      phoneNumber: shipperForm.value.phoneNumber,
+      licensePlate: shipperForm.value.licensePlate,
+    })
+    shipperMessage.value =
+      'Đã gửi yêu cầu làm Shipper cho admin. Khi được duyệt, tài khoản của bạn sẽ trở thành SHIPPER.'
+    shipperForm.value = { phoneNumber: '', licensePlate: '' }
+    showShipperForm.value = false
+
+    // Refresh requests list
+    try {
+      const myRequests = await shipperRequestService.getMyRequests()
+      shipperRequests.value = Array.isArray(myRequests) ? myRequests : []
+    } catch {
+      // ignore
+    }
+  } catch (error) {
+    const msg = String(error?.message || '')
+    if (msg.toLowerCase().includes('pending') || msg.toLowerCase().includes('already')) {
+      shipperMessage.value = 'Bạn đã có yêu cầu đang chờ duyệt. Vui lòng chờ admin xử lý.'
+    } else {
+      shipperMessage.value = msg || 'Không thể gửi yêu cầu làm Shipper'
+    }
+  } finally {
+    shipperLoading.value = false
   }
 }
