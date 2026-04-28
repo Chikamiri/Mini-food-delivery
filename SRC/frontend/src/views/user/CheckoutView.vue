@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useOrderStore } from '@/stores/order'
 import userService from '@/services/userService'
+import restaurantService from '@/services/restaurantService'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
 import {
   formatPriceVND,
@@ -28,6 +29,8 @@ const errorMessage = ref('')
 const successMessage = ref('')
 const currentTime = ref(new Date())
 let timeTicker = null
+const addressDistanceMap = ref({})
+const restaurantPoint = ref(null)
 
 const cartItems = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.subtotal)
@@ -37,6 +40,7 @@ const total = computed(() => subtotal.value + deliveryFee.value - discount.value
 const selectedAddress = computed(() =>
   deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
 )
+const primaryRestaurantId = computed(() => Number(cartItems.value[0]?.restaurantId || 0))
 const estimatedDeliveryTime = computed(() => {
   if (selectedOrderType.value === 'Giao hẹn giờ' && desiredDeliveryTime.value) {
     const [hours, minutes] = desiredDeliveryTime.value.split(':').map(Number)
@@ -96,10 +100,85 @@ async function resolveAddressMarker(address) {
   }
 }
 
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const toRad = (deg) => (deg * Math.PI) / 180
+  const R = 6371
+  const dLat = toRad(lat2 - lat1)
+  const dLng = toRad(lng2 - lng1)
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return R * c
+}
+
+function formatDistance(km) {
+  if (!Number.isFinite(km)) return ''
+  if (km < 1) return `${Math.round(km * 1000)} m`
+  return `${km.toFixed(1)} km`
+}
+
+async function resolveRestaurantPoint() {
+  if (!primaryRestaurantId.value) {
+    restaurantPoint.value = null
+    return
+  }
+  try {
+    const restaurant = await restaurantService.getById(primaryRestaurantId.value)
+    if (restaurant?.latitude && restaurant?.longitude) {
+      restaurantPoint.value = { lat: Number(restaurant.latitude), lng: Number(restaurant.longitude) }
+      return
+    }
+    if (restaurant?.address) {
+      const geo = await mapService.searchAddress(restaurant.address)
+      if (geo.length) {
+        restaurantPoint.value = { lat: Number(geo[0].lat), lng: Number(geo[0].lng || geo[0].lon) }
+        return
+      }
+    }
+  } catch (_) {}
+  restaurantPoint.value = null
+}
+
+async function resolveAddressPoint(address) {
+  if (!address) return null
+  if (address.latitude && address.longitude) {
+    return { lat: Number(address.latitude), lng: Number(address.longitude) }
+  }
+  try {
+    const q = address.addressLine || address.detail || ''
+    const geo = await mapService.searchAddress(q)
+    if (geo.length) return { lat: Number(geo[0].lat), lng: Number(geo[0].lng || geo[0].lon) }
+  } catch (_) {}
+  return null
+}
+
+async function calculateAddressDistances() {
+  addressDistanceMap.value = {}
+  if (!restaurantPoint.value || !deliveryAddresses.value.length) return
+  const nextMap = {}
+  for (const address of deliveryAddresses.value) {
+    const point = await resolveAddressPoint(address)
+    if (!point) continue
+    const km = haversineKm(restaurantPoint.value.lat, restaurantPoint.value.lng, point.lat, point.lng)
+    nextMap[address.id] = formatDistance(km)
+  }
+  addressDistanceMap.value = nextMap
+}
+
 watch(selectedAddress, (addr) => resolveAddressMarker(addr))
+watch(primaryRestaurantId, async () => {
+  await resolveRestaurantPoint()
+  await calculateAddressDistances()
+})
+watch(deliveryAddresses, () => {
+  calculateAddressDistances()
+}, { deep: true })
 
 onMounted(() => {
   loadAddresses()
+  resolveRestaurantPoint().then(calculateAddressDistances)
   timeTicker = setInterval(() => {
     currentTime.value = new Date()
   }, 30000)
@@ -139,6 +218,9 @@ onUnmounted(() => {
           >
             <p class="address-label">{{ item.label || 'Địa chỉ' }}</p>
             <p class="address-detail">{{ item.addressLine || item.detail }}</p>
+            <p v-if="addressDistanceMap[item.id]" class="address-distance">
+              Cách nhà hàng: {{ addressDistanceMap[item.id] }}
+            </p>
           </article>
         </div>
         <MapView
@@ -336,6 +418,13 @@ onUnmounted(() => {
   color: #677185;
   font-size: 0.9rem;
   line-height: 1.45;
+}
+
+.address-distance {
+  margin: 0.35rem 0 0;
+  color: #f8143f;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .chips-row {
