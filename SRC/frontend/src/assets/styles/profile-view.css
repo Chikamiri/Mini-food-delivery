@@ -580,7 +580,19 @@
 }
 
 .settings-group-icon {
-  font-size: 1.15rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #fff3e8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-group-icon img {
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
 }
 
 .settings-items {

@@ -965,6 +965,11 @@
   font-size: 0.92rem;
 }
 
+.dish-detail-close img {
+  width: 14px;
+  height: 14px;
+}
+
 .dish-detail-image {
   width: 100%;
   height: 230px;

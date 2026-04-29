@@ -224,6 +224,11 @@
   background: #ffe3ea;
 }
 
+.remove-btn img {
+  width: 14px;
+  height: 14px;
+}
+
 /* Empty state */
 .empty-state {
   text-align: center;

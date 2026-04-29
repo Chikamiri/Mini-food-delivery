@@ -5,6 +5,7 @@ import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
 import iconView from '@/assets/icon/view.svg'
 import iconImage from '@/assets/icon/image.svg'
+import iconClose from '@/assets/icon/close.svg'
 import { loadRestaurantMenuDataAction } from '@/utils/restaurantDataUtils'
 import {
   encodeDescriptionWithSizePrices,
@@ -347,7 +348,9 @@ onMounted(async () => {
               <div class="image-upload-area">
                 <div v-if="imagePreview" class="image-preview-box">
                   <img :src="imagePreview" alt="Preview" class="image-preview" />
-                  <button type="button" class="remove-img-btn" @click="removeImage">✕</button>
+                  <button type="button" class="remove-img-btn" @click="removeImage">
+                    <img :src="iconClose" alt="" width="12" height="12" />
+                  </button>
                 </div>
                 <div v-else class="image-placeholder" @click="fileInputRef?.click()">
                   <img :src="iconView" alt="" class="upload-icon-svg" />

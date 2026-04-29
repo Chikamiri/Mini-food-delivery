@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import iconBackArrow from '@/assets/icon/back-arrow.svg'
 import iconHome from '@/assets/icon/home.svg'
 import iconImage from '@/assets/icon/image.svg'
+import iconDelete from '@/assets/icon/delete.svg'
 import { useCartStore } from '@/stores/cart'
 import {
   incrementCartItem,
@@ -89,7 +90,9 @@ const goBrowse = () => goBrowseFromCart(router)
                 <button class="qty-btn" @click="increment(item)">+</button>
               </div>
               <span class="item-subtotal">{{ formatPrice(item.price * item.quantity) }}</span>
-              <button class="remove-btn" @click="removeItem(item.lineId)" aria-label="Xoá">✕</button>
+              <button class="remove-btn" @click="removeItem(item.lineId)" aria-label="Xoá">
+                <img :src="iconDelete" alt="" width="14" height="14" />
+              </button>
             </div>
           </article>
         </div>

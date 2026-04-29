@@ -21,6 +21,7 @@ import iconLove from '@/assets/icon/love.svg'
 import iconImage from '@/assets/icon/image.svg'
 import iconFlash from '@/assets/icon/monet-bill.svg'
 import iconReceipt from '@/assets/icon/reciept.svg'
+import iconClose from '@/assets/icon/close.svg'
 import {
   isItemFavorite,
   toggleFavoriteItem,
@@ -722,7 +723,7 @@ onUnmounted(() => {
             aria-label="Đóng chi tiết món"
             @click="closeDishDetail"
           >
-            ✕
+            <img :src="iconClose" alt="" width="14" height="14" />
           </button>
 
           <img :src="selectedDish.image" :alt="selectedDish.name" class="dish-detail-image" />

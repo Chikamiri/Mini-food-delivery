@@ -13,6 +13,11 @@ import iconOpenRestaurant from '@/assets/icon/home.svg'
 import iconShipper from '@/assets/icon/send.svg'
 import iconSetting from '@/assets/icon/setting.svg'
 import iconHelp from '@/assets/icon/info.svg'
+import iconClose from '@/assets/icon/close.svg'
+import iconNotice from '@/assets/icon/notice.svg'
+import iconGlobe from '@/assets/icon/globe.svg'
+import iconShield from '@/assets/icon/shield.svg'
+import iconDelete from '@/assets/icon/delete.svg'
 import userService from '@/services/userService'
 import orderService from '@/services/orderService'
 import { useAuthStore } from '@/stores/auth'
@@ -365,7 +370,9 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
         <article class="restaurant-modal">
           <div class="restaurant-modal-head">
             <h3>Mở nhà hàng</h3>
-            <button type="button" class="modal-close-btn" @click="closeRestaurantModal">✕</button>
+            <button type="button" class="modal-close-btn" @click="closeRestaurantModal">
+              <img :src="iconClose" alt="" width="14" height="14" />
+            </button>
           </div>
 
           <section class="restaurant-section">
@@ -446,13 +453,15 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
         <article class="restaurant-modal settings-modal">
           <div class="restaurant-modal-head">
             <h3>Cài đặt tài khoản</h3>
-            <button type="button" class="modal-close-btn" @click="closeSettingsModal">✕</button>
+            <button type="button" class="modal-close-btn" @click="closeSettingsModal">
+              <img :src="iconClose" alt="" width="14" height="14" />
+            </button>
           </div>
 
           <!-- Thông báo -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">TB</span>
+              <span class="settings-group-icon"><img :src="iconNotice" alt="" /></span>
               <h4>Thông báo</h4>
             </div>
             <div class="settings-items">
@@ -489,7 +498,7 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
           <!-- Hiển thị -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">HT</span>
+              <span class="settings-group-icon"><img :src="iconGlobe" alt="" /></span>
               <h4>Hiển thị & ngôn ngữ</h4>
             </div>
             <div class="settings-items">
@@ -520,7 +529,7 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
           <!-- Riêng tư -->
           <section class="settings-group">
             <div class="settings-group-title">
-              <span class="settings-group-icon">RT</span>
+              <span class="settings-group-icon"><img :src="iconShield" alt="" /></span>
               <h4>Quyền riêng tư</h4>
             </div>
             <div class="settings-items">
@@ -540,7 +549,7 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
 
           <section class="settings-group danger-zone">
             <div class="settings-group-title">
-              <span class="settings-group-icon">X</span>
+              <span class="settings-group-icon"><img :src="iconDelete" alt="" /></span>
               <h4>Xóa tài khoản</h4>
             </div>
             <div class="settings-items">
@@ -574,7 +583,9 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
         <article class="restaurant-modal">
           <div class="restaurant-modal-head">
             <h3>Đăng ký làm Shipper</h3>
-            <button type="button" class="modal-close-btn" @click="closeShipperModal">✕</button>
+            <button type="button" class="modal-close-btn" @click="closeShipperModal">
+              <img :src="iconClose" alt="" width="14" height="14" />
+            </button>
           </div>
 
           <section class="restaurant-section">

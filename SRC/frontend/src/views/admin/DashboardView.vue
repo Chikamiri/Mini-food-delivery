@@ -10,6 +10,7 @@ import iconRevenue from '@/assets/icon/dollar-sign.svg'
 import iconComplaint from '@/assets/icon/info.svg'
 import iconPromo from '@/assets/icon/tag.svg'
 import iconSettings from '@/assets/icon/setting.svg'
+import iconClose from '@/assets/icon/close.svg'
 import {
   logoutAdminAction,
   formatAdminCurrency,
@@ -608,7 +609,9 @@ onMounted(() => {
         <article class="restaurant-modal">
           <div class="restaurant-modal-head">
             <h3>Chỉnh sửa người dùng</h3>
-            <button type="button" class="modal-close-btn" @click="closeEditUser">✕</button>
+            <button type="button" class="modal-close-btn" @click="closeEditUser">
+              <img :src="iconClose" alt="" width="14" height="14" />
+            </button>
           </div>
           <section class="restaurant-section">
             <label class="field">
