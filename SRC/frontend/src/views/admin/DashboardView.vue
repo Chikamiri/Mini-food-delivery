@@ -355,7 +355,6 @@ onMounted(() => {
             <div>
               <p>{{ card.title }}</p>
               <h3>{{ card.value }}</h3>
-              <small>Dữ liệu realtime từ backend</small>
             </div>
           </article>
         </section>
