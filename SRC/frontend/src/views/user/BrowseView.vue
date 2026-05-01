@@ -172,6 +172,22 @@ const openDishDetail = (item) => openDishDetailModal(selectedDish, dishNote, sel
 const closeDishDetail = () => closeDishDetailModal(selectedDish)
 const addToCart = (item) =>
   addItemToCartFromDish(cartStore, closeDishDetail, dishNote, selectedSize, item)
+const reorderRecentDish = (dish) => {
+  if (!dish?.menuItemId) return
+  cartStore.addItem(
+    {
+      id: dish.menuItemId,
+      name: dish.name || 'Món ăn',
+      price: Number(dish.reorderUnitPrice || 0),
+      imageUrl: dish.imageUrl || null,
+      restaurantId: dish.restaurantId || null,
+      restaurantName: dish.restaurantName || 'Nha hang',
+      note: '',
+      size: 'Vừa',
+    },
+    1,
+  )
+}
 const loadBrowseData = () =>
   loadBrowseDataAction({
     isLoading,
@@ -723,11 +739,22 @@ onUnmounted(() => {
         </div>
         <div class="dish-grid recent">
           <p v-if="!recentOrders.length" class="muted">Chưa có đơn đã giao thành công.</p>
-          <article v-for="dish in recentOrders" :key="dish.id" class="dish-card">
-            <div class="dish-img"><img :src="iconImage" alt="" class="dish-img-icon" /></div>
+          <article v-for="dish in recentOrders" :key="dish.id" class="dish-card recent-order-card">
+            <div class="dish-img">
+              <img v-if="dish.imageUrl" :src="dish.imageUrl" :alt="dish.name" class="dish-photo" />
+              <img v-else :src="iconImage" alt="" class="dish-img-icon" />
+            </div>
             <h4>{{ dish.name }}</h4>
             <p>{{ dish.price }}</p>
             <small>Đặt lúc: {{ dish.eta }}</small>
+            <button
+              type="button"
+              class="reorder-btn"
+              :disabled="!dish.menuItemId"
+              @click="reorderRecentDish(dish)"
+            >
+              Đặt lại
+            </button>
           </article>
         </div>
       </section>

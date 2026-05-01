@@ -228,11 +228,42 @@ export function formatRecentOrderTime(value) {
 }
 
 export function mapRecentBrowseOrder(order) {
+  const firstItem = getPrimaryOrderItem(order)
+  const fallbackName = order.restaurantName || `Đơn hàng #${order.id}`
+  const numericTotal = Number(order.totalAmount || 0)
+  const unitPrice = Number(firstItem?.unitPrice || firstItem?.price || numericTotal || 0)
   return {
     id: order.id,
-    name: order.restaurantName || `Đơn hàng #${order.id}`,
-    price: `${Number(order.totalAmount || 0).toLocaleString('vi-VN')}đ`,
+    name: firstItem?.name || fallbackName,
+    price: `${numericTotal.toLocaleString('vi-VN')}đ`,
     eta: formatRecentOrderTime(order.createdAt),
+    imageUrl: firstItem?.imageUrl || null,
+    menuItemId: firstItem?.menuItemId || null,
+    restaurantId: Number(order?.restaurantId || order?.restaurant?.id || 0) || null,
+    restaurantName: order?.restaurantName || order?.restaurant?.name || 'Nha hang',
+    reorderUnitPrice: unitPrice,
+  }
+}
+
+function getPrimaryOrderItem(order) {
+  const list =
+    (Array.isArray(order?.items) && order.items) ||
+    (Array.isArray(order?.orderItems) && order.orderItems) ||
+    (Array.isArray(order?.menuItems) && order.menuItems) ||
+    []
+  if (!list.length) return null
+  const item = list[0] || {}
+  const menuItem = item?.menuItem || {}
+  return {
+    menuItemId: item?.menuItemId || menuItem?.id || item?.id || null,
+    name: item?.menuItemName || item?.name || menuItem?.name || null,
+    imageUrl:
+      item?.imageUrl ||
+      item?.menuItemImage ||
+      item?.menuItemImageUrl ||
+      menuItem?.imageUrl ||
+      null,
+    unitPrice: item?.unitPrice || item?.price || menuItem?.price || null,
   }
 }
 
@@ -316,10 +347,22 @@ export async function loadBrowseDataAction({
     popularDishes.value = flatMenus.slice(0, 6)
     recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
     const orderHistory = await orderService.getByUser()
-    recentOrders.value = (Array.isArray(orderHistory) ? orderHistory : [])
+    const deliveredOrders = (Array.isArray(orderHistory) ? orderHistory : [])
       .filter((order) => String(order?.status || '').toUpperCase() === 'DELIVERED')
       .slice(0, 6)
-      .map(mapRecentBrowseOrder)
+
+    const deliveredOrderDetails = await Promise.all(
+      deliveredOrders.map(async (order) => {
+        try {
+          const detail = await orderService.getById(order.id)
+          return { ...order, ...detail }
+        } catch {
+          return order
+        }
+      }),
+    )
+    const rawRecentOrders = deliveredOrderDetails.map(mapRecentBrowseOrder)
+    recentOrders.value = await enrichRecentOrdersWithMenuImages(rawRecentOrders, restaurantService)
     try {
       const profile = await userService.getProfile()
       profileName.value = profile.fullName || authStore.user?.fullName || 'Người dùng'
@@ -333,4 +376,37 @@ export async function loadBrowseDataAction({
   } finally {
     isLoading.value = false
   }
+}
+
+async function enrichRecentOrdersWithMenuImages(recentOrders, restaurantService) {
+  const list = Array.isArray(recentOrders) ? recentOrders : []
+  const missingImageOrders = list.filter((item) => !item?.imageUrl && item?.menuItemId && item?.restaurantId)
+  if (!missingImageOrders.length) return list
+
+  const restaurantIds = Array.from(new Set(missingImageOrders.map((item) => Number(item.restaurantId)).filter(Boolean)))
+  const imageMap = new Map()
+
+  await Promise.all(
+    restaurantIds.map(async (restaurantId) => {
+      try {
+        const menu = await restaurantService.getMenuByRestaurant(restaurantId)
+        ;(Array.isArray(menu) ? menu : []).forEach((menuItem) => {
+          const id = Number(menuItem?.id)
+          if (!Number.isFinite(id)) return
+          const imageUrl = menuItem?.imageUrl || menuItem?.image || null
+          if (!imageUrl) return
+          imageMap.set(`${restaurantId}:${id}`, imageUrl)
+        })
+      } catch {
+        // keep fallback when menu cannot be loaded
+      }
+    }),
+  )
+
+  return list.map((item) => {
+    if (item?.imageUrl || !item?.menuItemId || !item?.restaurantId) return item
+    const key = `${Number(item.restaurantId)}:${Number(item.menuItemId)}`
+    const imageUrl = imageMap.get(key)
+    return imageUrl ? { ...item, imageUrl } : item
+  })
 }
