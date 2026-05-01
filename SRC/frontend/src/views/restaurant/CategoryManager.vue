@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
@@ -10,6 +12,8 @@ const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const actionLoading = ref(false)
+const router = useRouter()
+const authStore = useAuthStore()
 const restaurants = ref([])
 const categories = ref([])
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
@@ -128,13 +132,17 @@ const closeCategoryItemsModal = () => {
   selectedCategory.value = null
   selectedCategoryItems.value = []
 }
+const logout = async () => {
+  await authStore.logout()
+  router.push('/')
+}
 
 onMounted(loadData)
 </script>
 
 <template>
   <section class="restaurant-shell">
-    <RestaurantSidebar active-key="categories" />
+    <RestaurantSidebar active-key="categories" :show-logout="true" @logout="logout" />
 
     <main class="restaurant-main">
       <header class="page-head">

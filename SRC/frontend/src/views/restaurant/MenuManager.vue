@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
 
@@ -17,6 +19,8 @@ const loading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const actionLoading = ref(false)
+const router = useRouter()
+const authStore = useAuthStore()
 const restaurants = ref([])
 const menuItems = ref([])
 const menuKeyword = ref('')
@@ -241,6 +245,10 @@ const deleteMenuItem = async (item) => {
     actionLoading.value = false
   }
 }
+const logout = async () => {
+  await authStore.logout()
+  router.push('/')
+}
 
 onMounted(async () => {
   await loadData()
@@ -250,7 +258,7 @@ onMounted(async () => {
 
 <template>
   <section class="restaurant-shell">
-    <RestaurantSidebar active-key="menu" />
+    <RestaurantSidebar active-key="menu" :show-logout="true" @logout="logout" />
 
     <main class="restaurant-main">
       <header class="page-head">

@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
 import mapService from '@/services/mapService'
 import MapView from '@/components/MapView.vue'
@@ -10,6 +12,8 @@ const isSaving = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
 const restaurants = ref([])
+const router = useRouter()
+const authStore = useAuthStore()
 const settingsForm = ref({
   id: null,
   name: '',
@@ -178,13 +182,17 @@ const saveSettings = async () => {
     isSaving.value = false
   }
 }
+const logout = async () => {
+  await authStore.logout()
+  router.push('/')
+}
 
 onMounted(loadData)
 </script>
 
 <template>
   <section class="restaurant-shell">
-    <RestaurantSidebar active-key="settings" />
+    <RestaurantSidebar active-key="settings" :show-logout="true" @logout="logout" />
 
     <main class="restaurant-main">
       <header class="page-head">
