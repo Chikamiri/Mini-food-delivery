@@ -46,6 +46,71 @@ const formatDate = (val) => {
   try { return new Date(val).toLocaleString('vi-VN') } catch { return val }
 }
 
+const restaurantDisplayName = computed(
+  () => order.value?.restaurantName || order.value?.restaurant?.name || 'Nhà hàng',
+)
+
+const menuItemNameMap = ref({})
+
+function extractOrderItems(ord) {
+  return (
+    (Array.isArray(ord?.items) && ord.items) ||
+    (Array.isArray(ord?.orderItems) && ord.orderItems) ||
+    (Array.isArray(ord?.menuItems) && ord.menuItems) ||
+    []
+  )
+}
+
+function extractMenuItemId(item) {
+  const id = Number(item?.menuItemId || item?.menuItem?.id || item?.id)
+  return Number.isFinite(id) ? id : null
+}
+
+const orderedItemNames = computed(() => {
+  const items = extractOrderItems(order.value)
+  if (!items.length) return 'Không rõ'
+
+  const names = items
+    .map((item) => {
+      const fromOrder = item?.menuItemName || item?.name || item?.menuItem?.name || ''
+      if (String(fromOrder).trim()) return fromOrder
+      const menuItemId = extractMenuItemId(item)
+      return menuItemId ? menuItemNameMap.value[menuItemId] || '' : ''
+    })
+    .filter((name) => Boolean(String(name).trim()))
+
+  return names.length ? names.join(', ') : 'Không rõ'
+})
+
+async function hydrateMenuItemNames(ord) {
+  const items = extractOrderItems(ord)
+  if (!items.length) return
+
+  const missingItemIds = items
+    .filter((item) => !(item?.menuItemName || item?.name || item?.menuItem?.name))
+    .map(extractMenuItemId)
+    .filter((id) => id != null && !menuItemNameMap.value[id])
+
+  if (!missingItemIds.length) return
+
+  const restaurantId = Number(ord?.restaurantId || ord?.restaurant?.id || 0)
+  if (!Number.isFinite(restaurantId) || restaurantId <= 0) return
+
+  try {
+    const menuItems = await restaurantService.getMenuByRestaurant(restaurantId)
+    const nextMap = { ...menuItemNameMap.value }
+    ;(Array.isArray(menuItems) ? menuItems : []).forEach((menuItem) => {
+      const id = Number(menuItem?.id)
+      const name = String(menuItem?.name || '').trim()
+      if (!Number.isFinite(id) || !name) return
+      nextMap[id] = name
+    })
+    menuItemNameMap.value = nextMap
+  } catch {
+    // keep graceful fallback as "Không rõ"
+  }
+}
+
 const cancelOrder = async () => {
   if (!order.value?.id) return
   const ok = window.confirm('Bạn có chắc muốn hủy đơn hàng này?')
@@ -91,6 +156,9 @@ async function buildMap(ord) {
 }
 
 watch(order, (ord) => buildMap(ord), { immediate: false })
+watch(order, (ord) => {
+  hydrateMenuItemNames(ord)
+}, { immediate: true })
 
 onMounted(() => {
   loadOrder()
@@ -168,6 +236,14 @@ onUnmounted(() => {
       <section class="detail-card">
         <h2>Chi tiết đơn hàng</h2>
         <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Tên quán</span>
+            <span class="detail-value">{{ restaurantDisplayName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tên món</span>
+            <span class="detail-value">{{ orderedItemNames }}</span>
+          </div>
           <div class="detail-item">
             <span class="detail-label">Địa chỉ giao</span>
             <span class="detail-value">{{ order.deliveryAddress || order.address || 'Chưa có' }}</span>
