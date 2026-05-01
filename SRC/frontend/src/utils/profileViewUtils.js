@@ -127,6 +127,10 @@ export async function openRestaurantModalAction({
 }
 
 export function handleProfileMenuClickAction(item, openRestaurantModal, router, restaurantMessage, restaurantModalOpen, showOpenRestaurantForm, openShipperModal) {
+  if (item.action === 'coming-soon') {
+    window.alert('Thêm sau')
+    return
+  }
   if (item.action === 'open-restaurant') {
     openRestaurantModal()
     return

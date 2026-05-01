@@ -526,26 +526,7 @@ watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOp
             </div>
           </section>
 
-          <!-- Riêng tư -->
-          <section class="settings-group">
-            <div class="settings-group-title">
-              <span class="settings-group-icon"><img :src="iconShield" alt="" /></span>
-              <h4>Quyền riêng tư</h4>
-            </div>
-            <div class="settings-items">
-              <div class="settings-select-row">
-                <div class="settings-toggle-info">
-                  <span class="toggle-label">Lịch sử đơn hàng</span>
-                  <span class="toggle-desc">Ai có thể xem lịch sử đặt hàng của bạn</span>
-                </div>
-                <select v-model="settingsForm.orderPrivacy" class="settings-select">
-                  <option value="private">Chỉ mình tôi</option>
-                  <option value="friends">Bạn bè</option>
-                  <option value="public">Công khai</option>
-                </select>
-              </div>
-            </div>
-          </section>
+  
 
           <section class="settings-group danger-zone">
             <div class="settings-group-title">
