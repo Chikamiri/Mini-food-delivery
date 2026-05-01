@@ -90,7 +90,58 @@ export function mapBrowseCategory(item) {
   }
 }
 
-export function mapBrowseMenuItem(item, restaurantMap) {
+function toFiniteNumber(value) {
+  const num = Number(value)
+  return Number.isFinite(num) ? num : null
+}
+
+function resolveLatLng(source) {
+  if (!source || typeof source !== 'object') return null
+  const lat =
+    toFiniteNumber(source.latitude) ??
+    toFiniteNumber(source.lat) ??
+    toFiniteNumber(source.deliveryLat)
+  const lng =
+    toFiniteNumber(source.longitude) ??
+    toFiniteNumber(source.lng) ??
+    toFiniteNumber(source.deliveryLng)
+  if (lat == null || lng == null) return null
+  return { lat, lng }
+}
+
+function calculateDistanceMeters(from, to) {
+  const earthRadius = 6371000
+  const dLat = ((to.lat - from.lat) * Math.PI) / 180
+  const dLng = ((to.lng - from.lng) * Math.PI) / 180
+  const lat1 = (from.lat * Math.PI) / 180
+  const lat2 = (to.lat * Math.PI) / 180
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLng / 2) * Math.sin(dLng / 2) * Math.cos(lat1) * Math.cos(lat2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  return earthRadius * c
+}
+
+function formatDistanceLabel(meters) {
+  if (!Number.isFinite(meters) || meters <= 0) return '---'
+  if (meters < 1000) return `${Math.round(meters)} m`
+  return `${(meters / 1000).toFixed(1)} km`
+}
+
+function getDistanceToRestaurantLabel(restaurant, userLocation) {
+  const restaurantLocation = resolveLatLng(restaurant)
+  if (!restaurantLocation || !userLocation) return '---'
+  return formatDistanceLabel(calculateDistanceMeters(userLocation, restaurantLocation))
+}
+
+function resolveUserDefaultLocation(addresses) {
+  const list = Array.isArray(addresses) ? addresses : []
+  const defaultAddress = list.find((item) => item?.isDefault) || list[0]
+  return resolveLatLng(defaultAddress)
+}
+
+export function mapBrowseMenuItem(item, restaurantMap, userLocation = null) {
   const fallbackRestaurantId = item.restaurant?.id || item.restaurantId || null
   const restaurant = restaurantMap.get(fallbackRestaurantId)
   const basePrice = Number(item.price || 0)
@@ -98,7 +149,7 @@ export function mapBrowseMenuItem(item, restaurantMap) {
   return {
     id: item.id,
     name: item.name,
-    distance: restaurant?.address ? 'Gan ban' : '---',
+    distance: getDistanceToRestaurantLabel(restaurant, userLocation),
     rating: String(restaurant?.rating ?? 4.7),
     reviews: 'new',
     price: `$${basePrice.toFixed(2)}`,
@@ -227,15 +278,27 @@ export async function loadBrowseDataAction({
     if (authStore.user?.fullName) {
       profileName.value = authStore.user.fullName
     }
-    const [categoryData, restaurants] = await Promise.all([
+    const [categoryData, restaurants, addresses] = await Promise.all([
       restaurantService.getCategories(),
       restaurantService.getAll(),
+      userService.getAddresses().catch(() => []),
     ])
     categories.value = (categoryData || []).slice(0, 6).map(mapBrowseCategory)
-    const restaurantMap = new Map((restaurants || []).map((restaurant) => [restaurant.id, restaurant]))
+    const selectedRestaurants = (restaurants || []).slice(0, 4)
+    const restaurantDetails = await Promise.all(
+      selectedRestaurants.map(async (restaurant) => {
+        try {
+          const detail = await restaurantService.getById(restaurant.id)
+          return { ...restaurant, ...detail }
+        } catch {
+          return restaurant
+        }
+      }),
+    )
+    const restaurantMap = new Map(restaurantDetails.map((restaurant) => [restaurant.id, restaurant]))
+    const userDefaultLocation = resolveUserDefaultLocation(addresses)
     const menus = await Promise.all(
-      (restaurants || [])
-        .slice(0, 4)
+      selectedRestaurants
         .map(async (restaurant) => {
           const list = await restaurantService.getMenuByRestaurant(restaurant.id)
           return (Array.isArray(list) ? list : []).map((item) => ({
@@ -249,7 +312,7 @@ export async function loadBrowseDataAction({
     const flatMenus = menus
       .flat()
       .slice(0, 12)
-      .map((item) => mapBrowseMenuItem(item, restaurantMap))
+      .map((item) => mapBrowseMenuItem(item, restaurantMap, userDefaultLocation))
     popularDishes.value = flatMenus.slice(0, 6)
     recommendedItems.value = flatMenus.slice(6, 12).length ? flatMenus.slice(6, 12) : flatMenus.slice(0, 6)
     const orderHistory = await orderService.getByUser()

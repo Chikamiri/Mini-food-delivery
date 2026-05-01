@@ -699,7 +699,6 @@ onUnmounted(() => {
               <span class="dot">|</span>
               <span class="star">★</span>
               <span>{{ dish.rating }}</span>
-              <span class="muted">({{ dish.reviews }})</span>
             </div>
             <div class="popular-price-row">
               <strong>{{ dish.price }}</strong>
@@ -757,7 +756,6 @@ onUnmounted(() => {
                 <span class="dot">|</span>
                 <span class="star">★</span>
                 <span>{{ item.rating }}</span>
-                <span class="muted">({{ item.reviews }})</span>
               </div>
               <div class="recommend-price-row">
                 <strong>{{ item.price }}</strong>
@@ -843,7 +841,6 @@ onUnmounted(() => {
               <span class="dot">|</span>
               <span class="star">★</span>
               <span>{{ selectedDish.rating }}</span>
-              <span class="muted">({{ selectedDish.reviews }})</span>
             </div>
             <p class="dish-availability">
               Tình trạng:
