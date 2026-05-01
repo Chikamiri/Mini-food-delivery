@@ -19,6 +19,7 @@ const successMessage = ref('')
 const actionLoading = ref(false)
 const restaurants = ref([])
 const menuItems = ref([])
+const menuKeyword = ref('')
 const categoryOptions = ref([])
 const menuModalOpen = ref(false)
 watch(menuModalOpen, (open) => { document.body.style.overflow = open ? 'hidden' : '' })
@@ -87,6 +88,15 @@ const removeImage = () => {
 }
 
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
+const filteredMenuItems = computed(() => {
+  const keyword = String(menuKeyword.value || '').trim().toLowerCase()
+  if (!keyword) return menuItems.value
+  return menuItems.value.filter((item) => {
+    const name = String(item?.name || '').toLowerCase()
+    const description = String(item?.description || '').toLowerCase()
+    return name.includes(keyword) || description.includes(keyword)
+  })
+})
 const loadData = async () => {
   await loadRestaurantMenuDataAction({
     loading,
@@ -265,15 +275,21 @@ onMounted(async () => {
       <!-- Menu cards -->
       <section class="panel">
         <div class="panel-head">
-          <h3>Danh sách món ({{ menuItems.length }})</h3>
+          <h3>Danh sách món ({{ filteredMenuItems.length }})</h3>
+          <input
+            v-model="menuKeyword"
+            type="text"
+            class="menu-search-input"
+            placeholder="Tìm theo tên hoặc mô tả món..."
+          />
         </div>
 
-        <div v-if="!menuItems.length" class="empty-state">
+        <div v-if="!filteredMenuItems.length" class="empty-state">
           <p>Chưa có món nào trong menu. Hãy thêm món đầu tiên!</p>
         </div>
 
         <div v-else class="menu-card-grid">
-          <article v-for="item in menuItems" :key="item.id" class="menu-card">
+          <article v-for="item in filteredMenuItems" :key="item.id" class="menu-card">
             <img
               v-if="item.imageUrl"
               :src="item.imageUrl"
