@@ -8,13 +8,14 @@ import iconUser from '@/assets/icon/user.svg'
 import iconPhone from '@/assets/icon/phone.svg'
 import iconShipper from '@/assets/icon/send.svg'
 import iconNotice from '@/assets/icon/notice.svg'
-import iconSignOut from '@/assets/icon/sign-out.svg'
+import iconDelete from '@/assets/icon/delete.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
 
 const isLoading = ref(false)
 const isSaving = ref(false)
+const deletingAccount = ref(false)
 const savedMsg = ref('')
 const errorMsg = ref('')
 
@@ -96,6 +97,25 @@ const saveNotifications = () => {
 const logout = async () => {
   await authStore.logout()
   router.push('/')
+}
+
+const deleteAccount = async () => {
+  const confirmed = window.confirm(
+    'Bạn có chắc muốn xóa tài khoản shipper? Hành động này không thể hoàn tác.',
+  )
+  if (!confirmed) return
+  deletingAccount.value = true
+  savedMsg.value = ''
+  errorMsg.value = ''
+  try {
+    await userService.deleteMyProfile()
+    await authStore.logout()
+    router.push('/')
+  } catch (err) {
+    errorMsg.value = err.message || 'Không thể xóa tài khoản lúc này.'
+  } finally {
+    deletingAccount.value = false
+  }
 }
 
 onMounted(() => {
@@ -239,19 +259,19 @@ onMounted(() => {
         <div class="settings-group">
           <div class="settings-group-head">
             <div class="settings-group-icon icon-red">
-              <img :src="iconSignOut" alt="" />
+              <img :src="iconDelete" alt="" />
             </div>
             <div>
-              <h3>Tài khoản</h3>
-              <p>Đăng xuất khỏi ứng dụng</p>
+              <h3>Xóa tài khoản</h3>
+              <p>Xóa vĩnh viễn tài khoản shipper</p>
             </div>
           </div>
           <p class="danger-desc">
-            Nhấn đăng xuất để thoát khỏi tài khoản Shipper. Bạn có thể đăng nhập lại bất cứ lúc nào.
+            Hành động này sẽ xóa toàn bộ dữ liệu tài khoản shipper và không thể hoàn tác.
           </p>
           <div class="settings-actions">
-            <button type="button" class="btn btn-ghost" @click="logout">
-              Đăng xuất
+            <button type="button" class="btn btn-ghost" :disabled="deletingAccount" @click="deleteAccount">
+              {{ deletingAccount ? 'Đang xóa...' : 'Xóa tài khoản' }}
             </button>
           </div>
         </div>
