@@ -14,12 +14,18 @@ const restaurants = ref([])
 const categories = ref([])
 const activeRestaurantId = computed(() => restaurants.value[0]?.id || null)
 const categoryModalOpen = ref(false)
-watch(categoryModalOpen, (open) => { document.body.style.overflow = open ? 'hidden' : '' })
+const categoryItemsModalOpen = ref(false)
+watch([categoryModalOpen, categoryItemsModalOpen], ([categoryOpen, itemsOpen]) => {
+  document.body.style.overflow = categoryOpen || itemsOpen ? 'hidden' : ''
+})
 const categoryModalMode = ref('add')
 const editingCategoryId = ref(null)
 const categoryForm = ref({
   name: '',
 })
+const categoryItemsLoading = ref(false)
+const selectedCategory = ref(null)
+const selectedCategoryItems = ref([])
 
 const loadData = () =>
   loadRestaurantCategoriesDataAction({
@@ -95,6 +101,33 @@ const deleteCategory = async (category) => {
     actionLoading.value = false
   }
 }
+const openCategoryItemsModal = async (category) => {
+  if (!activeRestaurantId.value || !category?.id) return
+  selectedCategory.value = category
+  selectedCategoryItems.value = []
+  categoryItemsLoading.value = true
+  categoryItemsModalOpen.value = true
+  try {
+    const menuItems = await restaurantService.getMenuByRestaurant(activeRestaurantId.value)
+    const normalizedCategoryId = Number(category.id)
+    selectedCategoryItems.value = (Array.isArray(menuItems) ? menuItems : []).filter((item) => {
+      const itemCategoryId = Number(item?.categoryId ?? item?.category?.id ?? item?.menuCategoryId)
+      const sameCategoryId = Number.isFinite(itemCategoryId) && itemCategoryId === normalizedCategoryId
+      const sameCategoryName = String(item?.categoryName || item?.category?.name || '').trim().toLowerCase() ===
+        String(category.name || '').trim().toLowerCase()
+      return sameCategoryId || sameCategoryName
+    })
+  } catch {
+    selectedCategoryItems.value = []
+  } finally {
+    categoryItemsLoading.value = false
+  }
+}
+const closeCategoryItemsModal = () => {
+  categoryItemsModalOpen.value = false
+  selectedCategory.value = null
+  selectedCategoryItems.value = []
+}
 
 onMounted(loadData)
 </script>
@@ -138,17 +171,27 @@ onMounted(loadData)
               <img v-if="category.iconUrl" :src="category.iconUrl" :alt="category.name" />
               <img v-else :src="iconTagOutline" alt="" />
             </div>
-            <div class="category-chip-text">
-              <strong>{{ category.name }}</strong>
-              <small>ID: {{ category.id }}</small>
-            </div>
-            <div class="category-actions">
-              <button type="button" class="outline-btn small" :disabled="actionLoading" @click="openEditCategory(category)">
-                Sửa
-              </button>
-              <button type="button" class="danger-btn small" :disabled="actionLoading" @click="deleteCategory(category)">
-                Xóa
-              </button>
+            <div class="category-chip-content">
+              <div class="category-chip-text">
+                <strong>{{ category.name }}</strong>
+                <small>ID: {{ category.id }}</small>
+              </div>
+              <div class="category-actions">
+                <button
+                  type="button"
+                  class="outline-btn small"
+                  :disabled="actionLoading"
+                  @click="openCategoryItemsModal(category)"
+                >
+                  Xem danh sách
+                </button>
+                <button type="button" class="outline-btn small" :disabled="actionLoading" @click="openEditCategory(category)">
+                  Sửa
+                </button>
+                <button type="button" class="danger-btn small" :disabled="actionLoading" @click="deleteCategory(category)">
+                  Xóa
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -172,6 +215,34 @@ onMounted(loadData)
             <button type="button" class="refresh-btn" :disabled="actionLoading" @click="saveCategory">
               {{ actionLoading ? 'Đang lưu...' : 'Lưu' }}
             </button>
+          </div>
+        </article>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="categoryItemsModalOpen" class="menu-overlay" @click.self="closeCategoryItemsModal">
+        <article class="menu-modal category-items-modal">
+          <div class="panel-head">
+            <h3>Danh sách món: {{ selectedCategory?.name || '' }}</h3>
+          </div>
+          <div v-if="categoryItemsLoading" class="empty-state compact-empty">
+            <p>Đang tải danh sách món...</p>
+          </div>
+          <div v-else-if="!selectedCategoryItems.length" class="empty-state compact-empty">
+            <p>Danh mục này chưa có món nào.</p>
+          </div>
+          <ul v-else class="category-item-list">
+            <li v-for="item in selectedCategoryItems" :key="item.id" class="category-item-row">
+              <div class="category-item-info">
+                <strong>{{ item.name }}</strong>
+                <small>{{ item.description || 'Chưa có mô tả' }}</small>
+              </div>
+              <span class="category-item-price">{{ Number(item.price || 0).toLocaleString('vi-VN') }} đ</span>
+            </li>
+          </ul>
+          <div class="menu-modal-actions">
+            <button type="button" class="outline-btn" @click="closeCategoryItemsModal">Đóng</button>
           </div>
         </article>
       </div>
