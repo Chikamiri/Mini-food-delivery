@@ -88,7 +88,7 @@ export async function submitCheckoutOrderAction({
 
     cartStore.clearCart()
     successMessage.value = 'Đặt đơn thành công'
-    setTimeout(() => router.push('/orders/history'), 800)
+    setTimeout(() => router.push('/browse?view=orders'), 800)
   } catch (error) {
     errorMessage.value = error.message || 'Không thể đặt đơn'
   } finally {

@@ -75,7 +75,7 @@ const stats = ref([
 ])
 
 const menuItems = [
-  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/orders/history' },
+  { icon: iconHistory, label: 'Lịch sử đơn hàng', route: '/browse?view=orders' },
   { icon: iconLocation, label: 'Quản lý địa chỉ', route: '/addresses' },
   { icon: iconPayment, label: 'Phương thức thanh toán', action: 'coming-soon' },
   { icon: iconOpenRestaurant, label: 'Mở nhà hàng', action: 'open-restaurant' },

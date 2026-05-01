@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import restaurantService from '@/services/restaurantService'
@@ -39,7 +39,7 @@ const sidebarMenus = [
   { key: 'promo', label: 'Ưu đãi', icon: iconTag, scrollTo: null },
   { key: 'favorites', label: 'Yêu thích', icon: iconLove, scrollTo: 'recommend-section' },
   { key: 'flashsale', label: 'Flash sale', icon: iconFlash, scrollTo: 'popular-section' },
-  { key: 'orders', label: 'Đơn hàng', icon: iconReceipt, route: '/orders/history' },
+  { key: 'orders', label: 'Đơn hàng', icon: iconReceipt, scrollTo: null },
 ]
 
 const activeMenu = ref('overview')
@@ -62,6 +62,7 @@ const isNoticeOpen = ref(false)
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+const route = useRoute()
 const cartCount = computed(() => cartStore.itemCount)
 const unreadNoticeCount = computed(
   () => notifications.value.filter((item) => item?.isRead === false).length,
@@ -76,6 +77,43 @@ const isSearchOpen = ref(false)
 const isPromoView = computed(() => activeMenu.value === 'promo')
 const isFavoritesView = computed(() => activeMenu.value === 'favorites')
 const isFlashSaleView = computed(() => activeMenu.value === 'flashsale')
+const isOrdersView = computed(() => activeMenu.value === 'orders')
+const orderHistory = ref([])
+const isOrderHistoryLoading = ref(false)
+const orderHistoryError = ref('')
+const formattedOrderHistory = computed(() =>
+  (Array.isArray(orderHistory.value) ? orderHistory.value : []).map((order) => {
+    const status = String(order?.status || '').toUpperCase()
+    let statusLabel = 'Đang xử lý'
+    let statusClass = 'pending'
+    if (status === 'DELIVERED') {
+      statusLabel = 'Đã giao'
+      statusClass = 'delivered'
+    } else if (status === 'CANCELLED') {
+      statusLabel = 'Đã hủy'
+      statusClass = 'cancelled'
+    } else if (status === 'DELIVERING' || status === 'SHIPPING') {
+      statusLabel = 'Đang giao'
+      statusClass = 'delivering'
+    }
+    return {
+      id: order?.id,
+      restaurantName: order?.restaurantName || 'Nhà hàng',
+      createdAtLabel: order?.createdAt
+        ? new Date(order.createdAt).toLocaleString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : '---',
+      totalLabel: `${Number(order?.totalAmount || 0).toLocaleString('vi-VN')}đ`,
+      status,
+      statusLabel,
+      statusClass,
+    }
+  }),
+)
 const promoItems = computed(() => {
   const merged = [...popularDishes.value, ...recommendedItems.value]
   const seen = new Set()
@@ -149,6 +187,22 @@ const loadBrowseData = () =>
     userService,
     profileAvatar,
   })
+const loadOrderHistory = async () => {
+  isOrderHistoryLoading.value = true
+  orderHistoryError.value = ''
+  try {
+    const data = await orderService.getByUser()
+    orderHistory.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    orderHistoryError.value = error?.message || 'Không thể tải lịch sử đơn hàng.'
+    orderHistory.value = []
+  } finally {
+    isOrderHistoryLoading.value = false
+  }
+}
+const openOrderHistoryView = () => {
+  activeMenu.value = 'orders'
+}
 const loadNotifications = async () => {
   try {
     const data = await userService.getNotifications()
@@ -258,13 +312,26 @@ watch(selectedDish, (value) => {
 onMounted(() => {
   loadFavoritesByStorageKey(favoriteStorageKey.value)
   loadBrowseData()
+  loadOrderHistory()
   loadNotifications()
+  if (String(route.query.view || '').toLowerCase() === 'orders') {
+    openOrderHistoryView()
+  }
 })
 
 watch(
   () => favoriteStorageKey.value,
   (key) => {
     loadFavoritesByStorageKey(key)
+  },
+)
+
+watch(
+  () => route.query.view,
+  (view) => {
+    if (String(view || '').toLowerCase() === 'orders') {
+      openOrderHistoryView()
+    }
   },
 )
 
@@ -528,6 +595,41 @@ onUnmounted(() => {
                   @click.stop.prevent="toggleFavorite(dish)"
                 >
                   {{ isFavorite(dish.id) ? '♥' : '♡' }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </template>
+
+      <template v-else-if="isOrdersView">
+        <section class="section-block">
+          <div class="section-head">
+            <h3>Lịch sử đơn hàng</h3>
+            <button type="button" class="history-refresh-btn" @click="loadOrderHistory">Tải lại</button>
+          </div>
+          <p v-if="isOrderHistoryLoading" class="muted">Đang tải đơn hàng...</p>
+          <p v-else-if="orderHistoryError" class="muted">{{ orderHistoryError }}</p>
+          <div v-else class="order-history-list">
+            <article v-if="!formattedOrderHistory.length" class="order-history-card empty">
+              <h4>Chưa có đơn hàng nào</h4>
+              <p>Hãy đặt món đầu tiên để theo dõi lịch sử tại đây.</p>
+            </article>
+            <article v-for="order in formattedOrderHistory" :key="order.id" class="order-history-card">
+              <div class="order-history-top">
+                <div>
+                  <strong>#{{ order.id }}</strong>
+                  <p>{{ order.restaurantName }}</p>
+                </div>
+                <span class="status-chip" :class="order.statusClass">{{ order.statusLabel }}</span>
+              </div>
+              <div class="order-history-meta">
+                <span>Đặt lúc: {{ order.createdAtLabel }}</span>
+                <strong>{{ order.totalLabel }}</strong>
+              </div>
+              <div class="order-history-actions">
+                <button type="button" class="history-outline-btn" @click="router.push(`/orders/${order.id}/tracking`)">
+                  Theo dõi đơn
                 </button>
               </div>
             </article>

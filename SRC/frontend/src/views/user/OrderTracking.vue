@@ -107,7 +107,7 @@ onUnmounted(() => {
 
 <template>
   <section class="tracking-page">
-    <button type="button" class="back-btn" @click="router.push('/orders/history')">
+    <button type="button" class="back-btn" @click="router.push('/browse?view=orders')">
       <img :src="iconBackArrow" alt="" width="16" height="16" />
       Quay lại lịch sử
     </button>
