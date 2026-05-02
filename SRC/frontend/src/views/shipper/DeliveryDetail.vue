@@ -1,35 +1,8 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import orderService from '@/services/orderService'
 import ShipperSidebar from '@/components/ShipperSidebar.vue'
+import { useShipperDeliveryDetailViewModel } from '@/composables/useShipperDeliveryDetailViewModel'
 
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
-const order = ref(null)
-const isLoading = ref(false)
-const errorMessage = ref('')
-
-const formatPrice = (val) => `${Number(val || 0).toLocaleString('vi-VN')}đ`
-
-const logout = async () => {
-  await authStore.logout()
-  router.push('/')
-}
-
-onMounted(async () => {
-  if (!route.params.id) return
-  isLoading.value = true
-  try {
-    order.value = await orderService.getById(route.params.id)
-  } catch (err) {
-    errorMessage.value = err.message || 'Không thể tải chi tiết đơn giao'
-  } finally {
-    isLoading.value = false
-  }
-})
+const { order, isLoading, errorMessage, formatPrice, logout, goBack } = useShipperDeliveryDetailViewModel()
 </script>
 
 <template>
@@ -39,7 +12,7 @@ onMounted(async () => {
     <main class="shipper-main">
       <div class="page-header">
         <div>
-          <button type="button" class="btn btn-ghost" style="margin-bottom:0.75rem;" @click="router.push('/shipper/dashboard')">
+          <button type="button" class="btn btn-ghost" style="margin-bottom:0.75rem;" @click="goBack">
             ← Quay lại
           </button>
           <h1 class="page-title">Chi tiết đơn giao</h1>

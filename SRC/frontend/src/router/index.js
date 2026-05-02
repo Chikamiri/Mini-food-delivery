@@ -87,13 +87,13 @@ const router = createRouter({
 })
 
 // Navigation guard — async to allow fetchProfile before role check (#1 fix)
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to, _from) => {
   const token = localStorage.getItem('token')
   const authStore = useAuthStore()
 
   // Check auth requirement
   if (to.meta.requiresAuth && !token) {
-    return next({ name: 'home' })
+    return { name: 'home' }
   }
 
   // Chỉ khách (USER/CUSTOMER) dùng luồng đặt món — OWNER/SHIPPER/ADMIN vào đúng dashboard
@@ -105,12 +105,12 @@ router.beforeEach(async (to, _from, next) => {
         role = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
       } catch {
         localStorage.removeItem('token')
-        return next({ name: 'home' })
+        return { name: 'home' }
       }
     }
-    if (role === 'ADMIN') return next({ name: 'admin-dashboard' })
-    if (role === 'OWNER') return next({ name: 'restaurant-dashboard' })
-    if (role === 'SHIPPER') return next({ name: 'shipper-dashboard' })
+    if (role === 'ADMIN') return { name: 'admin-dashboard' }
+    if (role === 'OWNER') return { name: 'restaurant-dashboard' }
+    if (role === 'SHIPPER') return { name: 'shipper-dashboard' }
   }
 
   // Check role requirement — use authStore user data (set after login/fetchProfile)
@@ -125,16 +125,15 @@ router.beforeEach(async (to, _from, next) => {
       } catch {
         // Token invalid/expired — clear and redirect to home
         localStorage.removeItem('token')
-        return next({ name: 'home' })
+        return { name: 'home' }
       }
     }
 
     if (!role || !to.meta.roles.includes(role)) {
-      return next({ name: 'home' })
+      return { name: 'home' }
     }
   }
-
-  next()
+  return true
 })
 
 export default router
