@@ -5,6 +5,7 @@ import RestaurantDetail from '@/views/user/RestaurantDetail.vue'
 import CartView from '@/views/user/CartView.vue'
 import CheckoutView from '@/views/user/CheckoutView.vue'
 import OrderTracking from '@/views/user/OrderTracking.vue'
+import OrderHistory from '@/views/user/OrderHistory.vue'
 import ProfileView from '@/views/user/ProfileView.vue'
 import AddressManager from '@/views/user/AddressManager.vue'
 import RestaurantDashboard from '@/views/restaurant/DashboardView.vue'
@@ -35,7 +36,7 @@ const router = createRouter({
     { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
     { path: '/checkout', name: 'checkout', component: CheckoutView, meta: { requiresAuth: true } },
     { path: '/orders/:id/tracking', name: 'order-tracking', component: OrderTracking, meta: { requiresAuth: true } },
-    { path: '/orders/history', redirect: '/browse?view=orders' },
+    { path: '/orders/history', name: 'order-history', component: OrderHistory, meta: { requiresAuth: true } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
     { path: '/addresses', name: 'addresses', component: AddressManager, meta: { requiresAuth: true } },
 

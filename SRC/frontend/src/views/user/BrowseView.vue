@@ -143,6 +143,19 @@ const filteredRecommendedItems = computed(() => {
     `${item.name || ''} ${item.categoryName || ''}`.toLowerCase().includes(keyword),
   )
 })
+
+/** Ba đơn đã giao hiển thị dưới dạng món — mới nhất trước (theo thời gian đặt). */
+const recentOrdersPreview = computed(() => {
+  const copy = [...recentOrders.value]
+  copy.sort((a, b) => {
+    const tb = new Date(b.createdAt ?? 0).getTime()
+    const ta = new Date(a.createdAt ?? 0).getTime()
+    if (tb !== ta) return tb - ta
+    return Number(b.id || 0) - Number(a.id || 0)
+  })
+  return copy.slice(0, 3)
+})
+
 const quickSearchResults = computed(() => {
   const keyword = searchKeyword.value.trim().toLowerCase()
   if (!keyword) return []
@@ -735,11 +748,11 @@ onUnmounted(() => {
       <section class="section-block">
         <div class="section-head">
           <h3>Đặt gần đây</h3>
-          <a href="#">Xem tất cả</a>
+          <RouterLink :to="{ name: 'order-history' }">Xem tất cả</RouterLink>
         </div>
         <div class="dish-grid recent">
-          <p v-if="!recentOrders.length" class="muted">Chưa có đơn đã giao thành công.</p>
-          <article v-for="dish in recentOrders" :key="dish.id" class="dish-card recent-order-card">
+          <p v-if="!recentOrdersPreview.length" class="muted">Chưa có đơn đã giao thành công.</p>
+          <article v-for="dish in recentOrdersPreview" :key="dish.id" class="dish-card recent-order-card">
             <div class="dish-img">
               <img v-if="dish.imageUrl" :src="dish.imageUrl" :alt="dish.name" class="dish-photo" />
               <img v-else :src="iconImage" alt="" class="dish-img-icon" />

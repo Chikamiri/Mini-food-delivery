@@ -236,6 +236,7 @@ export function mapRecentBrowseOrder(order) {
     id: order.id,
     name: firstItem?.name || fallbackName,
     price: `${numericTotal.toLocaleString('vi-VN')}đ`,
+    createdAt: order.createdAt || order.created_at || null,
     eta: formatRecentOrderTime(order.createdAt),
     imageUrl: firstItem?.imageUrl || null,
     menuItemId: firstItem?.menuItemId || null,
