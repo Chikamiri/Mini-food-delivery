@@ -648,7 +648,23 @@
 }
 
 /* --- Settings page specific --- */
+.shipper-settings-main .page-header {
+  justify-content: center;
+}
+
+.shipper-settings-main .page-header > div {
+  text-align: center;
+}
+
+.shipper-settings-main > .empty-state {
+  margin-inline: auto;
+  max-width: 560px;
+  text-align: center;
+}
+
 .settings-layout {
+  margin-inline: auto;
+  width: 100%;
   max-width: 640px;
 }
 

@@ -128,7 +128,7 @@ onMounted(() => {
   <div class="shipper-layout">
     <ShipperSidebar active-key="settings" @logout="logout" />
 
-    <main class="shipper-main">
+    <main class="shipper-main shipper-settings-main">
       <div class="page-header">
         <div>
           <h1 class="page-title">Cài đặt</h1>
