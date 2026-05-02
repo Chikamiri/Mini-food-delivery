@@ -478,8 +478,8 @@ onUnmounted(() => {
           </div>
         </div>
       </header>
-      <p v-if="isLoading">Dang tai du lieu...</p>
-      <p v-if="loadError">{{ loadError }}</p>
+      <p v-if="isLoading">Đang tải dữ liệu...</p>
+      <p v-else-if="loadError">{{ loadError }}</p>
 
       <template v-if="isPromoView">
         <section id="voucher-section" class="voucher-banner">

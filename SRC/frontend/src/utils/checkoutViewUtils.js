@@ -11,7 +11,7 @@ export async function loadCheckoutAddressesAction(userService, deliveryAddresses
       deliveryAddresses.value[0]?.id ||
       null
   } catch (error) {
-    errorMessage.value = error.message || 'Khong the tai danh sach dia chi'
+    errorMessage.value = error.message || 'Không thể tải danh sách địa chỉ'
   }
 }
 
@@ -31,11 +31,11 @@ export async function submitCheckoutOrderAction({
   errorMessage.value = ''
   successMessage.value = ''
   if (!cartItems.value.length) {
-    errorMessage.value = 'Gio hang dang trong'
+    errorMessage.value = 'Giỏ hàng đang trống'
     return
   }
   if (!selectedAddress.value) {
-    errorMessage.value = 'Vui long chon dia chi giao hang'
+    errorMessage.value = 'Vui lòng chọn địa chỉ giao hàng'
     return
   }
   if (selectedOrderType?.value === 'Giao hẹn giờ' && !desiredDeliveryTime?.value) {
@@ -54,13 +54,23 @@ export async function submitCheckoutOrderAction({
     }, {})
 
     const restaurantIds = Object.keys(groupsByRestaurant)
+
+    // Warn if some items have no restaurantId (#21 fix)
+    const droppedCount = cartItems.value.length - Object.values(groupsByRestaurant).flat().length
+    if (droppedCount > 0) {
+      errorMessage.value = `${droppedCount} món trong giỏ hàng thiếu thông tin nhà hàng và sẽ không được đặt.`
+    }
+
     if (!restaurantIds.length) {
       errorMessage.value = 'Không tìm thấy nhà hàng của món ăn trong giỏ hàng'
       isSubmitting.value = false
       return
     }
 
-    // Create one order per restaurant to match backend model
+    // Track successful orders for partial-commit safety (#4 fix)
+    const successfulRids = []
+    let lastError = null
+
     for (const rid of restaurantIds) {
       const items = groupsByRestaurant[rid]
       const flowTags = []
@@ -83,12 +93,31 @@ export async function submitCheckoutOrderAction({
           note: item.note || '',
         })),
       }
-      await orderStore.createOrder(payload)
+      try {
+        await orderStore.createOrder(payload)
+        successfulRids.push(rid)
+      } catch (err) {
+        lastError = err
+      }
     }
 
-    cartStore.clearCart()
-    successMessage.value = 'Đặt đơn thành công'
-    setTimeout(() => router.push('/browse?view=orders'), 800)
+    if (successfulRids.length === restaurantIds.length) {
+      // All succeeded
+      cartStore.clearCart()
+      successMessage.value = 'Đặt đơn thành công'
+      setTimeout(() => router.push('/browse?view=orders'), 800)
+    } else if (successfulRids.length > 0) {
+      // Partial success — remove only items from successful restaurants
+      for (const rid of successfulRids) {
+        const items = groupsByRestaurant[rid]
+        for (const item of items) {
+          cartStore.removeItem(item.lineId)
+        }
+      }
+      errorMessage.value = `Đã đặt ${successfulRids.length}/${restaurantIds.length} đơn. Các món còn lại vẫn trong giỏ hàng.`
+    } else {
+      errorMessage.value = lastError?.message || 'Không thể đặt đơn'
+    }
   } catch (error) {
     errorMessage.value = error.message || 'Không thể đặt đơn'
   } finally {

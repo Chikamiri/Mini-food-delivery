@@ -10,7 +10,9 @@ export const useNotificationStore = defineStore('notification', () => {
 
   function pushNotification(payload) {
     const notification = {
-      id: Date.now(),
+      id: typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       type: payload.type || 'SYSTEM',
       title: payload.title || 'Thong bao',
       message: payload.message || '',

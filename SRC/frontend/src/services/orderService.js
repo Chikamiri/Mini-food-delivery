@@ -56,10 +56,10 @@ export default {
 
   async reject(orderId, reason) {
     await api.patch(`/api/orders/${orderId}/status`, {
-      status: 'CANCELLED',
+      status: 'REJECTED',
       note: reason,
     })
-    return { id: Number(orderId), status: 'CANCELLED' }
+    return { id: Number(orderId), status: 'REJECTED' }
   },
 
   async updateStatus(orderId, status) {

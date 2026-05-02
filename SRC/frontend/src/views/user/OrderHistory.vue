@@ -46,7 +46,7 @@ onMounted(() => {
     </header>
 
     <p v-if="orderStore.isLoading" class="state-msg">Đang tải đơn hàng...</p>
-    <p v-if="orderStore.error" class="state-msg state-msg--error">{{ orderStore.error }}</p>
+    <p v-else-if="orderStore.error" class="state-msg state-msg--error">{{ orderStore.error }}</p>
 
     <section class="order-list">
       <article v-if="!formattedOrders.length && !orderStore.isLoading" class="order-card empty">

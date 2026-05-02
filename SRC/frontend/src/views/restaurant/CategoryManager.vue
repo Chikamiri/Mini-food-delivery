@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
@@ -138,6 +138,10 @@ const logout = async () => {
 }
 
 onMounted(loadData)
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
@@ -162,7 +166,7 @@ onMounted(loadData)
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="error-text success-text">{{ successMessage }}</p>
+      <p v-if="successMessage" class="success-text">{{ successMessage }}</p>
 
       <section class="panel">
         <div class="panel-head">

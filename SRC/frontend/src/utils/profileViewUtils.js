@@ -12,7 +12,7 @@ export function cancelEditingProfileAction(isEditing) {
 }
 
 export async function logoutProfileAction(authStore, router) {
-  authStore.logout()
+  await authStore.logout()
   router.push('/')
 }
 

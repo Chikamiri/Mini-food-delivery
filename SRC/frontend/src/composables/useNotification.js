@@ -7,17 +7,17 @@ export function useNotification() {
   const notifications = computed(() => notificationStore.items)
   const unreadCount = computed(() => notificationStore.unreadCount)
 
-  function success(message, title = 'Thanh cong') {
+  function success(message, title = 'Thành công') {
     return notificationStore.pushNotification({
-      type: 'SYSTEM',
+      type: 'SUCCESS',
       title,
       message,
     })
   }
 
-  function error(message, title = 'Loi') {
+  function error(message, title = 'Lỗi') {
     return notificationStore.pushNotification({
-      type: 'SYSTEM',
+      type: 'ERROR',
       title,
       message,
     })

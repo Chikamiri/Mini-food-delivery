@@ -13,16 +13,41 @@ export const useCartStore = defineStore('cart', () => {
   function _persist() {
     const key = _storageKey()
     if (!key) return
-    try { localStorage.setItem(key, JSON.stringify(items.value)) } catch { /* quota */ }
+    try {
+      localStorage.setItem(key, JSON.stringify({ items: items.value, note: note.value }))
+    } catch { /* quota */ }
   }
 
   function _loadFromStorage() {
     const key = _storageKey()
-    if (!key) { items.value = []; return }
+    if (!key) {
+      items.value = []
+      note.value = ''
+      return
+    }
     try {
       const raw = localStorage.getItem(key)
-      items.value = raw ? JSON.parse(raw) : []
-    } catch { items.value = [] }
+      if (!raw) {
+        items.value = []
+        note.value = ''
+        return
+      }
+      const parsed = JSON.parse(raw)
+      // Legacy: stored as plain items array only
+      if (Array.isArray(parsed)) {
+        items.value = parsed
+        note.value = ''
+      } else if (parsed && typeof parsed === 'object') {
+        items.value = Array.isArray(parsed.items) ? parsed.items : []
+        note.value = typeof parsed.note === 'string' ? parsed.note : ''
+      } else {
+        items.value = []
+        note.value = ''
+      }
+    } catch {
+      items.value = []
+      note.value = ''
+    }
   }
 
   function setUser(userIdOrEmail) {
@@ -33,6 +58,7 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   watch(items, () => _persist(), { deep: true })
+  watch(note, () => _persist())
 
   const itemCount = computed(() =>
     items.value.reduce((total, item) => total + item.quantity, 0),
@@ -54,6 +80,19 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   function addItem(menuItem, quantity = 1) {
+    if (
+      items.value.length > 0 &&
+      menuItem.restaurantId != null &&
+      items.value[0].restaurantId != null &&
+      String(items.value[0].restaurantId) !== String(menuItem.restaurantId)
+    ) {
+      const confirmed = window.confirm(
+        'Giỏ hàng đang có món từ nhà hàng khác. Bạn muốn xóa giỏ hàng cũ và thêm món mới?',
+      )
+      if (!confirmed) return
+      items.value = []
+    }
+
     const lineId = buildLineId(menuItem)
     const existing = items.value.find((item) => item.lineId === lineId)
     if (existing) {
@@ -92,6 +131,10 @@ export const useCartStore = defineStore('cart', () => {
   function clearCart() {
     items.value = []
     note.value = ''
+    const key = _storageKey()
+    if (key) {
+      try { localStorage.removeItem(key) } catch { /* ignore */ }
+    }
   }
 
   function setNote(value) {

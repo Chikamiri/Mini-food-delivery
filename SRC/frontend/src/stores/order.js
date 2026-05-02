@@ -5,7 +5,8 @@ import orderService from '@/services/orderService'
 export const useOrderStore = defineStore('order', () => {
   const orders = ref([])
   const currentOrder = ref(null)
-  const isLoading = ref(false)
+  const _activeRequests = ref(0)
+  const isLoading = computed(() => _activeRequests.value > 0)
   const error = ref(null)
 
   const activeOrders = computed(() =>
@@ -14,23 +15,23 @@ export const useOrderStore = defineStore('order', () => {
     ),
   )
 
-  async function fetchUserOrders(userId) {
-    isLoading.value = true
+  async function fetchUserOrders() {
+    _activeRequests.value++
     error.value = null
     try {
-      const data = await orderService.getByUser(userId)
+      const data = await orderService.getByUser()
       orders.value = data
       return data
     } catch (err) {
       error.value = err.message || 'Không thể tải danh sách đơn hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function fetchOrderById(orderId) {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const data = await orderService.getById(orderId)
@@ -40,12 +41,12 @@ export const useOrderStore = defineStore('order', () => {
       error.value = err.message || 'Không thể tải chi tiết đơn hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function createOrder(payload) {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const created = await orderService.create(payload)
@@ -56,12 +57,12 @@ export const useOrderStore = defineStore('order', () => {
       error.value = err.message || 'Không thể tạo đơn hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function cancelOrder(orderId) {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const updated = await orderService.cancel(orderId)
@@ -76,7 +77,7 @@ export const useOrderStore = defineStore('order', () => {
       error.value = err.message || 'Không thể hủy đơn hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 

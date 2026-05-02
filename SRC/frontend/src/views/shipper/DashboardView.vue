@@ -39,7 +39,10 @@ const statusLabel = (s) => ({
   DELIVERED: 'Đã giao xong',
 }[s] || s)
 
+const acceptingOrderId = ref(null)
+
 const loadData = async () => {
+  if (!isOnline.value) return
   isLoading.value = true
   errorMessage.value = ''
   try {
@@ -69,15 +72,23 @@ const loadData = async () => {
 }
 
 const acceptDelivery = async (delivery) => {
+  if (!isOnline.value) {
+    errorMessage.value = 'Bạn đang ngoại tuyến. Hãy bật "Đang hoạt động" để nhận đơn.'
+    return
+  }
   if (!shipperId.value) { errorMessage.value = 'Không xác định được tài khoản shipper'; return }
+  if (acceptingOrderId.value) return
   errorMessage.value = ''
   successMessage.value = ''
+  acceptingOrderId.value = delivery.orderId
   try {
     await orderService.selfAssign(delivery.orderId, shipperId.value)
     successMessage.value = `Đã nhận đơn #${delivery.orderId}. Hãy đến nhà hàng lấy hàng!`
     await loadData()
   } catch (err) {
     errorMessage.value = err.message || 'Không thể nhận đơn'
+  } finally {
+    acceptingOrderId.value = null
   }
 }
 
@@ -133,6 +144,7 @@ async function buildDeliveryMap(delivery) {
 function startGpsBroadcast() {
   if (!navigator.geolocation || gpsWatchId) return
   gpsWatchId = navigator.geolocation.watchPosition((pos) => {
+    if (!isOnline.value) return
     const lat = pos.coords.latitude
     const lng = pos.coords.longitude
     const delivery = activeDelivery.value
@@ -157,9 +169,35 @@ watch(orderDetails, () => {
 }, { deep: true })
 
 let pollTimer = null
-onMounted(() => { loadData(); pollTimer = setInterval(loadData, 30000) })
+function startPolling() {
+  if (pollTimer || !isOnline.value) return
+  pollTimer = setInterval(() => {
+    if (isOnline.value) loadData()
+  }, 30000)
+}
+function stopPolling() {
+  if (pollTimer) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
+
+watch(isOnline, (on) => {
+  if (on) {
+    loadData()
+    startPolling()
+  } else {
+    stopPolling()
+    successMessage.value = ''
+  }
+})
+
+onMounted(() => {
+  loadData()
+  startPolling()
+})
 onUnmounted(() => {
-  if (pollTimer) clearInterval(pollTimer)
+  stopPolling()
   stopGpsBroadcast()
   resetRouteMap()
 })
@@ -295,9 +333,16 @@ onUnmounted(() => {
                 type="button"
                 class="btn btn-primary"
                 style="flex:1"
+                :disabled="!isOnline || acceptingOrderId === delivery.orderId"
                 @click="acceptDelivery(delivery)"
               >
-                Nhận đơn này
+                {{
+                  acceptingOrderId === delivery.orderId
+                    ? 'Đang nhận...'
+                    : !isOnline
+                      ? 'Tắt nhận đơn khi ngoại tuyến'
+                      : 'Nhận đơn này'
+                }}
               </button>
             </div>
           </article>

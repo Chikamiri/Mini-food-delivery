@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
@@ -212,6 +212,11 @@ function clearRestaurantImage() {
 }
 
 onMounted(loadData)
+
+onUnmounted(() => {
+  clearTimeout(searchTimer)
+  searchTimer = null
+})
 </script>
 
 <template>

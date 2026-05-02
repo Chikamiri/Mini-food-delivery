@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import userService from '@/services/userService'
 import { fetchAddressesAction, setDefaultAddressAction } from '@/utils/addressManagerUtils'
@@ -220,6 +220,14 @@ const updateAddress = async () => {
 }
 
 onMounted(fetchAddresses)
+
+onUnmounted(() => {
+  clearTimeout(newSearchTimer)
+  clearTimeout(editSearchTimer)
+  newSearchTimer = null
+  editSearchTimer = null
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
@@ -237,8 +245,8 @@ onMounted(fetchAddresses)
     </header>
 
     <p v-if="isLoading" class="state-msg">Đang tải danh sách địa chỉ...</p>
-    <p v-if="errorMessage" class="state-msg state-msg--error">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="state-msg state-msg--success">{{ successMessage }}</p>
+    <p v-else-if="errorMessage" class="state-msg state-msg--error">{{ errorMessage }}</p>
+    <p v-else-if="successMessage" class="state-msg state-msg--success">{{ successMessage }}</p>
 
     <section v-if="showAddForm" class="address-block">
       <h2>Thêm địa chỉ mới</h2>

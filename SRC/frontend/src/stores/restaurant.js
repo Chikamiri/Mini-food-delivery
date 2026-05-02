@@ -7,7 +7,8 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   const categories = ref([])
   const selectedRestaurant = ref(null)
   const menuItems = ref([])
-  const isLoading = ref(false)
+  const _activeRequests = ref(0)
+  const isLoading = computed(() => _activeRequests.value > 0)
   const error = ref(null)
 
   const openRestaurants = computed(() =>
@@ -15,7 +16,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   )
 
   async function fetchRestaurants() {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const data = await restaurantService.getAll()
@@ -25,12 +26,12 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       error.value = err.message || 'Không thể tải danh sách nhà hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function fetchRestaurantById(id) {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const data = await restaurantService.getById(id)
@@ -40,12 +41,12 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       error.value = err.message || 'Không thể tải chi tiết nhà hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function fetchCategories() {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const data = await restaurantService.getCategories()
@@ -55,12 +56,12 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       error.value = err.message || 'Không thể tải danh mục nhà hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 
   async function fetchMenuByRestaurant(restaurantId) {
-    isLoading.value = true
+    _activeRequests.value++
     error.value = null
     try {
       const data = await restaurantService.getMenuByRestaurant(restaurantId)
@@ -70,7 +71,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
       error.value = err.message || 'Không thể tải menu nhà hàng'
       throw err
     } finally {
-      isLoading.value = false
+      _activeRequests.value--
     }
   }
 

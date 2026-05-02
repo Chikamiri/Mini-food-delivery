@@ -25,6 +25,9 @@ const orderTypes = ['Giao tiêu chuẩn', 'Giao hẹn giờ', 'Nhận tại quá
 const selectedOrderType = ref(orderTypes[0])
 const desiredDeliveryTime = ref('')
 const orderNote = ref(cartStore.note || '')
+watch(orderNote, (v) => {
+  cartStore.setNote(typeof v === 'string' ? v : '')
+})
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -37,7 +40,7 @@ const cartItems = computed(() => cartStore.items)
 const subtotal = computed(() => cartStore.subtotal)
 const deliveryFee = computed(() => getDeliveryFeeBySubtotal(subtotal.value))
 const discount = computed(() => getDiscountBySubtotal(subtotal.value))
-const total = computed(() => subtotal.value + deliveryFee.value - discount.value)
+const total = computed(() => Math.max(0, subtotal.value + deliveryFee.value - discount.value))
 const selectedAddress = computed(() =>
   deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
 )

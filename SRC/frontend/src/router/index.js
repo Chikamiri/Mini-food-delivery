@@ -1,26 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/user/HomeView.vue'
-import BrowseView from '@/views/user/BrowseView.vue'
-import RestaurantDetail from '@/views/user/RestaurantDetail.vue'
-import CartView from '@/views/user/CartView.vue'
-import CheckoutView from '@/views/user/CheckoutView.vue'
-import OrderTracking from '@/views/user/OrderTracking.vue'
-import OrderHistory from '@/views/user/OrderHistory.vue'
-import ProfileView from '@/views/user/ProfileView.vue'
-import AddressManager from '@/views/user/AddressManager.vue'
-import RestaurantDashboard from '@/views/restaurant/DashboardView.vue'
-import MenuManager from '@/views/restaurant/MenuManager.vue'
-import CategoryManager from '@/views/restaurant/CategoryManager.vue'
-import OrderManager from '@/views/restaurant/OrderManager.vue'
-import RevenueStats from '@/views/restaurant/RevenueStats.vue'
-import RestaurantSettings from '@/views/restaurant/SettingsView.vue'
-import ShipperDashboard from '@/views/shipper/DashboardView.vue'
-import DeliveryDetail from '@/views/shipper/DeliveryDetail.vue'
-import DeliveryHistory from '@/views/shipper/DeliveryHistory.vue'
-import ShipperSettings from '@/views/shipper/SettingsView.vue'
-import AdminDashboard from '@/views/admin/DashboardView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import { useAuthStore } from '@/stores/auth'
+
+// Lazy-load all non-home views for code splitting (#14)
+const BrowseView = () => import('@/views/user/BrowseView.vue')
+const RestaurantDetail = () => import('@/views/user/RestaurantDetail.vue')
+const CartView = () => import('@/views/user/CartView.vue')
+const CheckoutView = () => import('@/views/user/CheckoutView.vue')
+const OrderTracking = () => import('@/views/user/OrderTracking.vue')
+const OrderHistory = () => import('@/views/user/OrderHistory.vue')
+const ProfileView = () => import('@/views/user/ProfileView.vue')
+const AddressManager = () => import('@/views/user/AddressManager.vue')
+const RestaurantDashboard = () => import('@/views/restaurant/DashboardView.vue')
+const MenuManager = () => import('@/views/restaurant/MenuManager.vue')
+const CategoryManager = () => import('@/views/restaurant/CategoryManager.vue')
+const OrderManager = () => import('@/views/restaurant/OrderManager.vue')
+const RevenueStats = () => import('@/views/restaurant/RevenueStats.vue')
+const RestaurantSettings = () => import('@/views/restaurant/SettingsView.vue')
+const ShipperDashboard = () => import('@/views/shipper/DashboardView.vue')
+const DeliveryDetail = () => import('@/views/shipper/DeliveryDetail.vue')
+const DeliveryHistory = () => import('@/views/shipper/DeliveryHistory.vue')
+const ShipperSettings = () => import('@/views/shipper/SettingsView.vue')
+const AdminDashboard = () => import('@/views/admin/DashboardView.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,13 +32,33 @@ const router = createRouter({
   routes: [
     { path: '/', name: 'home', component: HomeView },
 
-    // User routes (require login)
-    { path: '/browse', name: 'browse', component: BrowseView, meta: { requiresAuth: true } },
-    { path: '/restaurants/:id', name: 'restaurant-detail', component: RestaurantDetail, meta: { requiresAuth: true } },
-    { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true } },
-    { path: '/checkout', name: 'checkout', component: CheckoutView, meta: { requiresAuth: true } },
-    { path: '/orders/:id/tracking', name: 'order-tracking', component: OrderTracking, meta: { requiresAuth: true } },
-    { path: '/orders/history', name: 'order-history', component: OrderHistory, meta: { requiresAuth: true } },
+    // User (customer) routes — OWNER / SHIPPER / ADMIN được chuyển về đúng panel
+    {
+      path: '/browse',
+      name: 'browse',
+      component: BrowseView,
+      meta: { requiresAuth: true, customerFlow: true },
+    },
+    {
+      path: '/restaurants/:id',
+      name: 'restaurant-detail',
+      component: RestaurantDetail,
+      meta: { requiresAuth: true, customerFlow: true },
+    },
+    { path: '/cart', name: 'cart', component: CartView, meta: { requiresAuth: true, customerFlow: true } },
+    { path: '/checkout', name: 'checkout', component: CheckoutView, meta: { requiresAuth: true, customerFlow: true } },
+    {
+      path: '/orders/:id/tracking',
+      name: 'order-tracking',
+      component: OrderTracking,
+      meta: { requiresAuth: true, customerFlow: true },
+    },
+    {
+      path: '/orders/history',
+      name: 'order-history',
+      component: OrderHistory,
+      meta: { requiresAuth: true, customerFlow: true },
+    },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true } },
     { path: '/addresses', name: 'addresses', component: AddressManager, meta: { requiresAuth: true } },
 
@@ -64,30 +86,46 @@ const router = createRouter({
   ],
 })
 
-// Navigation guard
-router.beforeEach((to, _from, next) => {
+// Navigation guard — async to allow fetchProfile before role check (#1 fix)
+router.beforeEach(async (to, _from, next) => {
   const token = localStorage.getItem('token')
+  const authStore = useAuthStore()
 
   // Check auth requirement
   if (to.meta.requiresAuth && !token) {
     return next({ name: 'home' })
   }
 
-  // Check role requirement — use authStore user data (set after login/fetchProfile)
-  if (to.meta.roles && to.meta.roles.length && token) {
-    const authStore = useAuthStore()
-    const rawRole = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
-
-    // If authStore.user not yet loaded (page refresh), try parsing JWT as fallback
-    let role = rawRole
+  // Chỉ khách (USER/CUSTOMER) dùng luồng đặt món — OWNER/SHIPPER/ADMIN vào đúng dashboard
+  if (to.meta.customerFlow && token) {
+    let role = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
     if (!role) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]))
-        // Spring Boot JWT may store role in: role, authorities, scope, or sub
-        const jwtRole = payload.role || payload.authorities?.[0] || ''
-        role = String(jwtRole).toUpperCase().replace(/^ROLE_/, '')
+        await authStore.fetchProfile()
+        role = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
       } catch {
-        role = ''
+        localStorage.removeItem('token')
+        return next({ name: 'home' })
+      }
+    }
+    if (role === 'ADMIN') return next({ name: 'admin-dashboard' })
+    if (role === 'OWNER') return next({ name: 'restaurant-dashboard' })
+    if (role === 'SHIPPER') return next({ name: 'shipper-dashboard' })
+  }
+
+  // Check role requirement — use authStore user data (set after login/fetchProfile)
+  if (to.meta.roles && to.meta.roles.length && token) {
+    let role = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
+
+    // If authStore.user not yet loaded (page refresh), call fetchProfile from server
+    if (!role) {
+      try {
+        await authStore.fetchProfile()
+        role = String(authStore.user?.role || '').toUpperCase().replace(/^ROLE_/, '')
+      } catch {
+        // Token invalid/expired — clear and redirect to home
+        localStorage.removeItem('token')
+        return next({ name: 'home' })
       }
     }
 

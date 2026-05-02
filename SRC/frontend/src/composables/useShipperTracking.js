@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, getCurrentInstance } from 'vue'
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
@@ -54,7 +54,9 @@ export function useShipperTracking() {
     })
   }
 
-  onUnmounted(disconnect)
+  if (getCurrentInstance()) {
+    onUnmounted(disconnect)
+  }
 
   return { shipperPos, connect, disconnect, sendLocation }
 }

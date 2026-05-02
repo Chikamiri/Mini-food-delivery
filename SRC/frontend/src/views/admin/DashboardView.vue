@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import adminService from '@/services/adminService'
@@ -282,8 +282,9 @@ const deleteUser = async (user) => {
       await adminService.toggleUserActive(user.id, false)
       successMessage.value =
         'Không thể xóa vĩnh viễn vì tài khoản đã có dữ liệu liên quan. Tài khoản đã được chuyển sang trạng thái khóa.'
-    } catch {
-      errorMessage.value = error.message || 'Không thể xóa người dùng'
+    } catch (toggleError) {
+      errorMessage.value =
+        toggleError?.message || error?.message || 'Không thể xóa hoặc khóa người dùng'
     }
   } finally {
     await loadDashboardData()
@@ -299,6 +300,10 @@ onMounted(() => {
     rejectedRestaurantIds.value = []
   }
   loadDashboardData()
+})
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 </script>
 

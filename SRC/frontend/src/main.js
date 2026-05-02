@@ -19,7 +19,7 @@ async function bootstrap() {
     try {
       await authStore.fetchProfile()
     } catch {
-      authStore.logout()
+      await authStore.logout()
     }
   }
   app.mount('#app')

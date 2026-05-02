@@ -1,10 +1,16 @@
 /**
  * Đọc file ảnh, thu nhỏ theo cạnh dài tối đa và xuất JPEG base64 (data URL).
  */
+const MAX_INPUT_BYTES = 15 * 1024 * 1024 // 15MB — tránh treo trình duyệt với file quá lớn
+
 export function compressImageToJpegDataUrl(file, maxSide = 960, quality = 0.85) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type?.startsWith('image/')) {
       reject(new Error('Chỉ chấp nhận file ảnh.'))
+      return
+    }
+    if (file.size > MAX_INPUT_BYTES) {
+      reject(new Error('Ảnh quá lớn (tối đa 15MB). Vui lòng chọn file nhỏ hơn.'))
       return
     }
     const objectUrl = URL.createObjectURL(file)

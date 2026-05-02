@@ -30,7 +30,7 @@ const deliveryFee = computed(() => getDeliveryFeeBySubtotal(subtotal.value))
 
 const discount = computed(() => getDiscountBySubtotal(subtotal.value))
 
-const total = computed(() => subtotal.value + deliveryFee.value - discount.value)
+const total = computed(() => Math.max(0, subtotal.value + deliveryFee.value - discount.value))
 
 const formatPrice = (value) => formatCartPrice(value)
 
@@ -103,8 +103,8 @@ const goBrowse = () => goBrowseFromCart(router)
           <h3>Tóm tắt đơn hàng</h3>
 
           <div class="voucher-row">
-            <input type="text" placeholder="Nhập mã giảm giá" />
-            <button>Áp dụng</button>
+            <input type="text" placeholder="Mã giảm giá (sắp có)" disabled aria-disabled="true" />
+            <button type="button" disabled aria-disabled="true">Sắp có</button>
           </div>
 
           <div class="bill-lines">

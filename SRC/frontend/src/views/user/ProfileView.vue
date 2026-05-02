@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import iconBackspace from '@/assets/icon/back-arrow.svg'
 import iconEdit from '@/assets/icon/edit.svg'
@@ -259,6 +259,11 @@ onMounted(() => {
 
 watch([restaurantModalOpen, settingsModalOpen, shipperModalOpen], ([restaurantOpen, settingsOpen, shipperOpen]) => {
   document.body.style.overflow = restaurantOpen || settingsOpen || shipperOpen ? 'hidden' : ''
+})
+
+// Cleanup body overflow on unmount (#10 fix)
+onUnmounted(() => {
+  document.body.style.overflow = ''
 })
 </script>
 

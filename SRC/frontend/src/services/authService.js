@@ -13,6 +13,20 @@ function toUser(authPayload) {
   }
 }
 
+/** Map /api/users/me to the same shape as login `toUser` (+ extra fields for callers). */
+function meToUser(data) {
+  if (!data) return null
+  return {
+    id: data.id ?? data.userId,
+    email: data.email,
+    fullName: data.fullName ?? data.full_name,
+    role: data.role,
+    phone: data.phone ?? null,
+    avatarUrl: data.avatarUrl ?? data.avatar_url ?? null,
+    createdAt: data.createdAt ?? data.created_at ?? null,
+  }
+}
+
 export default {
   async login(email, password) {
     const data = await api.post('/api/auth/login', { email, password })
@@ -45,6 +59,7 @@ export default {
   },
 
   async getProfile() {
-    return api.get('/api/users/me')
+    const data = await api.get('/api/users/me')
+    return meToUser(data)
   },
 }

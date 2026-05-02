@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import restaurantService from '@/services/restaurantService'
@@ -208,6 +208,7 @@ const saveMenuItem = async () => {
     if (menuModalMode.value === 'add') {
       if (!menuForm.value.categoryId) {
         errorMessage.value = 'Vui lòng chọn danh mục trước khi thêm món.'
+        actionLoading.value = false
         return
       }
       await restaurantService.createMenuItem(
@@ -254,6 +255,10 @@ onMounted(async () => {
   await loadData()
   await loadCategoryOptions()
 })
+
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
@@ -278,7 +283,7 @@ onMounted(async () => {
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="error-text success-text">{{ successMessage }}</p>
+      <p v-if="successMessage" class="success-text">{{ successMessage }}</p>
 
       <!-- Menu cards -->
       <section class="panel">

@@ -64,7 +64,7 @@ const rejectOrder = async (orderId) => {
   try {
     await orderService.reject(orderId, reason)
     const target = orders.value.find((o) => o.id === orderId)
-    if (target) target.status = 'CANCELLED'
+    if (target) target.status = 'REJECTED'
     successMsg.value = 'Đã từ chối đơn hàng #' + orderId
   } catch (err) {
     errorMessage.value = err.message || 'Không thể từ chối đơn hàng'
