@@ -42,7 +42,7 @@ public class Restaurant {
 	@Column(precision = 11, scale = 8)
 	private BigDecimal longitude;
 
-	@Column(name = "image_url")
+	@Column(name = "image_url", columnDefinition = "LONGTEXT")
 	private String imageUrl;
 
 	@Column(name = "opening_time")

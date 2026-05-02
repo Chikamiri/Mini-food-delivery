@@ -6,6 +6,7 @@ import restaurantService from '@/services/restaurantService'
 import mapService from '@/services/mapService'
 import MapView from '@/components/MapView.vue'
 import RestaurantSidebar from '@/components/RestaurantSidebar.vue'
+import { compressImageToJpegDataUrl } from '@/utils/imageCompress'
 
 const loading = ref(false)
 const isSaving = ref(false)
@@ -35,6 +36,8 @@ const addressResults = ref([])
 const searchingAddress = ref(false)
 const mapMarkers = ref([])
 const miniMapOpen = ref(true)
+const imageFileInputRef = ref(null)
+const avatarInputKey = ref(0)
 let searchTimer = null
 
 const toTimeInput = (value) => {
@@ -187,6 +190,27 @@ const logout = async () => {
   router.push('/')
 }
 
+const triggerRestaurantImagePick = () => imageFileInputRef.value?.click()
+
+async function onRestaurantImageFileChange(e) {
+  const file = e.target?.files?.[0]
+  if (!file) return
+  errorMessage.value = ''
+  try {
+    const dataUrl = await compressImageToJpegDataUrl(file, 960, 0.85)
+    settingsForm.value.imageUrl = dataUrl
+  } catch (err) {
+    errorMessage.value = err?.message || 'Không xử lý được ảnh. Thử file JPG/PNG nhỏ hơn.'
+  } finally {
+    avatarInputKey.value += 1
+  }
+}
+
+function clearRestaurantImage() {
+  settingsForm.value.imageUrl = ''
+  avatarInputKey.value += 1
+}
+
 onMounted(loadData)
 </script>
 
@@ -282,10 +306,42 @@ onMounted(loadData)
             <span>Giờ đóng cửa</span>
             <input v-model="settingsForm.closingTime" type="time" />
           </label>
-          <label class="full">
-            <span>Ảnh đại diện (URL)</span>
-            <input v-model="settingsForm.imageUrl" type="text" placeholder="https://..." />
-          </label>
+          <div class="full restaurant-image-block">
+            <span>Ảnh đại diện</span>
+            <div class="restaurant-image-row">
+              <img
+                v-if="settingsForm.imageUrl"
+                :src="settingsForm.imageUrl"
+                alt=""
+                class="restaurant-avatar-preview"
+              />
+              <div v-else class="restaurant-avatar-placeholder">Chưa có ảnh</div>
+              <div class="restaurant-image-actions">
+                <input
+                  :key="avatarInputKey"
+                  ref="imageFileInputRef"
+                  type="file"
+                  accept="image/*"
+                  class="restaurant-image-file-input"
+                  @change="onRestaurantImageFileChange"
+                />
+                <button type="button" class="outline-btn" @click="triggerRestaurantImagePick">
+                  Chọn ảnh từ máy
+                </button>
+                <button
+                  v-if="settingsForm.imageUrl"
+                  type="button"
+                  class="outline-btn restaurant-image-remove"
+                  @click="clearRestaurantImage"
+                >
+                  Xóa ảnh
+                </button>
+                <small class="restaurant-image-hint">
+                  Ảnh được nén JPEG (~960px cạnh dài) rồi lưu. Ảnh đã có dạng link vẫn hiển thị bình thường.
+                </small>
+              </div>
+            </div>
+          </div>
           <label class="full">
             <span>Mô tả</span>
             <textarea v-model="settingsForm.description" rows="4" placeholder="Mô tả ngắn về nhà hàng"></textarea>

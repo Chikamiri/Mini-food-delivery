@@ -120,8 +120,7 @@ onMounted(loadDashboard)
         <div>
           <span class="page-tag">Tổng quan</span>
           <h1>Dashboard nhà hàng</h1>
-          <p v-if="activeRestaurant" class="subtitle">Xin chào! Dưới đây là tình hình hoạt động của <strong>{{ activeRestaurant.name }}</strong>.</p>
-          <p v-else class="subtitle">Chưa có nhà hàng nào được liên kết với tài khoản này.</p>
+          <p v-if="!activeRestaurant" class="subtitle">Chưa có nhà hàng nào được liên kết với tài khoản này.</p>
         </div>
         <div class="header-actions">
           <button class="outline-btn" type="button" @click="backToProfile">Quay về hồ sơ</button>
