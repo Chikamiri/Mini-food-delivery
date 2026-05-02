@@ -21,12 +21,21 @@
   border-color: #f8143f;
 }
 
+/* Override .simple-list li { display: grid } from restaurant-views.css */
+.simple-list li.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+}
+
 .order-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem 1.25rem;
 }
 
 .order-info {
@@ -34,6 +43,8 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: min(100%, 220px);
 }
 
 .order-id {
@@ -43,17 +54,22 @@
 
 .order-actions {
   display: flex;
-  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem 0.85rem;
+  flex-shrink: 0;
 }
 
 .action-btn {
   border: 0;
   border-radius: 8px;
-  padding: 0.38rem 0.72rem;
+  padding: 0.42rem 0.9rem;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
+  white-space: nowrap;
 }
 
 .action-btn:disabled {
@@ -97,4 +113,16 @@
 .shipper-tag.waiting {
   background: #fff3cd;
   color: #856404;
+}
+
+@media (max-width: 760px) {
+  .simple-list li.order-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .order-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }

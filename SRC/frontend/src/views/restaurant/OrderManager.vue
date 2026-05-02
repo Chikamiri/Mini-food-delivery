@@ -171,7 +171,7 @@ onMounted(loadData)
 
         <p v-if="successMsg" class="success-text">{{ successMsg }}</p>
 
-        <ul v-else class="simple-list">
+        <ul v-if="filteredOrders.length" class="simple-list">
           <li v-for="order in filteredOrders" :key="order.id" class="order-row">
             <div class="order-info">
               <span class="order-id">#{{ order.id }}</span>
