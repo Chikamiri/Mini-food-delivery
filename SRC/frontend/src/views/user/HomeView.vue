@@ -78,7 +78,7 @@ const popularItems = [
   {
     id: 1,
     name: 'Pizza Y',
-    price: '$7.49',
+    price: '79.000đ',
     rating: '4.9',
     image:
       'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80',
@@ -86,7 +86,7 @@ const popularItems = [
   {
     id: 2,
     name: 'Burger Gà',
-    price: '$5.20',
+    price: '55.000đ',
     rating: '4.7',
     image:
       'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80',
@@ -94,7 +94,7 @@ const popularItems = [
   {
     id: 3,
     name: 'Salad Tươi',
-    price: '$6.10',
+    price: '65.000đ',
     rating: '4.8',
     image:
       'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=500&q=80',
@@ -188,7 +188,7 @@ const steps = [
           <div class="card-text">
             <strong>Pizza Y</strong>
             <small>★★★★★</small>
-            <p>$ 7.49</p>
+            <p>79.000đ</p>
           </div>
         </div>
       </div>

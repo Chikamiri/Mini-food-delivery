@@ -152,10 +152,10 @@ export function mapBrowseMenuItem(item, restaurantMap, userLocation = null) {
     distance: getDistanceToRestaurantLabel(restaurant, userLocation),
     rating: String(restaurant?.rating ?? 4.7),
     reviews: 'new',
-    price: `$${basePrice.toFixed(2)}`,
+    price: `${Math.round(basePrice).toLocaleString('vi-VN')}đ`,
     basePrice,
     sizePrices: parsedSizePrices,
-    oldPrice: `$${Math.max(Number(item.price || 0) - 1, 0).toFixed(2)}`,
+    oldPrice: '',
     badge: 'NEW',
     isAvailable: Boolean(item.isAvailable),
     image:
@@ -205,14 +205,14 @@ export function getSizeAdjustedPrice(item, size = 'Vừa') {
     return Number(item.sizePrices.medium || 0)
   }
   const baseSource =
-    item?.basePrice ?? Number(String(item?.price || '').replace('$', '') || 0)
+    item?.basePrice ?? Number(String(item?.price || '').replace(/[^\d.]/g, '') || 0)
   const base = Number(baseSource || 0)
   const multiplier = SIZE_MULTIPLIERS[size] || 1
   return Number((base * multiplier).toFixed(2))
 }
 
 export function formatDishPrice(amount) {
-  return `$${Number(amount || 0).toFixed(2)}`
+  return `${Math.round(Number(amount || 0)).toLocaleString('vi-VN')}đ`
 }
 
 export function formatRecentOrderTime(value) {

@@ -162,7 +162,7 @@ const selectedDish = ref(null)
 const dishNote = ref('')
 const selectedSize = ref('Vừa')
 const selectedDishDisplayPrice = computed(() => {
-  if (!selectedDish.value) return '$0.00'
+  if (!selectedDish.value) return '0đ'
   return formatDishPrice(getSizeAdjustedPrice(selectedDish.value, selectedSize.value))
 })
 const isFavorite = (itemId) => isItemFavorite(favoriteIds, itemId)
