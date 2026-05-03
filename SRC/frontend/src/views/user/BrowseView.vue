@@ -1,4 +1,5 @@
 <script setup>
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { createBrowseSidebarMenus } from '@/config/browseMenus'
 import { useBrowseViewModel } from '@/composables/useBrowseViewModel'
@@ -83,6 +84,76 @@ const {
   formatNoticeTime,
 } = useBrowseViewModel()
 
+const popularScrollEl = ref(null)
+const canScrollPopularPrev = ref(false)
+const canScrollPopularNext = ref(false)
+
+function updatePopularScrollState() {
+  const el = popularScrollEl.value
+  if (!el) {
+    canScrollPopularPrev.value = false
+    canScrollPopularNext.value = false
+    return
+  }
+  const { scrollLeft, scrollWidth, clientWidth } = el
+  const maxScroll = Math.max(0, scrollWidth - clientWidth)
+  canScrollPopularPrev.value = scrollLeft > 4
+  canScrollPopularNext.value = scrollLeft < maxScroll - 4
+}
+
+function scrollPopularCarousel(direction) {
+  const el = popularScrollEl.value
+  if (!el) return
+  el.scrollBy({ left: direction * el.clientWidth, behavior: 'smooth' })
+  window.setTimeout(updatePopularScrollState, 320)
+}
+
+watch(
+  () => filteredPopularDishes.value.length,
+  () => nextTick(updatePopularScrollState),
+)
+
+let popularScrollResizeObserver = null
+
+function attachPopularScrollObserver() {
+  popularScrollResizeObserver?.disconnect()
+  popularScrollResizeObserver = null
+  const el = popularScrollEl.value
+  if (!el || typeof ResizeObserver === 'undefined') return
+  popularScrollResizeObserver = new ResizeObserver(updatePopularScrollState)
+  popularScrollResizeObserver.observe(el)
+}
+
+watch(
+  () =>
+    !isPromoView.value &&
+    !isFavoritesView.value &&
+    !isFlashSaleView.value &&
+    !isOrdersView.value,
+  (atHome) => {
+    nextTick(() => {
+      if (!atHome) {
+        popularScrollResizeObserver?.disconnect()
+        popularScrollResizeObserver = null
+        return
+      }
+      updatePopularScrollState()
+      attachPopularScrollObserver()
+    })
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  window.addEventListener('resize', updatePopularScrollState)
+})
+
+onUnmounted(() => {
+  popularScrollResizeObserver?.disconnect()
+  popularScrollResizeObserver = null
+  window.removeEventListener('resize', updatePopularScrollState)
+})
+
 </script>
 
 <template>
@@ -119,9 +190,6 @@ const {
             @click="toggleNoticePanel"
           >
             <img :src="iconNotice" alt="" width="22" height="22" />
-          </button>
-          <button type="button" class="action-btn" aria-label="Cài đặt" @click="openSettings">
-            <img :src="iconSetting" alt="" width="22" height="22" />
           </button>
         </div>
         <div v-if="isNoticeOpen" class="notice-panel">
@@ -422,41 +490,67 @@ const {
           <h3>Món mới ra</h3>
           <a href="#">Xem tất cả</a>
         </div>
-        <div class="popular-grid">
-          <article
-            v-for="dish in filteredPopularDishes"
-            :key="dish.id"
-            class="popular-card"
-            role="button"
-            tabindex="0"
-            @click="openDishDetail(dish)"
-            @keydown.enter="openDishDetail(dish)"
-            @keydown.space.prevent="openDishDetail(dish)"
+        <div class="popular-carousel">
+          <button
+            type="button"
+            class="popular-nav popular-nav--prev"
+            aria-label="Xem món trước"
+            :disabled="!canScrollPopularPrev"
+            @click="scrollPopularCarousel(-1)"
           >
-            <div class="popular-image-wrap">
-              <img :src="dish.image" :alt="dish.name" class="popular-image" />
-              <span class="popular-badge">{{ dish.badge }}</span>
-            </div>
-            <h4>{{ dish.name }}</h4>
-            <div class="popular-meta">
-              <span>{{ dish.distance }}</span>
-              <span class="dot">|</span>
-              <span class="star">★</span>
-              <span>{{ dish.rating }}</span>
-            </div>
-            <div class="popular-price-row">
-              <strong>{{ dish.price }}</strong>
-              <button
-                type="button"
-                class="favorite-btn"
-                :class="{ 'is-active': isFavorite(dish.id) }"
-                aria-label="Yêu thích"
-                @click.stop.prevent="toggleFavorite(dish)"
+            ‹
+          </button>
+          <div class="popular-viewport">
+            <div
+              ref="popularScrollEl"
+              class="popular-scroll"
+              @scroll.passive="updatePopularScrollState"
+            >
+              <article
+                v-for="dish in filteredPopularDishes"
+                :key="dish.id"
+                class="popular-card"
+                role="button"
+                tabindex="0"
+                @click="openDishDetail(dish)"
+                @keydown.enter="openDishDetail(dish)"
+                @keydown.space.prevent="openDishDetail(dish)"
               >
-                {{ isFavorite(dish.id) ? '♥' : '♡' }}
-              </button>
+                <div class="popular-image-wrap">
+                  <img :src="dish.image" :alt="dish.name" class="popular-image" />
+                  <span class="popular-badge">{{ dish.badge }}</span>
+                </div>
+                <h4>{{ dish.name }}</h4>
+                <div class="popular-meta">
+                  <span>{{ dish.distance }}</span>
+                  <span class="dot">|</span>
+                  <span class="star">★</span>
+                  <span>{{ dish.rating }}</span>
+                </div>
+                <div class="popular-price-row">
+                  <strong>{{ dish.price }}</strong>
+                  <button
+                    type="button"
+                    class="favorite-btn"
+                    :class="{ 'is-active': isFavorite(dish.id) }"
+                    aria-label="Yêu thích"
+                    @click.stop.prevent="toggleFavorite(dish)"
+                  >
+                    {{ isFavorite(dish.id) ? '♥' : '♡' }}
+                  </button>
+                </div>
+              </article>
             </div>
-          </article>
+          </div>
+          <button
+            type="button"
+            class="popular-nav popular-nav--next"
+            aria-label="Xem món sau"
+            :disabled="!canScrollPopularNext"
+            @click="scrollPopularCarousel(1)"
+          >
+            ›
+          </button>
         </div>
       </section>
 
