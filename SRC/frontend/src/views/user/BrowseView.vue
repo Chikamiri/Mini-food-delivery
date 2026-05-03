@@ -160,7 +160,7 @@ onUnmounted(() => {
   <section class="browse-page">
     <aside class="left-sidebar">
       <div class="brand">
-        <span class="logo">FO</span>
+        <span class="logo">FD</span>
         <strong>MiniFood</strong>
       </div>
 
@@ -625,7 +625,7 @@ onUnmounted(() => {
 
       <footer class="home-footer">
         <div class="footer-brand">
-          <div class="logo-box">FO</div>
+          <div class="logo-box">FD</div>
           <div>
             <strong>Giao Đồ Ăn</strong>
             <p>Ngon nhanh, giao tận nơi.</p>
