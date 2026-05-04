@@ -30,6 +30,14 @@
 .panel-head{ display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
 .panel-head h3{ margin:0; font-size:1rem; color:#202a3c; }
 .panel-head span,.panel-head a{ color:#8a93a3; font-size:.82rem; text-decoration:none; }
+.panel-head select{
+  border:1px solid #dbe1ec;
+  border-radius:8px;
+  background:#fff;
+  color:#4c5568;
+  font-size:.82rem;
+  padding:.3rem .5rem;
+}
 .donut-wrap{ margin-top:.7rem; display:flex; gap:1rem; align-items:center; }
 .donut{ width:120px; height:120px; border-radius:50%; display:grid; place-items:center; font-weight:700; color:#1d2638; background:conic-gradient(#1bb45f 0 68%, #f3b53a 68% 89%, #ef476f 89% 100%); }
 .donut::before{ content:""; width:76px; height:76px; border-radius:50%; background:#fff; position:absolute; }
@@ -37,9 +45,8 @@
 .donut{ font-size:1.05rem; }
 .donut{ isolation:isolate; }
 .donut{ z-index:0; }
-.donut::after{ content:"68%"; position:absolute; z-index:1; }
-.donut{ color:transparent; }
 .donut-wrap ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:.35rem; color:#576076; font-size:.86rem; }
+.muted-metric{ color:#8a93a3; font-size:.8rem; }
 .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:.35rem; }
 .dot.success{ background:#1bb45f; } .dot.warn{ background:#f3b53a; } .dot.danger{ background:#ef476f; }
 .fake-line-chart{ margin-top:.8rem; height:150px; border-radius:12px; background:

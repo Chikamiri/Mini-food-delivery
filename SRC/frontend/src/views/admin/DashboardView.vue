@@ -70,6 +70,87 @@ const kpiCards = computed(() => [
   { title: 'Doanh thu', value: formatCurrency(stats.value.totalRevenue), icon: iconRevenue },
 ])
 
+const orderStatusRange = ref('today')
+const orderStatusRangeOptions = [
+  { value: 'today', label: 'Hôm nay' },
+  { value: '7d', label: '7 ngày' },
+  { value: '30d', label: '30 ngày' },
+]
+
+const toNumber = (value) => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
+
+const getByPath = (source, path) =>
+  path.split('.').reduce((acc, part) => (acc && typeof acc === 'object' ? acc[part] : undefined), source)
+
+const pickFirstNumber = (source, keys) => {
+  for (const key of keys) {
+    const value = toNumber(getByPath(source, key))
+    if (value > 0) return value
+  }
+  return 0
+}
+
+const orderStatusMetrics = computed(() => {
+  const source = stats.value || {}
+  const range = orderStatusRange.value
+  const rangePrefixMap = {
+    today: ['today', 'daily'],
+    '7d': ['week', 'weekly', 'last7Days'],
+    '30d': ['month', 'monthly', 'last30Days'],
+  }
+  const prefixes = rangePrefixMap[range] || []
+
+  const keysByType = {
+    completed: ['completedOrders', 'completed', 'deliveredOrders', 'delivered', 'successOrders'],
+    processing: ['processingOrders', 'processing', 'inProgressOrders', 'pendingOrders', 'activeOrders'],
+    cancelled: ['cancelledOrders', 'canceledOrders', 'cancelled', 'canceled', 'rejectedOrders'],
+  }
+
+  const buildKeys = (suffixes) => [
+    ...prefixes.flatMap((prefix) => suffixes.map((suffix) => `${prefix}.${suffix}`)),
+    ...suffixes,
+  ]
+
+  let completed = pickFirstNumber(source, buildKeys(keysByType.completed))
+  let processing = pickFirstNumber(source, buildKeys(keysByType.processing))
+  let cancelled = pickFirstNumber(source, buildKeys(keysByType.cancelled))
+  let total = completed + processing + cancelled
+
+  if (total <= 0) {
+    const totalKeys = buildKeys(['totalOrders', 'orders', 'orderCount'])
+    const fallbackTotal = pickFirstNumber(source, totalKeys)
+    if (fallbackTotal > 0) {
+      completed = completed || fallbackTotal
+      processing = Math.max(0, fallbackTotal - completed - cancelled)
+      total = completed + processing + cancelled
+    }
+  }
+
+  const percentage = (value) => (total > 0 ? Math.round((value / total) * 100) : 0)
+  const completedPercent = percentage(completed)
+  const processingPercent = percentage(processing)
+  const cancelledPercent = Math.max(0, 100 - completedPercent - processingPercent)
+  const completedArc = completedPercent
+  const processingArc = completedPercent + processingPercent
+
+  return {
+    completed,
+    processing,
+    cancelled,
+    total,
+    completedPercent,
+    processingPercent,
+    cancelledPercent,
+    donutLabel: `${completedPercent}%`,
+    donutStyle: {
+      background: `conic-gradient(#1bb45f 0 ${completedArc}%, #f3b53a ${completedArc}% ${processingArc}%, #ef476f ${processingArc}% 100%)`,
+    },
+  }
+})
+
 const filteredApprovals = computed(() =>
   approvalQueue.value.filter((item) =>
     `${item.name} ${item.ownerName} ${item.address || ''}`
@@ -368,14 +449,22 @@ onUnmounted(() => {
           <article class="panel">
             <div class="panel-head">
               <h3>Tỉ lệ đơn theo trạng thái</h3>
-              <span>Hôm nay</span>
+              <select v-model="orderStatusRange" aria-label="Khoảng thời gian thống kê đơn hàng">
+                <option v-for="option in orderStatusRangeOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
             </div>
             <div class="donut-wrap">
-              <div class="donut">68%</div>
+              <div class="donut" :style="orderStatusMetrics.donutStyle">{{ orderStatusMetrics.donutLabel }}</div>
               <ul>
-                <li><span class="dot success"></span> Hoàn thành: 68%</li>
-                <li><span class="dot warn"></span> Đang xử lý: 21%</li>
-                <li><span class="dot danger"></span> Hủy: 11%</li>
+                <li><span class="dot success"></span> Hoàn thành: {{ orderStatusMetrics.completedPercent }}%</li>
+                <li><span class="dot warn"></span> Đang xử lý: {{ orderStatusMetrics.processingPercent }}%</li>
+                <li><span class="dot danger"></span> Hủy: {{ orderStatusMetrics.cancelledPercent }}%</li>
+                <li v-if="orderStatusMetrics.total" class="muted-metric">
+                  Tổng {{ Number(orderStatusMetrics.total).toLocaleString('vi-VN') }} đơn
+                </li>
+                <li v-else class="muted-metric">Chưa có dữ liệu đơn hàng cho mốc này</li>
               </ul>
             </div>
           </article>
