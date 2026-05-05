@@ -46,9 +46,6 @@ const {
           <button class="outline-btn" type="button" :disabled="actionLoading" @click="openAddMenu">
             Thêm món
           </button>
-          <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
-            {{ loading ? 'Đang tải...' : 'Làm mới' }}
-          </button>
         </div>
       </header>
 

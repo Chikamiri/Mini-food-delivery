@@ -43,9 +43,6 @@ const {
           <button class="outline-btn" type="button" :disabled="actionLoading" @click="openAddCategory">
             Thêm danh mục
           </button>
-          <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
-            {{ loading ? 'Đang tải...' : 'Làm mới' }}
-          </button>
         </div>
       </header>
 

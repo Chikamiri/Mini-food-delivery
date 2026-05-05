@@ -42,9 +42,6 @@ const {
             Cập nhật thông tin cửa hàng. Bạn có thể chỉnh sửa địa chỉ nhà hàng tại đây.
           </p>
         </div>
-        <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
-          {{ loading ? 'Đang tải...' : 'Tải lại' }}
-        </button>
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>

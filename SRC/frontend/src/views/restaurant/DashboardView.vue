@@ -124,9 +124,6 @@ onMounted(loadDashboard)
         </div>
         <div class="header-actions">
           <button class="outline-btn" type="button" @click="backToProfile">Quay về hồ sơ</button>
-          <button class="refresh-btn" type="button" :disabled="isLoading" @click="loadDashboard">
-            {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
-          </button>
         </div>
       </header>
 

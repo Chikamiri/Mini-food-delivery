@@ -52,9 +52,6 @@ onMounted(loadData)
           <h1>Báo cáo doanh thu</h1>
           <p class="subtitle">Tổng hợp doanh thu dựa trên đơn hàng đã giao thành công.</p>
         </div>
-        <button class="refresh-btn" type="button" :disabled="loading" @click="loadData">
-          {{ loading ? 'Đang tải...' : 'Làm mới' }}
-        </button>
       </header>
 
       <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
