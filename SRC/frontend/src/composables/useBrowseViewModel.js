@@ -46,6 +46,8 @@ export function useBrowseViewModel() {
   const selectedDish = ref(null)
   const dishNote = ref('')
   const selectedSize = ref('Vừa')
+  const orderStatusReadKeys = ref(new Set())
+  let notificationRefreshTimer = null
 
   const cartCount = computed(() => cartStore.itemCount)
   const unreadNoticeCount = computed(
@@ -53,6 +55,9 @@ export function useBrowseViewModel() {
   )
   const favoriteStorageKey = computed(
     () => `browse_favorite_ids_${String(authStore.user?.id || authStore.user?.email || 'guest')}`,
+  )
+  const orderStatusReadStorageKey = computed(
+    () => `browse_order_status_read_${String(authStore.user?.id || authStore.user?.email || 'guest')}`,
   )
   const isPromoView = computed(() => activeMenu.value === 'promo')
   const isFavoritesView = computed(() => activeMenu.value === 'favorites')
@@ -202,15 +207,113 @@ export function useBrowseViewModel() {
       isOrderHistoryLoading.value = false
     }
   }
+  const normalizeOrderStatus = (status) => String(status || '').trim().toUpperCase()
+  const orderStatusNoticeMeta = (status) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return {
+          title: 'Nhà hàng đã xác nhận đơn',
+          message: 'Đơn hàng của bạn đã được nhà hàng xác nhận.',
+        }
+      case 'PREPARING':
+        return {
+          title: 'Nhà hàng đang chuẩn bị món',
+          message: 'Đơn hàng của bạn đang được chuẩn bị.',
+        }
+      case 'READY':
+        return {
+          title: 'Đơn hàng đã sẵn sàng',
+          message: 'Nhà hàng đã chuẩn bị xong, đang chờ shipper nhận đơn.',
+        }
+      case 'DELIVERING':
+      case 'SHIPPING':
+      case 'PICKED_UP':
+        return {
+          title: 'Shipper đang giao hàng',
+          message: 'Đơn hàng của bạn đang trên đường giao đến.',
+        }
+      case 'DELIVERED':
+        return {
+          title: 'Giao hàng thành công',
+          message: 'Đơn hàng của bạn đã được giao thành công.',
+        }
+      case 'CANCELLED':
+        return {
+          title: 'Đơn hàng đã hủy',
+          message: 'Đơn hàng của bạn đã bị hủy.',
+        }
+      case 'REJECTED':
+        return {
+          title: 'Đơn hàng bị từ chối',
+          message: 'Nhà hàng đã từ chối đơn hàng của bạn.',
+        }
+      default:
+        return null
+    }
+  }
+  const loadOrderStatusReadState = (key) => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || '[]')
+      if (Array.isArray(parsed)) {
+        orderStatusReadKeys.value = new Set(parsed.map((item) => String(item)))
+        return
+      }
+    } catch {
+      // ignore parse errors
+    }
+    orderStatusReadKeys.value = new Set()
+  }
+  const persistOrderStatusReadState = () => {
+    try {
+      localStorage.setItem(
+        orderStatusReadStorageKey.value,
+        JSON.stringify(Array.from(orderStatusReadKeys.value)),
+      )
+    } catch {
+      // ignore storage write errors
+    }
+  }
+  const buildOrderStatusNotifications = async () => {
+    try {
+      const orders = await orderService.getByUser()
+      if (!Array.isArray(orders)) return []
+      const notices = []
+      orders.forEach((order) => {
+        const normalizedStatus = normalizeOrderStatus(order?.status)
+        const noticeMeta = orderStatusNoticeMeta(normalizedStatus)
+        if (!noticeMeta || !order?.id) return
+        const noticeId = `order-status-${order.id}-${normalizedStatus}`
+        notices.push({
+          id: noticeId,
+          type: 'ORDER_STATUS',
+          title: noticeMeta.title,
+          message: `${noticeMeta.message} (Đơn #${order.id})`,
+          createdAt: order?.updatedAt || order?.createdAt || new Date().toISOString(),
+          isRead: orderStatusReadKeys.value.has(noticeId),
+          source: 'local-order-status',
+        })
+      })
+      notices.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+      return notices
+    } catch {
+      return []
+    }
+  }
   const openOrderHistoryView = () => {
     activeMenu.value = 'orders'
   }
   const loadNotifications = async () => {
     try {
-      const data = await userService.getNotifications()
-      notifications.value = Array.isArray(data) ? data : []
+      const [remoteNotifications, orderStatusNotifications] = await Promise.all([
+        userService.getNotifications(),
+        buildOrderStatusNotifications(),
+      ])
+      const remote = Array.isArray(remoteNotifications) ? remoteNotifications : []
+      notifications.value = [...orderStatusNotifications, ...remote].sort(
+        (a, b) => new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime(),
+      )
     } catch {
-      notifications.value = []
+      notifications.value = await buildOrderStatusNotifications()
     }
   }
   const toggleNoticePanel = async () => {
@@ -220,6 +323,15 @@ export function useBrowseViewModel() {
   }
   const markNotificationRead = async (notice) => {
     if (!notice?.id || notice?.isRead) return
+    const noticeId = String(notice.id)
+    if (noticeId.startsWith('order-status-')) {
+      orderStatusReadKeys.value.add(noticeId)
+      persistOrderStatusReadState()
+      notifications.value = notifications.value.map((item) =>
+        item.id === notice.id ? { ...item, isRead: true } : item,
+      )
+      return
+    }
     try {
       await userService.markNotificationRead(notice.id)
       notifications.value = notifications.value.map((item) =>
@@ -230,11 +342,18 @@ export function useBrowseViewModel() {
     }
   }
   const markAllNotificationsRead = async () => {
+    const orderStatusIds = notifications.value
+      .map((item) => String(item?.id || ''))
+      .filter((id) => id.startsWith('order-status-'))
+    if (orderStatusIds.length) {
+      orderStatusIds.forEach((id) => orderStatusReadKeys.value.add(id))
+      persistOrderStatusReadState()
+    }
     try {
       await userService.markAllNotificationsRead(null)
       notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
     } catch {
-      // ignore mark-all errors
+      notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
     }
   }
   const openSettings = () => {
@@ -310,9 +429,13 @@ export function useBrowseViewModel() {
 
   onMounted(() => {
     loadFavoritesByStorageKey(favoriteStorageKey.value)
+    loadOrderStatusReadState(orderStatusReadStorageKey.value)
     loadBrowseData()
     loadOrderHistory()
     loadNotifications()
+    notificationRefreshTimer = setInterval(() => {
+      loadNotifications()
+    }, 30000)
     if (String(route.query.view || '').toLowerCase() === 'orders') {
       openOrderHistoryView()
     }
@@ -322,6 +445,14 @@ export function useBrowseViewModel() {
     () => favoriteStorageKey.value,
     (key) => {
       loadFavoritesByStorageKey(key)
+    },
+  )
+
+  watch(
+    () => orderStatusReadStorageKey.value,
+    (key) => {
+      loadOrderStatusReadState(key)
+      loadNotifications()
     },
   )
 
@@ -336,6 +467,10 @@ export function useBrowseViewModel() {
 
   onUnmounted(() => {
     document.body.style.overflow = ''
+    if (notificationRefreshTimer) {
+      clearInterval(notificationRefreshTimer)
+      notificationRefreshTimer = null
+    }
   })
 
   return {
