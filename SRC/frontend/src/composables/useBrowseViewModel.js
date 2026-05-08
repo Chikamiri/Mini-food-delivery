@@ -302,6 +302,19 @@ export function useBrowseViewModel() {
   const openOrderHistoryView = () => {
     activeMenu.value = 'orders'
   }
+  const extractOrderIdFromNotice = (notice) => {
+    const directOrderId = Number(notice?.orderId || notice?.order?.id)
+    if (Number.isFinite(directOrderId) && directOrderId > 0) return directOrderId
+
+    const noticeId = String(notice?.id || '')
+    const localMatch = noticeId.match(/^order-status-(\d+)-/i)
+    if (localMatch) return Number(localMatch[1])
+
+    const textMatch = String(notice?.message || '').match(/đơn\s*#?\s*(\d+)/i)
+    if (textMatch) return Number(textMatch[1])
+
+    return null
+  }
   const loadNotifications = async () => {
     try {
       const [remoteNotifications, orderStatusNotifications] = await Promise.all([
@@ -322,23 +335,31 @@ export function useBrowseViewModel() {
     if (next) await loadNotifications()
   }
   const markNotificationRead = async (notice) => {
-    if (!notice?.id || notice?.isRead) return
+    if (!notice?.id) return
     const noticeId = String(notice.id)
-    if (noticeId.startsWith('order-status-')) {
-      orderStatusReadKeys.value.add(noticeId)
-      persistOrderStatusReadState()
-      notifications.value = notifications.value.map((item) =>
-        item.id === notice.id ? { ...item, isRead: true } : item,
-      )
-      return
+    if (!notice?.isRead) {
+      if (noticeId.startsWith('order-status-')) {
+        orderStatusReadKeys.value.add(noticeId)
+        persistOrderStatusReadState()
+        notifications.value = notifications.value.map((item) =>
+          item.id === notice.id ? { ...item, isRead: true } : item,
+        )
+      } else {
+        try {
+          await userService.markNotificationRead(notice.id)
+          notifications.value = notifications.value.map((item) =>
+            item.id === notice.id ? { ...item, isRead: true } : item,
+          )
+        } catch {
+          // ignore mark-read errors to keep UI responsive
+        }
+      }
     }
-    try {
-      await userService.markNotificationRead(notice.id)
-      notifications.value = notifications.value.map((item) =>
-        item.id === notice.id ? { ...item, isRead: true } : item,
-      )
-    } catch {
-      // ignore mark-read errors to keep UI responsive
+
+    const orderId = extractOrderIdFromNotice(notice)
+    if (orderId) {
+      isNoticeOpen.value = false
+      router.push(`/orders/${orderId}/tracking`)
     }
   }
   const markAllNotificationsRead = async () => {
