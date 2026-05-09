@@ -137,7 +137,7 @@ const {
         <div class="bill-detail">
           <div><span>Tạm tính</span><strong>{{ formatPrice(subtotal) }}</strong></div>
           <div><span>Phí giao hàng</span><strong>{{ formatPrice(deliveryFee) }}</strong></div>
-          <div><span>Giảm giá</span><strong>-{{ formatPrice(discount) }}</strong></div>
+          <div><span>Giảm giá</span><strong>{{ formatPrice(discount) }}</strong></div>
         </div>
 
         <div class="total-row">

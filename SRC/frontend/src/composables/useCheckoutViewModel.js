@@ -9,7 +9,6 @@ import {
   loadCheckoutAddressesAction,
   submitCheckoutOrderAction,
 } from '@/utils/checkoutViewUtils'
-import { getDeliveryFeeBySubtotal, getDiscountBySubtotal } from '@/utils/pricingUtils'
 import mapService from '@/services/mapService'
 
 export function useCheckoutViewModel() {
@@ -33,12 +32,29 @@ export function useCheckoutViewModel() {
   let timeTicker = null
   const addressDistanceMap = ref({})
   const restaurantPoint = ref(null)
+  const selectedAddressPoint = ref(null)
   const addressMapMarkers = ref([])
 
   const cartItems = computed(() => cartStore.items)
   const subtotal = computed(() => cartStore.subtotal)
-  const deliveryFee = computed(() => getDeliveryFeeBySubtotal(subtotal.value))
-  const discount = computed(() => getDiscountBySubtotal(subtotal.value))
+  const routeDistanceKm = computed(() => {
+    if (!restaurantPoint.value || !selectedAddressPoint.value) return null
+    return haversineKm(
+      restaurantPoint.value.lat,
+      restaurantPoint.value.lng,
+      selectedAddressPoint.value.lat,
+      selectedAddressPoint.value.lng,
+    )
+  })
+  const deliveryFee = computed(() => {
+    if (Number(subtotal.value) <= 0) return 0
+    const km = routeDistanceKm.value
+    if (Number.isFinite(km)) {
+      return Number((5 + km * 2).toFixed(2))
+    }
+    return 15
+  })
+  const discount = computed(() => 0)
   const total = computed(() => Math.max(0, subtotal.value + deliveryFee.value - discount.value))
   const selectedAddress = computed(() =>
     deliveryAddresses.value.find((address) => address.id === selectedAddressId.value),
@@ -79,13 +95,18 @@ export function useCheckoutViewModel() {
   async function resolveAddressMarker(address) {
     if (!address) {
       addressMapMarkers.value = []
+      selectedAddressPoint.value = null
       return
     }
     if (address.latitude && address.longitude) {
+      selectedAddressPoint.value = {
+        lat: Number(address.latitude),
+        lng: Number(address.longitude),
+      }
       addressMapMarkers.value = [
         {
-          lat: Number(address.latitude),
-          lng: Number(address.longitude),
+          lat: selectedAddressPoint.value.lat,
+          lng: selectedAddressPoint.value.lng,
           label: address.label || 'Giao đến đây',
           color: 'red',
         },
@@ -94,17 +115,24 @@ export function useCheckoutViewModel() {
       try {
         const results = await mapService.searchAddress(address.addressLine || address.detail)
         if (results.length) {
+          selectedAddressPoint.value = {
+            lat: Number(results[0].lat),
+            lng: Number(results[0].lng || results[0].lon),
+          }
           addressMapMarkers.value = [
             {
-              lat: Number(results[0].lat),
-              lng: Number(results[0].lng || results[0].lon),
+              lat: selectedAddressPoint.value.lat,
+              lng: selectedAddressPoint.value.lng,
               label: address.label || 'Giao đến đây',
               color: 'red',
             },
           ]
+        } else {
+          selectedAddressPoint.value = null
         }
       } catch (_) {
         addressMapMarkers.value = []
+        selectedAddressPoint.value = null
       }
     }
   }
