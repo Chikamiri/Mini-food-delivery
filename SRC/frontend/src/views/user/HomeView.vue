@@ -96,7 +96,7 @@ const {
             alt="Pizza"
           />
           <div class="card-text">
-            <strong>Pizza Y</strong>
+            <strong>Pizza Ý</strong>
             <small>★★★★★</small>
             <p>79.000đ</p>
           </div>
