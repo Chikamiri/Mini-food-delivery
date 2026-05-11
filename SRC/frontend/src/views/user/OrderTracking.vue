@@ -23,7 +23,7 @@ const statusSteps = [
   { key: 'CONFIRMED', label: 'Xác nhận', icon: '2', desc: 'Nhà hàng đã nhận đơn' },
   { key: 'PREPARING', label: 'Chuẩn bị', icon: '3', desc: 'Đang chế biến món ăn' },
   { key: 'READY', label: 'Sẵn sàng', icon: '4', desc: 'Món đã sẵn sàng giao' },
-  { key: 'DELIVERING', label: 'Đang giao', icon: '5', desc: 'Shipper đang trên đường' },
+  { key: 'SHIPPING', label: 'Đang giao', icon: '5', desc: 'Shipper đang trên đường' },
   { key: 'DELIVERED', label: 'Hoàn thành', icon: '6', desc: 'Đã giao thành công' },
 ]
 
@@ -133,7 +133,7 @@ const { markers: mapMarkers, route: mapRoute, loadForOrder, reset: resetMap } = 
   mapService,
 })
 const { shipperPos, connect: wsConnect, disconnect: wsDisconnect } = useShipperTracking()
-const TRACKING_STATUSES = ['READY', 'DELIVERING', 'SHIPPING', 'DELIVERED']
+const TRACKING_STATUSES = ['READY', 'SHIPPING', 'DELIVERED']
 let wsConnected = false
 
 async function buildMap(ord) {
@@ -146,7 +146,7 @@ async function buildMap(ord) {
   await loadForOrder(ord)
 
   // WebSocket for shipper position
-  if (!wsConnected && (status === 'DELIVERING' || status === 'SHIPPING')) {
+  if (!wsConnected && status === 'SHIPPING') {
     wsConnected = true
     wsConnect(ord.id, (pos) => {
       const existing = mapMarkers.value.filter((m) => m.label !== 'Shipper')
@@ -225,7 +225,7 @@ onUnmounted(() => {
         <p>{{ order.cancelReason || order.note || 'Không có lý do cụ thể.' }}</p>
       </section>
 
-      <!-- Live map for READY / SHIPPING / DELIVERING / DELIVERED -->
+      <!-- Live map for READY / SHIPPING / DELIVERED -->
       <section v-if="mapMarkers.length" class="detail-card">
         <h2>Bản đồ giao hàng</h2>
         <p v-if="shipperPos" class="shipper-online">Shipper đang trực tuyến</p>
