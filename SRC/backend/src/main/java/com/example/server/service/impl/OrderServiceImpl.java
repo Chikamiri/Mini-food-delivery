@@ -112,10 +112,42 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderSummaryResponse getOrderSummary(Long id) {
+    public OrderSummaryResponse getOrderSummary(Long id, Long requesterId) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", id));
+        
+        validateOrderOwnership(order, requesterId);
+        
         return orderMapper.toSummaryResponse(order);
+    }
+
+    private void validateOrderOwnership(Order order, Long requesterId) {
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", requesterId));
+        
+        // Admin can see everything
+        if (com.example.server.enums.Role.ROLE_ADMIN.equals(requester.getRole())) {
+            return;
+        }
+
+        // Customer can see their own orders
+        if (order.getUser().getId().equals(requesterId)) {
+            return;
+        }
+
+        // Restaurant owner can see orders for their restaurant
+        if (order.getRestaurant().getOwner().getId().equals(requesterId)) {
+            return;
+        }
+
+        // Shipper can see orders assigned to them
+        if (order.getDeliveryAssignment() != null && 
+            order.getDeliveryAssignment().getShipper() != null && 
+            order.getDeliveryAssignment().getShipper().getId().equals(requesterId)) {
+            return;
+        }
+
+        throw new AppException(HttpStatus.FORBIDDEN, "You do not have permission to access this order", "UNAUTHORIZED_ACCESS");
     }
 
     @Override
@@ -143,6 +175,9 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        // Ownership check for status update
+        validateStatusUpdatePermission(order, user, request.getStatus());
+
         String oldStatus = order.getStatus();
         String newStatus = request.getStatus();
 
@@ -157,6 +192,41 @@ public class OrderServiceImpl implements OrderService {
         if (OrderStatus.READY.name().equals(newStatus)) {
             eventPublisher.publishEvent(new OrderReadyEvent(this, order.getId()));
         }
+    }
+
+    private void validateStatusUpdatePermission(Order order, User user, String newStatus) {
+        String role = user.getRole();
+        
+        if (com.example.server.enums.Role.ROLE_ADMIN.equals(role)) {
+            return;
+        }
+
+        OrderStatus status = OrderStatus.valueOf(newStatus);
+
+        if (status == OrderStatus.CANCELLED) {
+            // Only customer who placed the order or admin can cancel (usually)
+            if (order.getUser().getId().equals(user.getId())) {
+                return;
+            }
+        }
+
+        if (status == OrderStatus.CONFIRMED || status == OrderStatus.PREPARING || status == OrderStatus.READY || status == OrderStatus.REJECTED) {
+            // Only restaurant owner can update to these statuses
+            if (order.getRestaurant().getOwner().getId().equals(user.getId())) {
+                return;
+            }
+        }
+
+        if (status == OrderStatus.SHIPPING || status == OrderStatus.DELIVERED) {
+            // Only assigned shipper can update to these statuses
+            if (order.getDeliveryAssignment() != null && 
+                order.getDeliveryAssignment().getShipper() != null && 
+                order.getDeliveryAssignment().getShipper().getId().equals(user.getId())) {
+                return;
+            }
+        }
+
+        throw new AppException(HttpStatus.FORBIDDEN, "You do not have permission to update this order status", "UNAUTHORIZED_ACCESS");
     }
 
     private void validateStateTransition(String oldStatus, String newStatus) {
@@ -187,9 +257,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderTrackingResponse getOrderTracking(Long orderId) {
+    public OrderTrackingResponse getOrderTracking(Long orderId, Long requesterId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, "id", orderId));
+        
+        validateOrderOwnership(order, requesterId);
+        
         return orderMapper.toTrackingResponse(order);
     }
 

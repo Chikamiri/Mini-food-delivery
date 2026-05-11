@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface OrderService {
     OrderSummaryResponse createOrder(Long userId, CreateOrderRequest request);
-    OrderSummaryResponse getOrderSummary(Long id);
+    OrderSummaryResponse getOrderSummary(Long id, Long requesterId);
+
     PageResponse<OrderSummaryResponse> getOrderHistory(Long userId, int page, int size);
+
     void updateOrderStatus(Long orderId, Long userId, OrderStatusUpdateRequest request);
-    OrderTrackingResponse getOrderTracking(Long orderId);
+
+    OrderTrackingResponse getOrderTracking(Long orderId, Long requesterId);
+
     List<OrderSummaryResponse> getRestaurantOrders(Long restaurantId, String status);
 }

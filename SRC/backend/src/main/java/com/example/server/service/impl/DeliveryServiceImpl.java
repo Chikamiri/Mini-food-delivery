@@ -164,10 +164,38 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public ShipperLocationResponse getShipperLocation(Long shipperId) {
+    public ShipperLocationResponse getShipperLocation(Long shipperId, Long requesterId) {
         ShipperLocation location = shipperLocationRepository.findByShipperId(shipperId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_LOCATION, "shipperId", shipperId));
+        
+        validateLocationAccess(shipperId, requesterId);
+
         return deliveryMapper.toLocationResponse(location);
+    }
+
+    private void validateLocationAccess(Long shipperId, Long requesterId) {
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", requesterId));
+
+        if (Role.ROLE_ADMIN.equals(requester.getRole())) {
+            return;
+        }
+
+        if (shipperId.equals(requesterId)) {
+            return;
+        }
+
+        // Check if requester is a customer with an active order being delivered by this shipper
+        boolean isAssociatedCustomer = deliveryAssignmentRepository.findAllByShipperId(shipperId).stream()
+                .anyMatch(a -> a.getOrder().getUser().getId().equals(requesterId) && 
+                              (DeliveryAssignmentStatus.ASSIGNED.name().equals(a.getStatus()) || 
+                               DeliveryAssignmentStatus.PICKED_UP.name().equals(a.getStatus())));
+        
+        if (isAssociatedCustomer) {
+            return;
+        }
+
+        throw new AppException(HttpStatus.FORBIDDEN, "You do not have permission to view this shipper's location", "UNAUTHORIZED_ACCESS");
     }
 
     @Override
@@ -187,9 +215,31 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public DeliveryAssignmentResponse getByOrderId(Long orderId) {
+    public DeliveryAssignmentResponse getByOrderId(Long orderId, Long requesterId) {
         DeliveryAssignment assignment = deliveryAssignmentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_ASSIGNMENT, "orderId", orderId));
+        
+        validateAssignmentAccess(assignment, requesterId);
+
         return deliveryMapper.toResponse(assignment);
+    }
+
+    private void validateAssignmentAccess(DeliveryAssignment assignment, Long requesterId) {
+        User requester = userRepository.findById(requesterId)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_USER, "id", requesterId));
+
+        if (Role.ROLE_ADMIN.equals(requester.getRole())) {
+            return;
+        }
+
+        if (assignment.getShipper() != null && assignment.getShipper().getId().equals(requesterId)) {
+            return;
+        }
+
+        if (assignment.getOrder().getUser().getId().equals(requesterId)) {
+            return;
+        }
+
+        throw new AppException(HttpStatus.FORBIDDEN, "You do not have permission to view this delivery assignment", "UNAUTHORIZED_ACCESS");
     }
 }

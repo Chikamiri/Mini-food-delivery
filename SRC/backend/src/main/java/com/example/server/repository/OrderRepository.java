@@ -3,6 +3,7 @@ package com.example.server.repository;
 import com.example.server.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,15 +13,21 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @EntityGraph(attributePaths = {"restaurant"})
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "restaurant", "orderItems", "statusHistories", "deliveryAssignment"})
+    Optional<Order> findById(Long id);
 
     @Query("SELECT o FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt BETWEEN :startDate AND :endDate")
     List<Order> findDeliveredOrdersForReport(@Param("startDate") LocalDateTime startDate,
                                            @Param("endDate") LocalDateTime endDate);
 
+    @EntityGraph(attributePaths = {"user", "restaurant"})
     List<Order> findByRestaurantIdAndStatus(Long restaurantId, String status);
 
     @Query(value = "SELECT o.*, (6371 * acos(cos(radians(:lat)) * cos(radians(o.delivery_lat)) * " +

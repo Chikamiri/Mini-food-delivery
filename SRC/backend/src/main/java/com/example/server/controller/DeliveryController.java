@@ -52,8 +52,9 @@ public class DeliveryController {
     }
 
     @GetMapping("/{shipperId}/location")
-    public ResponseEntity<ShipperLocationResponse> getShipperLocation(@PathVariable Long shipperId) {
-        return ResponseEntity.ok(deliveryService.getShipperLocation(shipperId));
+    public ResponseEntity<ShipperLocationResponse> getShipperLocation(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                     @PathVariable Long shipperId) {
+        return ResponseEntity.ok(deliveryService.getShipperLocation(shipperId, userDetails.getId()));
     }
 
     @GetMapping("/available")
@@ -70,7 +71,8 @@ public class DeliveryController {
 
     @GetMapping("/order/{orderId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<DeliveryAssignmentResponse> getByOrderId(@PathVariable Long orderId) {
-        return ResponseEntity.ok(deliveryService.getByOrderId(orderId));
+    public ResponseEntity<DeliveryAssignmentResponse> getByOrderId(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                  @PathVariable Long orderId) {
+        return ResponseEntity.ok(deliveryService.getByOrderId(orderId, userDetails.getId()));
     }
 }

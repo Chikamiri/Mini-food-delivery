@@ -10,8 +10,12 @@ public interface DeliveryService {
     void markPickedUp(Long shipperId, Long orderId, MarkPickupRequest request);
     void markDelivered(Long shipperId, Long orderId, MarkDeliveredRequest request);
     void updateLocation(Long shipperId, ShipperLocationUpdateRequest request);
-    ShipperLocationResponse getShipperLocation(Long shipperId);
+    ShipperLocationResponse getShipperLocation(Long shipperId, Long requesterId);
+
     List<DeliveryAssignmentResponse> getAvailableDeliveries();
+
     List<DeliveryAssignmentResponse> getMyDeliveries(Long shipperId);
-    DeliveryAssignmentResponse getByOrderId(Long orderId);
+
+    DeliveryAssignmentResponse getByOrderId(Long orderId, Long requesterId);
+
 }

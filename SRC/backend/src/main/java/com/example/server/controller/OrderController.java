@@ -32,8 +32,9 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderSummaryResponse> getOrderSummary(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderSummary(id));
+    public ResponseEntity<OrderSummaryResponse> getOrderSummary(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                               @PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderSummary(id, userDetails.getId()));
     }
 
     @GetMapping("/history")
@@ -52,8 +53,9 @@ public class OrderController {
     }
 
     @GetMapping("/{id}/tracking")
-    public ResponseEntity<OrderTrackingResponse> getOrderTracking(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderTracking(id));
+    public ResponseEntity<OrderTrackingResponse> getOrderTracking(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                 @PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderTracking(id, userDetails.getId()));
     }
 
     @GetMapping("/restaurant/{restaurantId}")
