@@ -44,29 +44,25 @@ public class OrderServiceImpl implements OrderService {
     private final com.example.server.service.MapService mapService;
 
     @Override
-    @Transactional
     public OrderSummaryResponse createOrder(Long userId, CreateOrderRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Restaurant restaurant = restaurantRepository.findById(request.getRestaurantId())
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant", "id", request.getRestaurantId()));
 
-        Order order = new Order();
-        order.setUser(user);
-        order.setRestaurant(restaurant);
-        order.setDeliveryAddress(request.getDeliveryAddress());
-        order.setDeliveryLat(request.getDeliveryLat());
-        order.setDeliveryLng(request.getDeliveryLng());
-        order.setPaymentMethod(request.getPaymentMethod());
-        order.setNote(request.getNote());
-        order.setStatus(OrderStatus.PENDING.name());
-        
-        // Calculate delivery fee based on road distance
+        // 1. Calculate delivery fee (EXTERNAL API CALL - OUTSIDE TRANSACTION)
+        BigDecimal deliveryFee = calculateDeliveryFee(restaurant, request.getDeliveryLat(), request.getDeliveryLng());
+
+        // 2. Persist order (INSIDE TRANSACTION)
+        return persistOrder(user, restaurant, deliveryFee, request);
+    }
+
+    private BigDecimal calculateDeliveryFee(Restaurant restaurant, BigDecimal deliveryLat, BigDecimal deliveryLng) {
         BigDecimal deliveryFee = new BigDecimal(defaultDeliveryFee);
         try {
             com.example.server.dto.map.RoutingResponse route = mapService.getRoute(
                     restaurant.getLatitude(), restaurant.getLongitude(),
-                    request.getDeliveryLat(), request.getDeliveryLng()
+                    deliveryLat, deliveryLng
             );
             if (route != null && !route.getRoutes().isEmpty()) {
                 double distanceKm = route.getRoutes().get(0).getDistance() / 1000.0;
@@ -77,6 +73,20 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             log.error("Failed to calculate distance-based fee, using default: {}", e.getMessage());
         }
+        return deliveryFee;
+    }
+
+    @Transactional
+    public OrderSummaryResponse persistOrder(User user, Restaurant restaurant, BigDecimal deliveryFee, CreateOrderRequest request) {
+        Order order = new Order();
+        order.setUser(user);
+        order.setRestaurant(restaurant);
+        order.setDeliveryAddress(request.getDeliveryAddress());
+        order.setDeliveryLat(request.getDeliveryLat());
+        order.setDeliveryLng(request.getDeliveryLng());
+        order.setPaymentMethod(request.getPaymentMethod());
+        order.setNote(request.getNote());
+        order.setStatus(OrderStatus.PENDING.name());
         order.setDeliveryFee(deliveryFee);
 
         BigDecimal subtotal = BigDecimal.ZERO;

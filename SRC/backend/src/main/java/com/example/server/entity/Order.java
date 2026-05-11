@@ -60,6 +60,9 @@ public class Order {
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
 
+	@Version
+	private Integer version;
+
 	@PrePersist
 	protected void onCreate() {
 		createdAt = LocalDateTime.now();

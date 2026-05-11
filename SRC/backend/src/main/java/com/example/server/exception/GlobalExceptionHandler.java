@@ -69,6 +69,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiResponse<Object>> handleOptimisticLockingFailure(org.springframework.orm.ObjectOptimisticLockingFailureException ex) {
+        ApiResponse<Object> response = ApiResponse.builder()
+                .success(false)
+                .message("The data you are trying to update has been modified by another user. Please refresh and try again.")
+                .timestamp(LocalDateTime.now())
+                .errorCode("CONCURRENCY_FAILURE")
+                .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception ex) {
         ApiResponse<Object> response = ApiResponse.builder()

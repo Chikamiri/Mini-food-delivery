@@ -34,6 +34,9 @@ public class DeliveryAssignment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Version
+    private Integer version;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

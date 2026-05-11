@@ -36,9 +36,9 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = jwtUtils.generateToken(request.getEmail());
-
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String jwt = jwtUtils.generateToken(userDetails);
+
             String role = userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
 
             return JwtResponse.builder()
@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        String jwt = jwtUtils.generateToken(user.getEmail());
+        String jwt = jwtUtils.generateToken(user.getId(), user.getEmail(), user.getRole(), user.getFullName());
 
         return JwtResponse.builder()
                 .accessToken(jwt)

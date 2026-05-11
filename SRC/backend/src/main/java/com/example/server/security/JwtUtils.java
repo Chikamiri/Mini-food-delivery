@@ -25,6 +25,7 @@ public class JwtUtils {
     }
 
     public String generateToken(String username) {
+        // Fallback for registration where we only have username
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
@@ -33,13 +34,33 @@ public class JwtUtils {
                 .compact();
     }
 
-    public String getUsernameFromToken(String token) {
+    public String generateToken(Long id, String username, String role, String fullName) {
+        return Jwts.builder()
+                .subject(username)
+                .claim("id", id)
+                .claim("role", role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                .claim("fullName", fullName)
+                .issuedAt(new Date())
+                .expiration(new Date((new Date()).getTime() + jwtExpirationMs))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generateToken(CustomUserDetails userDetails) {
+        String role = userDetails.getAuthorities().iterator().next().getAuthority();
+        return generateToken(userDetails.getId(), userDetails.getUsername(), role, userDetails.getFullName());
+    }
+
+    public Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+                .getPayload();
+    }
+
+    public String getUsernameFromToken(String token) {
+        return getClaimsFromToken(token).getSubject();
     }
 
     public boolean validateToken(String authToken) {
