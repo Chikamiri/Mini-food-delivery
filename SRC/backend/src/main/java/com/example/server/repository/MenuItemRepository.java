@@ -6,14 +6,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.server.entity.MenuItem;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
 
+    @Override
+    @NonNull
     @EntityGraph(attributePaths = {"category"})
-    Optional<MenuItem> findById(Long id);
+    Optional<MenuItem> findById(@NonNull Long id);
 
     // Sử dụng JPQL để join từ MenuItem sang MenuCategory và đối chiếu restaurantId
     @EntityGraph(attributePaths = {"category"})

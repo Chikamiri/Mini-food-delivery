@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.lang.NonNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,8 +21,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"restaurant"})
     Page<Order> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
+    @Override
+    @NonNull
     @EntityGraph(attributePaths = {"user", "restaurant", "orderItems", "statusHistories", "deliveryAssignment"})
-    Optional<Order> findById(Long id);
+    Optional<Order> findById(@NonNull Long id);
 
     @Query("SELECT o FROM Order o WHERE o.status = 'DELIVERED' AND o.createdAt BETWEEN :startDate AND :endDate")
     List<Order> findDeliveredOrdersForReport(@Param("startDate") LocalDateTime startDate,

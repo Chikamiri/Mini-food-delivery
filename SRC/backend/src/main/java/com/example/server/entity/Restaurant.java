@@ -11,6 +11,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Restaurant {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,12 +53,15 @@ public class Restaurant {
 	private LocalTime closingTime;
 
 	@Column(name = "is_open")
+	@Builder.Default
 	private Boolean isOpen = true;
 
 	@Column(name = "is_approved")
+	@Builder.Default
 	private Boolean isApproved = false;
 
 	@Column(name = "is_deleted")
+	@Builder.Default
 	private Boolean isDeleted = false;
 
 	@Column(name = "created_at")
@@ -67,9 +71,11 @@ public class Restaurant {
 	private LocalDateTime updatedAt;
 
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<MenuItem> menuItems = new ArrayList<>();
 
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<MenuCategory> menuCategories = new ArrayList<>();
 
 	@PrePersist
@@ -84,5 +90,6 @@ public class Restaurant {
 	}
 
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Order> orders = new ArrayList<>();
 }

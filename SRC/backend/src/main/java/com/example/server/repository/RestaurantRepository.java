@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import com.example.server.entity.Restaurant;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +24,10 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
                         @Param("categoryId") Long categoryId,
                         Pageable pageable);
 
+        @Override
+        @NonNull
         @EntityGraph(attributePaths = {"category", "owner"})
-        Optional<Restaurant> findById(Long id);
+        Optional<Restaurant> findById(@NonNull Long id);
 
         Page<Restaurant> findByIsApprovedFalse(Pageable pageable);
 

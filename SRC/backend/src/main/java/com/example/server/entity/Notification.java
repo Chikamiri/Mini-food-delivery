@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +29,7 @@ public class Notification {
     private String type;
 
     @Column(name = "is_read")
+    @Builder.Default
     private Boolean isRead = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)

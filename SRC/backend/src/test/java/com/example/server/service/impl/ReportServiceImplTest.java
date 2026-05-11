@@ -32,7 +32,7 @@ class ReportServiceImplTest {
     private ReportServiceImpl reportService;
 
     @Test
-    void getAdminReport_ShouldAggregateDataCorrectly() {
+    void shouldAggregateAdminReportDataCorrectly() {
         LocalDate start = LocalDate.of(2023, 1, 1);
         LocalDate end = LocalDate.of(2023, 1, 31);
 
@@ -55,7 +55,7 @@ class ReportServiceImplTest {
     }
 
     @Test
-    void getAdminReport_NullRevenue_ShouldReturnZero() {
+    void shouldReturnZeroRevenueWhenNoOrdersFound() {
         LocalDate start = LocalDate.now();
         LocalDate end = LocalDate.now();
 

@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ShipperLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +28,7 @@ public class ShipperLocation {
     private BigDecimal longitude;
 
     @Column(name = "is_online", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Builder.Default
     private Boolean isOnline = false;
 
     @Column(name = "updated_at", nullable = false, updatable = true)

@@ -10,6 +10,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RestaurantCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,5 +40,6 @@ public class RestaurantCategory {
 	}
 
 	@OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Restaurant> restaurants = new ArrayList<>();
 }

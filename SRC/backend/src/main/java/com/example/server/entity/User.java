@@ -10,6 +10,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,9 +35,11 @@ public class User {
 	private String role;
 
 	@Column(name = "is_active")
+	@Builder.Default
 	private Boolean active = true;
 
 	@Column(name = "is_deleted")
+	@Builder.Default
 	private Boolean deleted = false;
 
 	@Column(name = "created_at")
@@ -56,24 +59,31 @@ public class User {
 	}
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Address> addresses = new ArrayList<>();
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Restaurant> restaurants = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Order> orders = new ArrayList<>();
 
 	@OneToMany(mappedBy = "shipper", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<DeliveryAssignment> deliveryAssignment = new ArrayList<>();
 
 	@OneToMany(mappedBy = "changedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<OrderStatusHistory> orderStatusHistories = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<Notification> notifications = new ArrayList<>();
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<OwnerRequest> ownerRequests = new ArrayList<>();
 
 	@OneToOne(mappedBy = "shipper", cascade = CascadeType.ALL, orphanRemoval = true)

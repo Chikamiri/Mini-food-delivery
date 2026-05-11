@@ -11,6 +11,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MenuItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +36,11 @@ public class MenuItem {
 	private String imageUrl;
 
 	@Column(name = "is_available")
+	@Builder.Default
 	private Boolean isAvailable = true;
 
 	@Column(name = "is_deleted")
+	@Builder.Default
 	private Boolean isDeleted = false;
 
 	@Column(name = "created_at")

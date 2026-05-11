@@ -9,6 +9,7 @@ import java.math.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,5 +32,6 @@ public class Address {
 	private BigDecimal longitude;
 
 	@Column(name = "is_default", nullable = false)
+	@Builder.Default
 	private Boolean isDefault = false;
 }

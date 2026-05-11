@@ -87,7 +87,7 @@ class ShipperRequestControllerTest {
     }
 
     @Test
-    void submitRequest_Success() throws Exception {
+    void shouldSubmitRequestSuccessfully() throws Exception {
         ShipperRequestSubmission submission = new ShipperRequestSubmission();
         submission.setPhoneNumber("0123456789");
         submission.setLicensePlate("59-A1 12345");
@@ -115,7 +115,7 @@ class ShipperRequestControllerTest {
     }
 
     @Test
-    void getMyRequests_Success() throws Exception {
+    void shouldGetMyRequestsSuccessfully() throws Exception {
         ShipperRequestResponse response = ShipperRequestResponse.builder()
                 .id(1L)
                 .userId(1L)
@@ -132,7 +132,7 @@ class ShipperRequestControllerTest {
     }
 
     @Test
-    void getPendingRequests_AsAdmin_Success() throws Exception {
+    void shouldGetPendingRequestsAsAdminSuccessfully() throws Exception {
         when(shipperRequestService.getAllPendingRequests()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/api/shipper-requests/pending")
@@ -141,14 +141,14 @@ class ShipperRequestControllerTest {
     }
 
     @Test
-    void getPendingRequests_AsUser_Forbidden() throws Exception {
+    void shouldReturnForbiddenWhenGettingPendingRequestsAsUser() throws Exception {
         mockMvc.perform(get("/api/shipper-requests/pending")
                 .with(user(userDetails)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    void processRequest_AsAdmin_Success() throws Exception {
+    void shouldProcessRequestAsAdminSuccessfully() throws Exception {
         Long requestId = 1L;
         ShipperRequestApproval approval = new ShipperRequestApproval();
         approval.setApproved(true);

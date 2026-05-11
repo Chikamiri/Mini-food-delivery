@@ -33,7 +33,7 @@ class UserServiceImplTest {
     private UserServiceImpl userService;
 
     @Test
-    void deleteUser_Success() {
+    void shouldDeleteUserSuccessfully() {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
@@ -46,7 +46,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void deleteUser_NotFound_ShouldThrowException() {
+    void shouldThrowExceptionWhenUserNotFound() {
         Long userId = 1L;
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 

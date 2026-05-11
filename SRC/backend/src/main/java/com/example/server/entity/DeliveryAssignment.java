@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DeliveryAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +24,7 @@ public class DeliveryAssignment {
     private User shipper;
 
     @Column(name = "status", nullable = false)
+    @Builder.Default
 	private String status = "UNASSIGNED";
 
     @Column(name = "picked_up_at")

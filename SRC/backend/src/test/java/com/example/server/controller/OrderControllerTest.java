@@ -1,14 +1,14 @@
 package com.example.server.controller;
 
 import com.example.server.config.SecurityConfig;
-import com.example.server.dto.user.UserRoleUpdateRequest;
-import com.example.server.dto.user.UserStatusUpdateRequest;
+import com.example.server.dto.order.CreateOrderRequest;
+import com.example.server.dto.order.OrderSummaryResponse;
+import com.example.server.dto.order.OrderStatusUpdateRequest;
 import com.example.server.security.CustomUserDetails;
 import com.example.server.security.CustomUserDetailsService;
 import com.example.server.security.JwtAuthFilter;
 import com.example.server.security.JwtUtils;
-import com.example.server.service.AdminService;
-import com.example.server.service.ReportService;
+import com.example.server.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,25 +26,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminController.class)
+@WebMvcTest(OrderController.class)
 @Import(SecurityConfig.class)
-class AdminControllerTest {
+class OrderControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private AdminService adminService;
-
-    @MockitoBean
-    private ReportService reportService;
+    private OrderService orderService;
 
     @MockitoBean
     private JwtUtils jwtUtils;
@@ -58,17 +55,16 @@ class AdminControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private CustomUserDetails adminDetails;
+    private CustomUserDetails customerDetails;
 
     @BeforeEach
     void setUp() throws Exception {
-        adminDetails = CustomUserDetails.builder()
+        customerDetails = CustomUserDetails.builder()
                 .id(1L)
-                .email("admin@test.com")
-                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                .email("customer@test.com")
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_CUSTOMER")))
                 .build();
 
-        // Stub the JwtAuthFilter mock to continue the filter chain
         doAnswer(invocation -> {
             HttpServletRequest request = invocation.getArgument(0);
             HttpServletResponse response = invocation.getArgument(1);
@@ -79,58 +75,47 @@ class AdminControllerTest {
     }
 
     @Test
-    void shouldDeleteUserSuccessfully() throws Exception {
-        Long targetUserId = 2L;
+    void shouldCreateOrderSuccessfully() throws Exception {
+        CreateOrderRequest request = new CreateOrderRequest();
+        request.setRestaurantId(1L);
+        // ... set other fields
 
-        mockMvc.perform(delete("/api/admin/users/{id}", targetUserId)
-                .with(user(adminDetails))
-                .with(csrf()))
-                .andExpect(status().isNoContent());
+        when(orderService.createOrder(eq(1L), any())).thenReturn(new OrderSummaryResponse());
 
-        verify(adminService).deleteUser(targetUserId);
-    }
-
-    @Test
-    void shouldReturnBadRequestWhenAdminDeletesSelf() throws Exception {
-        Long targetUserId = 1L; // Same as adminDetails.id
-
-        mockMvc.perform(delete("/api/admin/users/{id}", targetUserId)
-                .with(user(adminDetails))
-                .with(csrf()))
-                .andExpect(status().isBadRequest());
-
-        verify(adminService, never()).deleteUser(any());
-    }
-
-    @Test
-    void shouldReturnBadRequestWhenAdminDemotesSelf() throws Exception {
-        Long targetUserId = 1L;
-        UserRoleUpdateRequest request = new UserRoleUpdateRequest();
-        request.setRole("USER");
-
-        mockMvc.perform(patch("/api/admin/users/{id}/role", targetUserId)
-                .with(user(adminDetails))
+        mockMvc.perform(post("/api/orders")
+                .with(user(customerDetails))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isCreated());
 
-        verify(adminService, never()).updateUserRole(any(), any());
+        verify(orderService).createOrder(eq(1L), any());
     }
 
     @Test
-    void shouldReturnBadRequestWhenAdminDeactivatesSelf() throws Exception {
-        Long targetUserId = 1L;
-        UserStatusUpdateRequest request = new UserStatusUpdateRequest();
-        request.setActive(false);
+    void shouldGetOrderSummarySuccessfully() throws Exception {
+        Long orderId = 1L;
+        when(orderService.getOrderSummary(eq(orderId), eq(1L))).thenReturn(new OrderSummaryResponse());
 
-        mockMvc.perform(patch("/api/admin/users/{id}/status", targetUserId)
-                .with(user(adminDetails))
+        mockMvc.perform(get("/api/orders/{id}", orderId)
+                .with(user(customerDetails)))
+                .andExpect(status().isOk());
+
+        verify(orderService).getOrderSummary(eq(orderId), eq(1L));
+    }
+
+    @Test
+    void shouldUpdateOrderStatusSuccessfully() throws Exception {
+        Long orderId = 1L;
+        OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("CONFIRMED", "Confirmed!");
+
+        mockMvc.perform(patch("/api/orders/{id}/status", orderId)
+                .with(user(customerDetails))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk());
 
-        verify(adminService, never()).updateUserStatus(any(), any());
+        verify(orderService).updateOrderStatus(eq(orderId), eq(1L), any());
     }
 }

@@ -66,7 +66,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void assignShipper_Success() {
+    void shouldAssignShipperSuccessfully() {
         AssignShipperRequest request = new AssignShipperRequest(orderId, shipperId);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(userRepository.findById(shipperId)).thenReturn(Optional.of(shipper));
@@ -81,7 +81,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void assignShipper_NotAShipper_ShouldThrowException() {
+    void shouldThrowExceptionWhenAssigningNonShipperRole() {
         AssignShipperRequest request = new AssignShipperRequest(orderId, shipperId);
         shipper.setRole("CUSTOMER");
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
@@ -93,7 +93,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void markPickedUp_Success() {
+    void shouldMarkOrderAsPickedUpSuccessfully() {
         when(deliveryAssignmentRepository.findByOrderId(orderId)).thenReturn(Optional.of(assignment));
 
         deliveryService.markPickedUp(shipperId, orderId, new MarkPickupRequest());
@@ -104,7 +104,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void markPickedUp_Unauthorized_ShouldThrowException() {
+    void shouldThrowExceptionWhenMarkingPickedUpUnauthorized() {
         when(deliveryAssignmentRepository.findByOrderId(orderId)).thenReturn(Optional.of(assignment));
 
         MarkPickupRequest request = new MarkPickupRequest();
@@ -114,7 +114,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void markDelivered_Success() {
+    void shouldMarkOrderAsDeliveredSuccessfully() {
         assignment.setStatus(DeliveryAssignmentStatus.PICKED_UP.name());
         when(deliveryAssignmentRepository.findByOrderId(orderId)).thenReturn(Optional.of(assignment));
 
@@ -131,7 +131,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void updateLocation_NewLocation_ShouldCreate() {
+    void shouldCreateNewLocationWhenUpdatingLocationForFirstTime() {
         ShipperLocationUpdateRequest request = new ShipperLocationUpdateRequest(new BigDecimal("10.0"),
                 new BigDecimal("20.0"), true);
         when(shipperLocationRepository.findByShipperId(shipperId)).thenReturn(Optional.empty());
@@ -143,7 +143,7 @@ class DeliveryServiceImplTest {
     }
 
     @Test
-    void updateLocation_ExistingLocation_ShouldUpdate() {
+    void shouldUpdateExistingLocationWhenUpdatingLocation() {
         ShipperLocation existingLocation = new ShipperLocation();
         existingLocation.setShipper(shipper);
         ShipperLocationUpdateRequest request = new ShipperLocationUpdateRequest(new BigDecimal("11.0"),

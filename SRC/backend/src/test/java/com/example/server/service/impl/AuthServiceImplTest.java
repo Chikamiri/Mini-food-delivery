@@ -52,7 +52,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void register_Success() {
+    void shouldRegisterUserSuccessfully() {
         RegisterRequest request = new RegisterRequest(email, password, "Test User", "12345678", null);
         when(userRepository.existsByEmail(email)).thenReturn(false);
         when(passwordEncoder.encode(password)).thenReturn("hashedPassword");
@@ -67,7 +67,7 @@ class AuthServiceImplTest {
     }
 
     @Test
-    void login_Success() {
+    void shouldLoginUserSuccessfully() {
         LoginRequest request = new LoginRequest(email, password);
         Authentication authentication = mock(Authentication.class);
         CustomUserDetails userDetails = CustomUserDetails.build(user);

@@ -48,7 +48,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void approveRestaurant_Success() {
+    void shouldApproveRestaurantSuccessfully() {
         RestaurantApprovalRequest request = new RestaurantApprovalRequest(true, "Looks good!");
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
 
@@ -65,7 +65,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void approveRestaurant_Rejection_Success() {
+    void shouldRejectRestaurantSuccessfully() {
         RestaurantApprovalRequest request = new RestaurantApprovalRequest(false, "Poor quality photos");
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
 
@@ -82,7 +82,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void approveRestaurant_NotFound_ShouldThrowException() {
+    void shouldThrowExceptionWhenApprovingNonExistentRestaurant() {
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.empty());
 
         RestaurantApprovalRequest request = new RestaurantApprovalRequest(true, null);
@@ -91,7 +91,7 @@ class AdminServiceImplTest {
     }
 
     @Test
-    void deleteUser_Success() {
+    void shouldDeleteUserSuccessfully() {
         Long userId = 1L;
         adminService.deleteUser(userId);
         verify(userService).deleteUser(userId);

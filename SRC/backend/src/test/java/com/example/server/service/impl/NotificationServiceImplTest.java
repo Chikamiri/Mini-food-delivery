@@ -61,7 +61,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void getUserNotifications_ShouldReturnMappedResponses() {
+    void shouldReturnMappedNotificationsForUser() {
         when(notificationRepository.findByUserIdOrderByCreatedAtDesc(userId))
                 .thenReturn(Arrays.asList(notification));
         
@@ -82,7 +82,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markAsRead_Success() {
+    void shouldMarkNotificationAsReadSuccessfully() {
         MarkNotificationReadRequest request = new MarkNotificationReadRequest(notificationId);
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(notification));
 
@@ -93,7 +93,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markAsRead_NotFound_ShouldThrowException() {
+    void shouldThrowExceptionWhenMarkingNonExistentNotificationAsRead() {
         MarkNotificationReadRequest request = new MarkNotificationReadRequest(notificationId);
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
 
@@ -101,7 +101,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markAsRead_Unauthorized_ShouldThrowException() {
+    void shouldThrowExceptionWhenMarkingAsReadUnauthorized() {
         MarkNotificationReadRequest request = new MarkNotificationReadRequest(notificationId);
         User otherUser = new User();
         otherUser.setId(2L);
@@ -115,7 +115,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markAllAsRead_WithoutType_ShouldCallGlobalReset() {
+    void shouldMarkAllNotificationsAsReadWhenNoTypeProvided() {
         MarkAllNotificationsReadRequest request = new MarkAllNotificationsReadRequest(null);
 
         notificationService.markAllAsRead(userId, request);
@@ -125,7 +125,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markAllAsRead_WithType_ShouldCallFilteredReset() {
+    void shouldMarkAllNotificationsOfTypeAsReadWhenTypeProvided() {
         String type = "ORDER";
         MarkAllNotificationsReadRequest request = new MarkAllNotificationsReadRequest(type);
 
@@ -136,7 +136,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void createNotification_Success() {
+    void shouldCreateNotificationSuccessfully() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         notificationService.createNotification(userId, "Title", "Message", "INFO");
@@ -145,7 +145,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void createNotification_UserNotFound_ShouldThrowException() {
+    void shouldThrowExceptionWhenCreatingNotificationForNonExistentUser() {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, 

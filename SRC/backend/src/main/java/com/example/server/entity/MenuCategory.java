@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MenuCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,8 +22,10 @@ public class MenuCategory {
 	private String name;
 
 	@Column(name = "sort_order")
+	@Builder.Default
 	private Integer sortOrder = 0;
 
 	@Column(name = "is_deleted")
+	@Builder.Default
 	private Boolean isDeleted = false;
 }

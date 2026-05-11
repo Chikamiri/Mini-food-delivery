@@ -11,6 +11,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Order {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,18 +38,22 @@ public class Order {
 	private BigDecimal subtotal;
 
 	@Column(name = "delivery_fee", nullable = false, precision = 12, scale = 2)
+	@Builder.Default
 	private BigDecimal deliveryFee = BigDecimal.ZERO;
 
 	@Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
 	private BigDecimal totalAmount;
 
 	@Column(name = "payment_method")
+	@Builder.Default
 	private String paymentMethod = "COD";
 
 	@Column(name = "status")
+	@Builder.Default
 	private String status = "PENDING";
 
 	@Column(name = "is_paid", nullable = false)
+	@Builder.Default
 	private Boolean isPaid = false;
 
 	@Column(name = "note")
@@ -75,11 +80,13 @@ public class Order {
 	}
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<OrderItem> orderItems = new ArrayList<>();
 
 	@OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
 	private DeliveryAssignment deliveryAssignment;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<OrderStatusHistory> statusHistories = new ArrayList<>();
 }
