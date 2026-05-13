@@ -24,7 +24,7 @@ export function formatOrderStatus(status) {
     CONFIRMED: 'Da xac nhan',
     PREPARING: 'Dang chuan bi',
     READY: 'San sang giao',
-    DELIVERING: 'Dang giao',
+    SHIPPING: 'Dang giao',
     DELIVERED: 'Da giao',
     CANCELLED: 'Da huy',
   }

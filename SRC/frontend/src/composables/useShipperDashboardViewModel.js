@@ -124,7 +124,7 @@ export function useShipperDashboardViewModel() {
   const activeDelivery = computed(() =>
     myDeliveries.value.find((d) => ['ASSIGNED', 'PICKED_UP'].includes(d.status)),
   )
-  const { sendLocation } = useShipperTracking()
+  const { connect: connectTracking, disconnect: disconnectTracking, sendLocation } = useShipperTracking()
   let gpsWatchId = null
 
   async function buildDeliveryMap(delivery) {
@@ -161,10 +161,19 @@ export function useShipperDashboardViewModel() {
     }
   }
 
+  function syncTrackingConnection(delivery) {
+    if (delivery && isOnline.value && shipperId.value) {
+      connectTracking()
+      return
+    }
+    disconnectTracking()
+  }
+
   watch(
     activeDelivery,
     (d) => {
       buildDeliveryMap(d)
+      syncTrackingConnection(d)
       if (d) startGpsBroadcast()
       else stopGpsBroadcast()
     },
@@ -197,8 +206,10 @@ export function useShipperDashboardViewModel() {
     if (on) {
       loadData()
       startPolling()
+      syncTrackingConnection(activeDelivery.value)
     } else {
       stopPolling()
+      disconnectTracking()
       successMessage.value = ''
     }
   })
@@ -210,6 +221,7 @@ export function useShipperDashboardViewModel() {
   onUnmounted(() => {
     stopPolling()
     stopGpsBroadcast()
+    disconnectTracking()
     resetRouteMap()
   })
 

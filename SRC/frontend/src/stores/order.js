@@ -11,7 +11,7 @@ export const useOrderStore = defineStore('order', () => {
 
   const activeOrders = computed(() =>
     orders.value.filter((order) =>
-      ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERING'].includes(order.status),
+      ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'SHIPPING'].includes(order.status),
     ),
   )
 

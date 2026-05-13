@@ -74,7 +74,7 @@ export function useBrowseViewModel() {
       } else if (status === 'CANCELLED') {
         statusLabel = 'Đã hủy'
         statusClass = 'cancelled'
-      } else if (status === 'DELIVERING' || status === 'SHIPPING') {
+      } else if (status === 'SHIPPING') {
         statusLabel = 'Đang giao'
         statusClass = 'delivering'
       }
@@ -225,7 +225,6 @@ export function useBrowseViewModel() {
           title: 'Đơn hàng đã sẵn sàng',
           message: 'Nhà hàng đã chuẩn bị xong, đang chờ shipper nhận đơn.',
         }
-      case 'DELIVERING':
       case 'SHIPPING':
       case 'PICKED_UP':
         return {

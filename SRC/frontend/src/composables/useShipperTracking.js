@@ -10,21 +10,26 @@ export function useShipperTracking() {
   let client = null
   let subscription = null
 
-  function connect(orderId, onPosition) {
+  function connect(orderId = null, onPosition) {
     if (client) disconnect()
+    const token = localStorage.getItem('token')
     client = new Client({
       webSocketFactory: () => new SockJS(WS_URL),
+      connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       reconnectDelay: 5000,
       onConnect: () => {
+        if (!orderId) return
         subscription = client.subscribe(`/topic/order/${orderId}`, (msg) => {
           try {
             const data = JSON.parse(msg.body)
             if (data.latitude != null && data.longitude != null) {
               const pos = { lat: Number(data.latitude), lng: Number(data.longitude) }
               shipperPos.value = pos
-              onPosition && onPosition(pos)
+              if (onPosition) onPosition(pos)
             }
-          } catch (_) {}
+          } catch {
+            // Ignore malformed websocket payloads.
+          }
         })
       },
       onStompError: (frame) => {
@@ -36,11 +41,15 @@ export function useShipperTracking() {
 
   function disconnect() {
     if (subscription) {
-      try { subscription.unsubscribe() } catch (_) {}
+      try { subscription.unsubscribe() } catch {
+        // Ignore stale subscription cleanup errors.
+      }
       subscription = null
     }
     if (client) {
-      try { client.deactivate() } catch (_) {}
+      try { client.deactivate() } catch {
+        // Ignore client shutdown errors during teardown.
+      }
       client = null
     }
     shipperPos.value = null

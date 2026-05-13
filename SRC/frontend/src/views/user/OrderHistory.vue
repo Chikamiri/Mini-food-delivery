@@ -9,7 +9,10 @@ const router = useRouter()
 const formattedOrders = computed(() =>
   (orderStore.orders || []).map((order) => ({
     ...order,
-    statusLabel: String(order?.status || '').toUpperCase(),
+    statusLabel:
+      String(order?.status || '').toUpperCase() === 'SHIPPING'
+        ? 'Đang giao'
+        : String(order?.status || '').toUpperCase(),
     totalLabel: `${Number(order?.totalAmount || 0).toLocaleString('vi-VN')}đ`,
     createdAtLabel: order?.createdAt
       ? new Date(order.createdAt).toLocaleString('vi-VN', {
@@ -25,7 +28,7 @@ const statusClass = (status) => {
   const s = String(status || '').toUpperCase()
   if (s === 'DELIVERED') return 'status delivered'
   if (s === 'CANCELLED') return 'status cancelled'
-  if (s === 'DELIVERING') return 'status delivering'
+  if (s === 'ĐANG GIAO' || s === 'SHIPPING') return 'status delivering'
   return 'status pending'
 }
 
