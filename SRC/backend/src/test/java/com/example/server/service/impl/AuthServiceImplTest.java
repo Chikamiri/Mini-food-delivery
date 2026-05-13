@@ -56,7 +56,15 @@ class AuthServiceImplTest {
         RegisterRequest request = new RegisterRequest(email, password, "Test User", "12345678", null);
         when(userRepository.existsByEmail(email)).thenReturn(false);
         when(passwordEncoder.encode(password)).thenReturn("hashedPassword");
-        when(jwtUtils.generateToken(email)).thenReturn("mockJwt");
+        
+        // Mock save to return a user with an ID
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            savedUser.setId(1L);
+            return savedUser;
+        });
+
+        when(jwtUtils.generateToken(anyLong(), anyString(), anyString(), anyString())).thenReturn("mockJwt");
 
         JwtResponse response = authService.register(request);
 
@@ -70,17 +78,25 @@ class AuthServiceImplTest {
     void shouldLoginUserSuccessfully() {
         LoginRequest request = new LoginRequest(email, password);
         Authentication authentication = mock(Authentication.class);
-        CustomUserDetails userDetails = CustomUserDetails.build(user);
+        
+        // Ensure CustomUserDetails has all required fields for login response
+        CustomUserDetails userDetails = CustomUserDetails.builder()
+                .id(1L)
+                .email(email)
+                .fullName("Test User")
+                .authorities(java.util.Collections.singletonList(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CUSTOMER")))
+                .build();
 
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(jwtUtils.generateToken(email)).thenReturn("mockJwt");
+        when(jwtUtils.generateToken(any(CustomUserDetails.class))).thenReturn("mockJwt");
 
         JwtResponse response = authService.login(request);
 
         assertNotNull(response);
         assertEquals("mockJwt", response.getAccessToken());
         assertEquals(email, response.getEmail());
+        assertEquals("CUSTOMER", response.getRole());
     }
 }

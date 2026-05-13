@@ -53,6 +53,11 @@ class OrderServiceImplTest {
     @InjectMocks
     private OrderServiceImpl orderService;
 
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        org.springframework.test.util.ReflectionTestUtils.setField(orderService, "defaultDeliveryFee", "15.00");
+    }
+
     @Test
     void shouldCreateOrderSuccessfully() {
         // Arrange

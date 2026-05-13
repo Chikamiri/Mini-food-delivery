@@ -204,14 +204,14 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    private void validateStatusUpdatePermission(Order order, User user, String newStatus) {
+    private void validateStatusUpdatePermission(Order order, User user, String statusStr) {
         String role = user.getRole();
         
         if (com.example.server.enums.Role.ROLE_ADMIN.equals(role)) {
             return;
         }
 
-        OrderStatus status = OrderStatus.valueOf(newStatus);
+        OrderStatus status = parseStatus(statusStr);
 
         if (status == OrderStatus.CANCELLED) {
             // Only customer who placed the order or admin can cancel (usually)
@@ -240,8 +240,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void validateStateTransition(String oldStatus, String newStatus) {
-        OrderStatus current = OrderStatus.valueOf(oldStatus);
-        OrderStatus next = OrderStatus.valueOf(newStatus);
+        OrderStatus current = parseStatus(oldStatus);
+        OrderStatus next = parseStatus(newStatus);
 
         if (next == OrderStatus.CANCELLED || next == OrderStatus.REJECTED) {
             if (current == OrderStatus.SHIPPING || current == OrderStatus.DELIVERED) {
@@ -263,6 +263,17 @@ public class OrderServiceImpl implements OrderService {
         if (!valid) {
             throw new AppException(HttpStatus.BAD_REQUEST,
                     "Invalid order status transition from " + oldStatus + " to " + newStatus, "INVALID_TRANSITION");
+        }
+    }
+
+    private OrderStatus parseStatus(String statusStr) {
+        if (statusStr == null) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Order status cannot be null", "INVALID_STATUS");
+        }
+        try {
+            return OrderStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid order status: " + statusStr, "INVALID_STATUS");
         }
     }
 
