@@ -69,13 +69,13 @@ src/main/java/com/example/server/
 4. **Resilience [DONE]**:
     - [DONE] Enhanced Exception Handling (Centralized Data Integrity and App Error mapping).
     - [DONE] Safe Enum parsing to prevent Internal Server Errors.
-5. **Real-time Updates [IN PROGRESS]**:
+5. **Real-time Updates [DONE]**:
     - [DONE] Secured WebSocket infrastructure.
-    - [TODO] Integrate SSE or WebSocket for user-facing notifications.
-6. **Advanced Security & DevOps [TODO]**:
-    - Implement Token Refresh mechanism.
-    - Account lockout logic.
-    - Multi-stage Dockerfile and CI/CD pipelines.
+    - [DONE] Integrate SSE or WebSocket for user-facing notifications.
+6. **Advanced Security & DevOps [IN PROGRESS]**:
+    - [DONE] Implement Token Refresh mechanism.
+    - [DONE] Account lockout logic.
+    - [TODO] Multi-stage Dockerfile and CI/CD pipelines. -->ignore, not really needed for now
 
 ## Design Constraints
 
