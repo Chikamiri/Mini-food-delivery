@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 class ServerApplicationTests extends BaseIntegrationTest {
 
 	@Test
-	void contextLoads() {
+	void shouldLoadContext() {
 	}
 
 }

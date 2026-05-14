@@ -116,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
         user.setAvatarUrl(request.getAvatarUrl());
-        user.setRole(Role.ROLE_CUSTOMER.name()); // Default role
+        user.setRole(Role.ROLE_CUSTOMER); // Default role
         user.setActive(true);
         user.setDeleted(false);
         user.setFailedLoginAttempts(0);

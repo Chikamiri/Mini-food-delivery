@@ -5,30 +5,34 @@
 - **Test Framework**: JUnit 5, Mockito, Spring Boot Test
 - **Infrastructure**: Testcontainers (MySQL 8.0)
 - **Coverage Tool**: JaCoCo
-- **Total Tests**: 65
-- **Pass Rate**: 100% (65/65)
+- **Total Tests**: 100
+- **Pass Rate**: 100% (100/100)
 
 ## Coverage Analysis (Summary)
 
-Based on the JaCoCo report (2026-05-13):
+Based on the JaCoCo report (2026-05-14):
 
 ### High Coverage (> 70% Instructions)
+
 - `Security`: `SecurityConfig`, `JwtAuthFilter`, `CustomUserDetailsService`
-- `Services`: `AuthServiceImpl`, `NotificationServiceImpl`
+- `Services`: `AuthServiceImpl` (94%), `NotificationServiceImpl` (95%), `OwnerRequestServiceImpl` (84%), `ShipperRequestServiceImpl` (82%), `RestaurantServiceImpl` (71%)
 - `Config`: `WebConfig`, `MapClientConfig`, `WebSocketConfig`, `OpenApiConfig`
 
 ### Medium Coverage (40% - 70% Instructions)
-- `Services`: `OrderServiceImpl`, `DeliveryServiceImpl`, `AdminServiceImpl`, `ReportServiceImpl`
+
+- `Services`: `OrderServiceImpl` (60%), `DeliveryServiceImpl` (50%), `MenuServiceImpl` (51%), `AdminServiceImpl` (40%)
 - `Security`: `JwtUtils`
 
 ### Low/Zero Coverage (< 40% Instructions)
-- `Services`: `RestaurantServiceImpl` (0%), `MenuServiceImpl` (0%), `OwnerRequestServiceImpl` (0%), `ShipperRequestServiceImpl` (0%), `UserServiceImpl` (6%), `MapServiceImpl` (4%)
+
+- `Services`: `UserServiceImpl` (6%), `ReportServiceImpl` (32%), `MapServiceImpl` (4%)
 - `Controllers`: Most controllers have very low coverage (e.g., `RestaurantController` 0%, `UserController` 0%, `AuthController` 0%).
 - `Mappers`: MapStruct generated implementations have very low coverage because they are mostly tested indirectly.
 
 ## Backend Existing Test Suites
 
 ### Unit Tests (`src/test/java/com/example/server/service/impl/`)
+
 - `AdminServiceImplTest`
 - `AuthServiceImplTest`
 - `DeliveryServiceImplTest`
@@ -36,19 +40,26 @@ Based on the JaCoCo report (2026-05-13):
 - `OrderServiceImplTest`
 - `ReportServiceImplTest`
 - `UserServiceImplTest`
+- `RestaurantServiceImplTest` (NEW)
+- `MenuServiceImplTest` (NEW)
+- `OwnerRequestServiceImplTest` (NEW)
+- `ShipperRequestServiceImplTest` (NEW)
 
 ### Integration Tests (`src/test/java/com/example/server/repository/`)
+
 - `EntityMappingIntegrationTest`: Verifies JPA mappings and basic CRUD.
 - `OrderRepositoryIntegrationTest`: Verifies complex queries like Haversine distance.
 - `RestaurantRepositoryIntegrationTest`: Verifies search and approval queries.
 - `UserRepositoryIntegrationTest`: Verifies role and email lookups.
 
 ### Security Tests (`src/test/java/com/example/server/security/`)
+
 - `JwtUtilsTest`
 - `JwtAuthFilterTest`
 - `CustomUserDetailsServiceTest`
 
 ### Controller Tests (`src/test/java/com/example/server/controller/`)
+
 - `AdminControllerTest`
 - `OrderControllerTest`
 - `DeliveryControllerTest`
@@ -57,6 +68,7 @@ Based on the JaCoCo report (2026-05-13):
 ## Frontend Existing Test Suites (`SRC/frontend/src/__tests__/`)
 
 ### Unit/Component Tests (Vitest)
+
 - `auth.spec.js`: Authentication logic and state management.
 - `cart.spec.js`: Cart operations and calculations.
 - `CartView.spec.js`: Component rendering for the cart.
@@ -65,14 +77,22 @@ Based on the JaCoCo report (2026-05-13):
 - `validators.spec.js`: Form validation rules.
 
 ### E2E/Integration Tests (Cypress)
+
 - `auth.cy.js`: Login/Registration flows.
 - `browse.cy.js`: Restaurant browsing and filtering.
 - `cart.cy.js`: Adding items and cart persistence.
 - `home.cy.js`: Landing page interactions.
 
-## Gaps Identified
+## Gaps Identified (High Priority)
 
-1. **Service Layer Gaps**: Critical business logic in `RestaurantService`, `MenuService`, and Promotion Request services (Owner/Shipper) is completely untested.
-2. **Controller Layer Gaps**: Public endpoints (Auth, Search) and User Profile endpoints lack coverage.
-3. **Edge Case Handling**: Current tests focus on "happy paths". More negative testing (invalid inputs, unauthorized access, concurrency conflicts) is needed.
-4. **WebSocket Testing**: `LocationWebSocketController` has very low coverage (4%).
+1.  **Service Layer**: `UserServiceImpl` (6%) needs comprehensive testing for user profile management.
+2.  **Controller Layer**: Integration tests for `AuthController`, `RestaurantController`, and `UserController` are missing or minimal.
+3.  **Real-time Logic**: `LocationWebSocketController` and STOMP message handling.
+4.  **Negative Testing**: Unauthorized access (403), invalid transitions (400), and resource not found (404) across all layers.
+
+## Coverage Targets (Phase 2)
+
+*   **Overall Instructions**: > 75%
+*   **Core Services (Business Logic)**: > 85%
+*   **Controllers (API Contracts)**: > 60%
+*   **Security Layer**: > 90%

@@ -7,6 +7,7 @@ import com.example.server.enums.OrderStatus;
 import com.example.server.exception.AppException;
 import com.example.server.mapper.DeliveryMapper;
 import com.example.server.repository.*;
+import com.example.server.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ class DeliveryServiceImplTest {
     private OrderStatusHistoryRepository orderStatusHistoryRepository;
     @Mock
     private DeliveryMapper deliveryMapper;
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private DeliveryServiceImpl deliveryService;
@@ -54,9 +57,14 @@ class DeliveryServiceImplTest {
         shipper.setRole("SHIPPER");
         shipper.setFullName("Test Shipper");
 
+        User customer = new User();
+        customer.setId(2L);
+        customer.setFullName("Customer");
+
         order = new Order();
         order.setId(orderId);
         order.setStatus(OrderStatus.READY.name());
+        order.setUser(customer);
 
         assignment = new DeliveryAssignment();
         assignment.setId(100L);
