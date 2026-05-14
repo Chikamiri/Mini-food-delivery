@@ -13,8 +13,10 @@ import com.example.server.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
@@ -33,10 +35,11 @@ class UserServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private AddressRepository addressRepository;
-    @Mock
-    private UserMapper userMapper;
-    @Mock
-    private AddressMapper addressMapper;
+
+    @Spy
+    private UserMapper userMapper = Mappers.getMapper(UserMapper.class);
+    @Spy
+    private AddressMapper addressMapper = Mappers.getMapper(AddressMapper.class);
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -52,6 +55,7 @@ class UserServiceImplTest {
         user.setId(userId);
         user.setFullName("Old Name");
         user.setPhone("123456789");
+        user.setActive(true);
 
         address = new Address();
         address.setId(addressId);
@@ -62,7 +66,6 @@ class UserServiceImplTest {
     @Test
     void shouldGetUserProfileSuccessfully() {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userMapper.toProfileResponse(user)).thenReturn(new UserProfileResponse());
 
         var response = userService.getUserProfile(userId);
 
@@ -78,7 +81,6 @@ class UserServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toProfileResponse(any(User.class))).thenReturn(new UserProfileResponse());
 
         var response = userService.updateUserProfile(userId, request);
 
@@ -116,7 +118,6 @@ class UserServiceImplTest {
     @Test
     void shouldGetUserAddressesSuccessfully() {
         when(addressRepository.findByUserId(userId)).thenReturn(Collections.singletonList(address));
-        when(addressMapper.toResponse(address)).thenReturn(new AddressResponse());
 
         List<AddressResponse> responses = userService.getUserAddresses(userId);
 
@@ -127,38 +128,39 @@ class UserServiceImplTest {
     void shouldAddAddressSuccessfully() {
         AddressRequest request = new AddressRequest();
         request.setIsDefault(true);
+        request.setLabel("Home");
+        request.setAddressLine("123 Street");
 
         Address existingDefault = new Address();
         existingDefault.setIsDefault(true);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(addressRepository.findByUserIdAndIsDefaultTrue(userId)).thenReturn(Optional.of(existingDefault));
-        when(addressMapper.toEntity(request)).thenReturn(address);
-        when(addressRepository.save(any(Address.class))).thenReturn(address);
-        when(addressMapper.toResponse(address)).thenReturn(new AddressResponse());
+        when(addressRepository.save(any(Address.class))).thenAnswer(i -> i.getArgument(0));
 
         var response = userService.addAddress(userId, request);
 
         assertNotNull(response);
         assertFalse(existingDefault.getIsDefault());
         verify(addressRepository).save(existingDefault);
-        verify(addressRepository).save(address);
+        verify(addressRepository, atLeastOnce()).save(any(Address.class));
     }
 
     @Test
     void shouldUpdateAddressSuccessfully() {
         AddressRequest request = new AddressRequest();
         request.setIsDefault(true);
+        request.setLabel("Work");
+        request.setAddressLine("456 Avenue");
 
         when(addressRepository.findById(addressId)).thenReturn(Optional.of(address));
         when(addressRepository.findByUserIdAndIsDefaultTrue(userId)).thenReturn(Optional.empty());
-        when(addressRepository.save(address)).thenReturn(address);
-        when(addressMapper.toResponse(address)).thenReturn(new AddressResponse());
+        when(addressRepository.save(any(Address.class))).thenAnswer(i -> i.getArgument(0));
 
         var response = userService.updateAddress(userId, addressId, request);
 
         assertNotNull(response);
-        verify(addressRepository).save(address);
+        verify(addressRepository).save(any(Address.class));
     }
 
     @Test

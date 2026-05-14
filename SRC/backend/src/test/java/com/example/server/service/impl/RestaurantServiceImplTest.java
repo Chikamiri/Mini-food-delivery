@@ -13,16 +13,16 @@ import com.example.server.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,8 +38,9 @@ class RestaurantServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private RestaurantCategoryRepository categoryRepository;
-    @Mock
-    private RestaurantMapper restaurantMapper;
+
+    @Spy
+    private RestaurantMapper restaurantMapper = Mappers.getMapper(RestaurantMapper.class);
 
     @InjectMocks
     private RestaurantServiceImpl restaurantService;
@@ -69,7 +70,6 @@ class RestaurantServiceImplTest {
 
         Page<Restaurant> page = new PageImpl<>(Collections.singletonList(restaurant));
         when(restaurantRepository.searchRestaurants(any(), any(), any(PageRequest.class))).thenReturn(page);
-        when(restaurantMapper.toCardResponse(any(Restaurant.class))).thenReturn(new RestaurantCardResponse());
 
         var response = restaurantService.searchRestaurants(request);
 
@@ -81,7 +81,6 @@ class RestaurantServiceImplTest {
     @Test
     void shouldGetRestaurantDetailSuccessfully() {
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
-        when(restaurantMapper.toDetailResponse(restaurant)).thenReturn(new RestaurantDetailResponse());
 
         var response = restaurantService.getRestaurantDetail(restaurantId);
 
@@ -115,9 +114,7 @@ class RestaurantServiceImplTest {
 
         when(userRepository.findById(ownerId)).thenReturn(Optional.of(owner));
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(category));
-        when(restaurantMapper.toEntity(request)).thenReturn(new Restaurant());
         when(restaurantRepository.save(any(Restaurant.class))).thenReturn(restaurant);
-        when(restaurantMapper.toDetailResponse(any(Restaurant.class))).thenReturn(new RestaurantDetailResponse());
 
         var response = restaurantService.createRestaurant(ownerId, request);
 
@@ -132,7 +129,6 @@ class RestaurantServiceImplTest {
 
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
         when(restaurantRepository.save(any(Restaurant.class))).thenReturn(restaurant);
-        when(restaurantMapper.toDetailResponse(any(Restaurant.class))).thenReturn(new RestaurantDetailResponse());
 
         var response = restaurantService.updateRestaurant(ownerId, restaurantId, request);
 

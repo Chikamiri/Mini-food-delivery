@@ -5,8 +5,8 @@
 - **Test Framework**: JUnit 5, Mockito, Spring Boot Test
 - **Infrastructure**: Testcontainers (MySQL 8.0)
 - **Coverage Tool**: JaCoCo
-- **Total Tests**: 100
-- **Pass Rate**: 100% (100/100)
+- **Total Tests**: 168
+- **Pass Rate**: 100% (168/168)
 
 ## Coverage Analysis (Summary)
 
@@ -15,19 +15,20 @@ Based on the JaCoCo report (2026-05-14):
 ### High Coverage (> 70% Instructions)
 
 - `Security`: `SecurityConfig`, `JwtAuthFilter`, `CustomUserDetailsService`
-- `Services`: `AuthServiceImpl` (94%), `NotificationServiceImpl` (95%), `OwnerRequestServiceImpl` (84%), `ShipperRequestServiceImpl` (82%), `RestaurantServiceImpl` (71%)
+- `Services`: `AuthServiceImpl` (94%), `NotificationServiceImpl` (95%), `OwnerRequestServiceImpl` (84%), `ShipperRequestServiceImpl` (82%), `RestaurantServiceImpl` (71%), `UserServiceImpl` (81%), `ReportServiceImpl` (100%), `MapServiceImpl` (100%)
+- `Controllers`: `UserController` (100%), `RestaurantController` (100%), `ShipperRequestController` (100%), `AuthController` (100%), `DeliveryController` (100%), `MenuController` (100%)
 - `Config`: `WebConfig`, `MapClientConfig`, `WebSocketConfig`, `OpenApiConfig`
+- `Mappers`: MapStruct generated implementations are now directly tested within the service layer tests, achieving 73% coverage.
 
 ### Medium Coverage (40% - 70% Instructions)
 
 - `Services`: `OrderServiceImpl` (60%), `DeliveryServiceImpl` (50%), `MenuServiceImpl` (51%), `AdminServiceImpl` (40%)
+- `Controllers`: `OrderController` (53%)
 - `Security`: `JwtUtils`
 
 ### Low/Zero Coverage (< 40% Instructions)
 
-- `Services`: `UserServiceImpl` (6%), `ReportServiceImpl` (32%), `MapServiceImpl` (4%)
-- `Controllers`: Most controllers have very low coverage (e.g., `RestaurantController` 0%, `UserController` 0%, `AuthController` 0%).
-- `Mappers`: MapStruct generated implementations have very low coverage because they are mostly tested indirectly.
+- `Controllers`: `AdminController` (34%), `LocationWebSocketController` (3%), `OwnerRequestController` (0%)
 
 ## Backend Existing Test Suites
 
@@ -85,10 +86,8 @@ Based on the JaCoCo report (2026-05-14):
 
 ## Gaps Identified (High Priority)
 
-1.  **Service Layer**: `UserServiceImpl` (6%) needs comprehensive testing for user profile management.
-2.  **Controller Layer**: Integration tests for `AuthController`, `RestaurantController`, and `UserController` are missing or minimal.
-3.  **Real-time Logic**: `LocationWebSocketController` and STOMP message handling.
-4.  **Negative Testing**: Unauthorized access (403), invalid transitions (400), and resource not found (404) across all layers.
+1.  **Real-time Logic**: `LocationWebSocketController` and STOMP message handling.
+2.  **Edge Case Scenarios**: Additional negative testing across all layers for invalid edge cases.
 
 ## Coverage Targets (Phase 2)
 

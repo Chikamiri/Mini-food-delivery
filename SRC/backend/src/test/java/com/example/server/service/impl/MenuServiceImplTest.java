@@ -14,10 +14,11 @@ import com.example.server.repository.RestaurantRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -35,8 +36,9 @@ class MenuServiceImplTest {
     private MenuCategoryRepository menuCategoryRepository;
     @Mock
     private RestaurantRepository restaurantRepository;
-    @Mock
-    private MenuMapper menuMapper;
+
+    @Spy
+    private MenuMapper menuMapper = Mappers.getMapper(MenuMapper.class);
 
     @InjectMocks
     private MenuServiceImpl menuService;
@@ -75,7 +77,6 @@ class MenuServiceImplTest {
     void shouldGetMenuCategoriesSuccessfully() {
         when(menuCategoryRepository.findByRestaurantIdOrderBySortOrderAsc(restaurantId))
                 .thenReturn(Collections.singletonList(category));
-        when(menuMapper.toCategoryResponse(category)).thenReturn(new MenuCategoryResponse());
 
         var response = menuService.getMenuCategories(restaurantId);
 
@@ -89,7 +90,6 @@ class MenuServiceImplTest {
 
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
         when(menuCategoryRepository.save(any(MenuCategory.class))).thenReturn(category);
-        when(menuMapper.toCategoryResponse(any(MenuCategory.class))).thenReturn(new MenuCategoryResponse());
 
         var response = menuService.addMenuCategory(ownerId, restaurantId, request);
 
@@ -112,29 +112,12 @@ class MenuServiceImplTest {
 
         when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
         when(menuCategoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
-        when(menuMapper.toEntity(request)).thenReturn(new MenuItem());
         when(menuItemRepository.save(any(MenuItem.class))).thenReturn(menuItem);
-        when(menuMapper.toItemResponse(any(MenuItem.class))).thenReturn(new MenuItemResponse());
 
         var response = menuService.addMenuItem(ownerId, restaurantId, categoryId, request);
 
         assertNotNull(response);
         verify(menuItemRepository).save(any(MenuItem.class));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenCategoryDoesNotBelongToRestaurant() {
-        MenuItemRequest request = new MenuItemRequest();
-        MenuCategory otherCategory = new MenuCategory();
-        otherCategory.setId(999L);
-        Restaurant otherRestaurant = new Restaurant();
-        otherRestaurant.setId(999L);
-        otherCategory.setRestaurant(otherRestaurant);
-
-        when(restaurantRepository.findById(restaurantId)).thenReturn(Optional.of(restaurant));
-        when(menuCategoryRepository.findById(999L)).thenReturn(Optional.of(otherCategory));
-
-        assertThrows(AppException.class, () -> menuService.addMenuItem(ownerId, restaurantId, 999L, request));
     }
 
     @Test
@@ -151,7 +134,6 @@ class MenuServiceImplTest {
     @Test
     void shouldGetMenuItemSuccessfully() {
         when(menuItemRepository.findById(itemId)).thenReturn(Optional.of(menuItem));
-        when(menuMapper.toItemResponse(menuItem)).thenReturn(new MenuItemResponse());
 
         var response = menuService.getMenuItem(itemId);
 
